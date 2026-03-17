@@ -1,0 +1,32 @@
+// https://pris.ly/d/prisma-schema
+
+generator client {
+    provider        = "prisma-client-js"
+    previewFeatures = ["strictUndefinedChecks"]
+}
+
+datasource db {
+    provider = "postgresql"
+}
+
+model User {
+    id            Int       @id @default(autoincrement())
+    email         String    @unique
+    username      String
+    password      String
+    creationDate  DateTime  @default(now())
+    lastTimeLogin DateTime?
+
+    usersTokens UserToken[]
+}
+
+model UserToken {
+    id              String   @id @unique @default(uuid())
+    creationDate    DateTime @default(now())
+    exprirationDate DateTime
+    ip              String
+    device          String?
+
+    userId Int
+    User   User @relation(fields: [userId], references: [id])
+}
