@@ -1,44 +1,63 @@
-import { BadRequestException, HttpException, Injectable } from '@nestjs/common';
+import { BadRequestException, HttpException, Injectable, InternalServerErrorException, UnauthorizedException } from '@nestjs/common';
 import { CreateUserDto } from './dto/createUser.dto';
-import { PrismaService } from 'src/prisma.service';
+import { PrismaService } from 'src/prisma/prisma.service';
+import { AppMailerService } from 'src/mailer/mailer.service';
 import { LoginUserDto } from './dto/loginUser.dto';
 import { User, UserToken } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
+import { createHash, randomBytes } from 'crypto';
 
 @Injectable()
 export class AuthService {
-    constructor(private readonly prisma: PrismaService) {}
+    private saltRounds: number = Number(process.env.BCRYPT_SALT) ?? 10;
 
-    async signUp(user: CreateUserDto): Promise<User> {
+    constructor(
+        private readonly prisma: PrismaService,
+        private readonly mailer: AppMailerService
+    ) {}
+
+
+
+    async signUp(user: CreateUserDto): Promise<string> {
         const existingUser: User | null = await this.prisma.user.findUnique({
             where: { email: user.email }
         });
 
-        if (existingUser) {
-            throw new BadRequestException('Email already taken');
-        }
+        if (existingUser) throw new BadRequestException('Email or username already taken');
 
-        const saltRounds = parseInt(process.env.BCRYPT_SALT || '10', 10);
-        const hashedPassword = await bcrypt.hash(user.password, saltRounds);
+        const hashedPassword: string = await bcrypt.hash(user.password, this.saltRounds);
+        const token: string = randomBytes(64).toString('hex');
+        const hashedTokenVerification: string = this.hashToken(token);
 
-        return this.prisma.user.create({ data: {
+        await this.prisma.user.create({ data: {
             email: user.email,
             username: user.username,
             password: hashedPassword,
+            emailVerificationToken: hashedTokenVerification
         }});
+
+        await this.mailer.sendConfirmationEmail(user.email, user.username, token);
+
+        return 'Please verify your email';
     }
 
+
+
     async login(user: LoginUserDto, ip: string, device: string): Promise<string> {
-        const realUser: User | null = await this.prisma.user.findUnique({
-            where: { email: user.email }
+        const existingUser: User | null = await this.prisma.user.findUnique({
+            where: { username: user.username }
         });
 
-        if (!realUser || !(await bcrypt.compare(user.password, realUser.password))) {
+        if (!existingUser || !(await bcrypt.compare(user.password, existingUser.password))) {
             throw new BadRequestException('Email or password incorrect');
         }
 
+        if (!existingUser.isEmailVerified) {
+            throw new UnauthorizedException('Please verify your email before login');
+        }
+
         await this.prisma.user.update({
-            where: { id: realUser.id },
+            where: { id: existingUser.id },
             data: { lastTimeLogin: new Date() }
         });
 
@@ -49,9 +68,32 @@ export class AuthService {
             exprirationDate: expirationDate,
             ip,
             device,
-            userId: realUser.id,
+            userId: existingUser.id,
         }});
 
-        return token.id;
+        return `Bearer ${token.id}`;
+    }
+
+
+
+    async confirmEmail(token: string): Promise<string> {
+        const hashedToken: string = this.hashToken(token);
+
+        try {
+            await this.prisma.user.update({
+                where: { emailVerificationToken: hashedToken},
+                data: { isEmailVerified: true, emailVerificationToken: null }
+            });
+
+            return 'Email verified, you can login';
+        } catch (error) {
+            return 'Invalid token';
+        }
+    }
+
+
+
+    private hashToken(token: string): string {
+        return createHash('sha256').update(token).digest('hex');
     }
 }

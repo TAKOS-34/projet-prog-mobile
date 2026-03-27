@@ -10,12 +10,14 @@ datasource db {
 }
 
 model User {
-    id            Int       @id @default(autoincrement())
-    email         String    @unique
-    username      String
-    password      String
-    creationDate  DateTime  @default(now())
-    lastTimeLogin DateTime?
+    id                     Int       @id @default(autoincrement())
+    email                  String    @unique
+    username               String    @unique
+    password               String
+    creationDate           DateTime  @default(now())
+    lastTimeLogin          DateTime?
+    isEmailVerified        Boolean   @default(false)
+    emailVerificationToken String?   @unique
 
     usersTokens UserToken[]
 }
@@ -28,5 +30,5 @@ model UserToken {
     device          String?
 
     userId Int
-    User   User @relation(fields: [userId], references: [id])
+    User   User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

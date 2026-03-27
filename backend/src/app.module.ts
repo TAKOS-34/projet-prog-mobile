@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { AuthModule } from './auth/auth.module';
 import { ScheduleModule } from '@nestjs/schedule';
+import { MailerModule } from '@nestjs-modules/mailer';
 
 @Module({
     imports: [
@@ -17,8 +18,19 @@ import { ScheduleModule } from '@nestjs/schedule';
         }),
         ScheduleModule.forRoot(),
         AuthModule,
+        MailerModule.forRoot({
+            transport: {
+                service: 'gmail',
+                host: 'smtp.google.com',
+                port: 587,
+                auth: {
+                    user: process.env.MAILER_USERNAME,
+                    pass: process.env.MAILER_PASSWORD,
+                },
+            }
+        }),
     ],
     controllers: [],
     providers: [AuthModule],
 })
-export class AppModule { }
+export class AppModule {}
