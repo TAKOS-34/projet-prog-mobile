@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { randomUUID } from 'crypto';
 import sharp from 'sharp';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -9,6 +9,7 @@ import type { User } from '@prisma/client';
 import { UpdateUserDto } from './dto/updateUser.dto';
 import * as bcrypt from 'bcrypt';
 import { AppMailerService } from 'src/mailer/mailer.service';
+import { Token } from './dto/token.dto';
 
 @Injectable()
 export class ProfileService {
@@ -98,5 +99,36 @@ export class ProfileService {
         await this.mailer.sendDeleteAccountEmail(user.email, user.username);
 
         return { status: true, message: "Account deleted" };
+    }
+
+
+
+    async getTokens(user: User): Promise<Array<Token>> {
+        return await this.prisma.userToken.findMany({
+            where: { userId: user.id },
+            select: {
+                id: true,
+                creationDate: true,
+                ip: true,
+                device: true
+            }
+        });
+    }
+
+
+
+    async deleteToken(tokenId: string, user: User): Promise<ResponseMessage> {
+        try {
+            await this.prisma.userToken.deleteMany({
+                where: {
+                    id: tokenId,
+                    userId: user.id
+                }
+            });
+        } catch (error) {
+            throw new BadRequestException('Error during session suppression');
+        }
+
+        return { status: true, message: "Session removed" };
     }
 }

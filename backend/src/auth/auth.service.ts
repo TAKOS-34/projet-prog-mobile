@@ -66,11 +66,12 @@ export class AuthService {
 
         const expirationDate: Date = new Date();
         expirationDate.setDate(expirationDate.getDate() + 30);
+        const realDevice: string = device ? device : 'unknow';
 
         const token: UserToken = await this.prisma.userToken.create({ data: {
-            exprirationDate: expirationDate,
+            expirationDate: expirationDate,
             ip,
-            device,
+            device: realDevice,
             userId: existingUser.id,
         }});
 

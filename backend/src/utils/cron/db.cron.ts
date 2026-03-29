@@ -10,7 +10,7 @@ export class DbService {
     async removeExpiredToken() {
         await this.prisma.userToken.deleteMany({
             where: {
-                exprirationDate: { lte: new Date() }
+                expirationDate: { lte: new Date() }
             }
         });
     }

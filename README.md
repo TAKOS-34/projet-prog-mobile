@@ -19,12 +19,15 @@ nest g {module/service/controller} {nom}
 
 ```bash
 # Migration
-npx prisma migrate dev --name init
+npx prisma migrate dev
+
+# Clean database
+prix prisma migrate reset
 
 # Générer le client
 npx prisma generate
 
-# Lancer UI
+# Interface admin
 npx prisma studio
 ```
 
@@ -40,9 +43,9 @@ sudo -u postgres psql
 # Créer utilisateur
 CREATE USER takos WITH PASSWORD 'takos123';
 
-# Permissions utilisateur
-GRANT ALL PRIVILEGES ON DATABASE prog_mobile_projet TO takos;
-
 # Créer database
 CREATE DATABASE prog_mobile_projet;
+
+# Permissions utilisateur
+GRANT ALL PRIVILEGES ON DATABASE prog_mobile_projet TO takos;
 ```

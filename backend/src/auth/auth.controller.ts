@@ -22,7 +22,7 @@ export class AuthController {
     login(@Body() loginUserDto: LoginUserDto, @Ip() ip: string, @Headers('user-agent') ua: string): Promise<TokenResponseMessage> {
         const parser = new UAParser(ua);
 
-        return this.authService.login(loginUserDto, ip, parser.getDevice().type ?? 'unknow');
+        return this.authService.login(loginUserDto, ip, parser.getDevice().type ?? '');
     }
 
     @Get('confirm-email/:token')

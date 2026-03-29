@@ -1,4 +1,4 @@
-import { Controller, Patch, Delete, UseGuards, UseInterceptors, UploadedFile, ParseFilePipe, MaxFileSizeValidator, FileTypeValidator, Body, } from '@nestjs/common';
+import { Param, Controller, Get, Patch, Delete, UseGuards, UseInterceptors, UploadedFile, ParseFilePipe, MaxFileSizeValidator, FileTypeValidator, Body, } from '@nestjs/common';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { ResponseMessage } from 'src/utils/dto/responseMessage.dto';
 import { ProfileService } from './profile.service';
@@ -6,6 +6,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { GetUser } from 'src/utils/decorator/get-user.decorator';
 import type { User } from '@prisma/client';
 import { UpdateUserDto } from './dto/updateUser.dto';
+import { Token } from './dto/token.dto';
 
 @Controller('profile')
 export class ProfileController {
@@ -44,5 +45,21 @@ export class ProfileController {
     @Delete()
     deleteAccount(@GetUser() user: User): Promise<ResponseMessage> {
         return this.profileService.deleteAccount(user);
+    }
+
+
+
+    @UseGuards(AuthGuard)
+    @Get('tokens')
+    getTokens(@GetUser() user: User): Promise<Array<Token>> {
+        return this.profileService.getTokens(user);
+    }
+
+
+
+    @UseGuards(AuthGuard)
+    @Delete('token/:tokenId')
+    deleteToken(@Param('tokenId') tokenId: string, @GetUser() user: User): Promise<ResponseMessage> {
+        return this.profileService.deleteToken(tokenId, user);
     }
 }

@@ -19,7 +19,7 @@ export class AuthGuard implements CanActivate {
             include: { User: true }
         });
 
-        if (!session || !session.User || new Date() > session.exprirationDate) {
+        if (!session || !session.User || new Date() > session.expirationDate) {
             if (session) await this.prisma.userToken.delete({ where: { id: token } });
             throw new UnauthorizedException('Error during token verification');
         }
