@@ -9,6 +9,8 @@ datasource db {
     provider = "postgresql"
 }
 
+
+
 model User {
     id                     Int       @id @default(autoincrement())
     email                  String    @unique
@@ -18,9 +20,12 @@ model User {
     lastTimeLogin          DateTime?
     isEmailVerified        Boolean   @default(false)
     emailVerificationToken String?   @unique
+    avatar                 String?   @unique
 
     usersTokens UserToken[]
 }
+
+
 
 model UserToken {
     id              String   @id @unique @default(uuid())

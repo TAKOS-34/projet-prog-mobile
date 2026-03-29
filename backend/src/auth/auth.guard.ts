@@ -1,7 +1,5 @@
-
 import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { UserToken } from '@prisma/client';
 import { Request } from 'express';
 
 @Injectable()
@@ -12,16 +10,18 @@ export class AuthGuard implements CanActivate {
         const request = context.switchToHttp().getRequest();
         const token: string | null = this.extractTokenFromHeader(request);
 
-        if (!token) throw new UnauthorizedException('Error during token verification');
+        if (!token) {
+            throw new UnauthorizedException('Error during token verification');
+        }
 
         const session = await this.prisma.userToken.findUnique({
             where: { id: token },
             include: { User: true }
         });
 
-        if (!session || new Date() > session.exprirationDate) {
+        if (!session || !session.User || new Date() > session.exprirationDate) {
             if (session) await this.prisma.userToken.delete({ where: { id: token } });
-            throw new UnauthorizedException('Session expired or invalid');
+            throw new UnauthorizedException('Error during token verification');
         }
 
         request['user'] = session.User;

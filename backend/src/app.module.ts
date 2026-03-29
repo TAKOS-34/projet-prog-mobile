@@ -4,6 +4,10 @@ import { ThrottlerModule } from '@nestjs/throttler';
 import { AuthModule } from './auth/auth.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { MailerModule } from '@nestjs-modules/mailer';
+import { HandlebarsAdapter } from '@nestjs-modules/mailer/adapters/handlebars.adapter';
+import { join } from 'path';
+import { ProfileModule } from './profile/profile.module';
+import { CdnModule } from './cdn/cdn.module';
 
 @Module({
     imports: [
@@ -17,7 +21,6 @@ import { MailerModule } from '@nestjs-modules/mailer';
             ],
         }),
         ScheduleModule.forRoot(),
-        AuthModule,
         MailerModule.forRoot({
             transport: {
                 service: 'gmail',
@@ -27,10 +30,16 @@ import { MailerModule } from '@nestjs-modules/mailer';
                     user: process.env.MAILER_USERNAME,
                     pass: process.env.MAILER_PASSWORD,
                 },
-            }
+            },
+            template: {
+                dir: join(__dirname, 'mailer', 'views'),
+                adapter: new HandlebarsAdapter(),
+                options: { strict: true, },
+            },
         }),
+        AuthModule, ProfileModule, CdnModule,
     ],
     controllers: [],
-    providers: [AuthModule],
+    providers: [],
 })
 export class AppModule {}

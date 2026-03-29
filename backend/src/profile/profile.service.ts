@@ -1,0 +1,102 @@
+import { BadRequestException, Injectable } from '@nestjs/common';
+import { randomUUID } from 'crypto';
+import sharp from 'sharp';
+import { PrismaService } from 'src/prisma/prisma.service';
+import { join } from 'path';
+import { existsSync, mkdirSync, unlink } from 'fs';
+import { ResponseMessage } from 'src/utils/dto/responseMessage.dto';
+import type { User } from '@prisma/client';
+import { UpdateUserDto } from './dto/updateUser.dto';
+import * as bcrypt from 'bcrypt';
+import { AppMailerService } from 'src/mailer/mailer.service';
+
+@Injectable()
+export class ProfileService {
+    private readonly baseUrl: string = process.env.AVATAR_URL ?? './cdn/avatar';
+    private saltRounds: number = Number(process.env.BCRYPT_SALT) ?? 10;
+
+    constructor(
+        private readonly prisma: PrismaService,
+        private readonly mailer: AppMailerService
+    ) {
+        if (!existsSync(this.baseUrl)) {
+            mkdirSync(this.baseUrl, { recursive: true });
+        }
+    }
+
+
+
+    async updateAvatar(avatar: Express.Multer.File, user: User): Promise<ResponseMessage> {
+        const avatarId: string = randomUUID() + '.jpg';
+        const url: string = join(this.baseUrl, avatarId);
+
+        try {
+            await sharp(avatar.buffer)
+                .resize(500)
+                .jpeg()
+                .toFile(url);
+
+            if (user.avatar) {
+                const oldAvatarUrl = join(this.baseUrl, user.avatar);
+                await unlink(oldAvatarUrl, () => {});
+            }
+
+            await this.prisma.user.update({
+                where: { id: user.id },
+                data: { avatar: avatarId }
+            });
+
+        return { status: true, message: "Avatar updated" };
+        } catch (error) {
+            throw new BadRequestException('Error during avatar update');
+        }
+    }
+
+
+
+    async updateInfos(updateUserDto: UpdateUserDto, user: User): Promise<ResponseMessage> {
+        const { email, username, password } = updateUserDto;
+
+        if (email && await this.prisma.user.findUnique({ where: { email } })) {
+            throw new BadRequestException('Email already taken');
+        }
+
+        if (username && await this.prisma.user.findUnique({ where: { username } })) {
+            throw new BadRequestException('Username already taken');
+        }
+
+        if (password) {
+            updateUserDto.password = await bcrypt.hash(password, this.saltRounds);
+
+            await this.prisma.userToken.deleteMany({
+                where: { userId: user.id }
+            });
+        }
+
+        await this.prisma.user.update({
+            where: { id: user.id },
+            data: updateUserDto
+        });
+
+        await this.mailer.sendUpdatedProfileEmail(user.email, user.username, { emailChanged: !!email, usernameChanged: !!username, passwordChanged: !!password });
+
+        const message: string = password ? "Password changed, please reconnecte to your account" : "Profile updated";
+        return { status: true, message };
+    }
+
+
+
+    async deleteAccount(user: User): Promise<ResponseMessage> {
+        if (user.avatar) {
+            await unlink(join(this.baseUrl, user.avatar), () => {});
+        }
+
+        await this.prisma.user.delete({
+            where: { id: user.id }
+        });
+
+        await this.mailer.sendDeleteAccountEmail(user.email, user.username);
+
+        return { status: true, message: "Account deleted" };
+    }
+}

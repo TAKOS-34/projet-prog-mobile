@@ -1,4 +1,4 @@
-import { BadRequestException, HttpException, Injectable, InternalServerErrorException, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { CreateUserDto } from './dto/createUser.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { AppMailerService } from 'src/mailer/mailer.service';
@@ -6,6 +6,7 @@ import { LoginUserDto } from './dto/loginUser.dto';
 import { User, UserToken } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import { createHash, randomBytes } from 'crypto';
+import { ResponseMessage, TokenResponseMessage } from 'src/utils/dto/responseMessage.dto';
 
 @Injectable()
 export class AuthService {
@@ -18,12 +19,14 @@ export class AuthService {
 
 
 
-    async signUp(user: CreateUserDto): Promise<string> {
-        const existingUser: User | null = await this.prisma.user.findUnique({
-            where: { email: user.email }
+    async signUp(user: CreateUserDto): Promise<ResponseMessage> {
+        const existingUser: User | null = await this.prisma.user.findFirst({
+            where: { OR : [{ email: user.email }, { username: user.username }] }
         });
 
-        if (existingUser) throw new BadRequestException('Email or username already taken');
+        if (existingUser) {
+            throw new BadRequestException('Email or username already taken');
+        }
 
         const hashedPassword: string = await bcrypt.hash(user.password, this.saltRounds);
         const token: string = randomBytes(64).toString('hex');
@@ -38,18 +41,18 @@ export class AuthService {
 
         await this.mailer.sendConfirmationEmail(user.email, user.username, token);
 
-        return 'Please verify your email';
+        return { status: true, message: 'Please verify your email' };
     }
 
 
 
-    async login(user: LoginUserDto, ip: string, device: string): Promise<string> {
+    async login(user: LoginUserDto, ip: string, device: string): Promise<TokenResponseMessage> {
         const existingUser: User | null = await this.prisma.user.findUnique({
             where: { username: user.username }
         });
 
         if (!existingUser || !(await bcrypt.compare(user.password, existingUser.password))) {
-            throw new BadRequestException('Email or password incorrect');
+            throw new BadRequestException('Username or password incorrect');
         }
 
         if (!existingUser.isEmailVerified) {
@@ -71,7 +74,7 @@ export class AuthService {
             userId: existingUser.id,
         }});
 
-        return `Bearer ${token.id}`;
+        return { status: true,  token: `Bearer ${token.id}` };
     }
 
 
