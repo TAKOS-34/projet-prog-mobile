@@ -4,14 +4,22 @@ import { existsSync, createReadStream } from 'fs';
 
 @Injectable()
 export class CdnService {
-    private readonly baseUrl: string = process.env.AVATAR_URL ?? './cdn/avatar';
+    private readonly avatarDir: string = process.env.AVATAR_DIR ?? 'cdn/avatar';
+    private readonly avatarUrl: string = (process.env.URL ?? '') + (process.env.AVATAR_URL ?? '');
+    private readonly defaultAvatar: string = 'default.jpg';
 
     constructor() {}
 
 
 
+    getAvatarUrl(avatarId: string | null): string {
+        return this.avatarUrl + (avatarId ?? this.defaultAvatar);
+    }
+
+
+
     getAvatar(avatar: string): StreamableFile {
-        const path = join(process.cwd(), this.baseUrl, basename(avatar));
+        const path = join(process.cwd(), this.avatarDir, basename(avatar));
 
         if (!existsSync(path)) {
             throw new NotFoundException('Invalid avatar');

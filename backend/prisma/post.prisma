@@ -1,0 +1,109 @@
+model Post {
+    id           String   @id @default(uuid()) @db.Uuid()
+    date         DateTime @default(now())
+    photoUrl     String   @unique
+    title        String
+    localisation String
+    long         Float
+    lat          Float
+    description  String?
+    audioUrl     String?
+
+    groupId Int?
+    Group   Group? @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+    nbLikes    Int @default(0)
+    nbComments Int @default(0)
+
+    likes    Like[]
+    comments Comment[]
+    reports  Report[]
+    postTags PostTag[]
+
+    userId Int
+    User   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+
+
+model Tag {
+    id    String    @id @default(uuid())
+    name  String    @unique
+    posts PostTag[]
+}
+
+
+
+model PostTag {
+    postId String @db.Uuid()
+    tagId  String @db.Uuid()
+    post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+    tag    Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+    @@id([postId, tagId])
+}
+
+
+
+model Like {
+    postId String @db.Uuid()
+    Post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+    userId Int
+    User   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    @@id([postId, userId])
+}
+
+
+
+model Comment {
+    id           Int      @id @default(autoincrement())
+    content      String
+    creationDate DateTime @default(now())
+
+    postId String @db.Uuid()
+    Post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+    userId Int
+    User   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    commentLikes CommentLike[]
+}
+
+
+
+model CommentLike {
+    commentId Int
+    Comment   Comment @relation(fields: [commentId], references: [id], onDelete: Cascade)
+
+    userId Int
+    User   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    @@id([commentId, userId])
+}
+
+
+
+model Report {
+    creationDate DateTime     @default(now())
+    reason       ReportReason
+    details      String?
+
+    postId String @db.Uuid()
+    Post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+    userId Int
+    User   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    @@id([postId, userId])
+}
+
+enum ReportReason {
+    INNAPROPRIATE_CONTENT
+    WRONG_LOCALISATION
+    SPAM
+    PRIVATE_LIFE_VIOLATION
+    DANGEROUS_INFORMATIONS
+    OTHER
+}

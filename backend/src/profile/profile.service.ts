@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { randomUUID } from 'crypto';
 import sharp from 'sharp';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -10,6 +10,8 @@ import { UpdateUserDto } from './dto/updateUser.dto';
 import * as bcrypt from 'bcrypt';
 import { AppMailerService } from 'src/mailer/mailer.service';
 import { Token } from './dto/token.dto';
+import type { UserProfile } from './dto/userProfile.dto';
+import { CdnService } from 'src/cdn/cdn.service';
 
 @Injectable()
 export class ProfileService {
@@ -18,11 +20,23 @@ export class ProfileService {
 
     constructor(
         private readonly prisma: PrismaService,
-        private readonly mailer: AppMailerService
+        private readonly mailer: AppMailerService,
+        private readonly cdn: CdnService
     ) {
         if (!existsSync(this.baseUrl)) {
             mkdirSync(this.baseUrl, { recursive: true });
         }
+    }
+
+
+
+    getProfile(user: User): UserProfile {
+        return {
+            email: user.email,
+            username: user.username,
+            creationDate: user.creationDate,
+            avatar: this.cdn.getAvatarUrl(user.avatar)
+        };
     }
 
 
@@ -89,7 +103,7 @@ export class ProfileService {
 
     async deleteAccount(user: User): Promise<ResponseMessage> {
         if (user.avatar) {
-            await unlink(join(this.baseUrl, user.avatar), () => {});
+            unlink(join(this.baseUrl, user.avatar), () => {});
         }
 
         await this.prisma.user.delete({

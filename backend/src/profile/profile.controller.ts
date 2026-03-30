@@ -7,10 +7,19 @@ import { GetUser } from 'src/utils/decorator/get-user.decorator';
 import type { User } from '@prisma/client';
 import { UpdateUserDto } from './dto/updateUser.dto';
 import { Token } from './dto/token.dto';
+import type { UserProfile } from './dto/userProfile.dto';
 
 @Controller('profile')
 export class ProfileController {
     constructor(private readonly profileService: ProfileService) {}
+
+
+
+    @UseGuards(AuthGuard)
+    @Get('profile')
+    getProfile(@GetUser() user: User): UserProfile {
+        return this.profileService.getProfile(user);
+    }
 
 
 

@@ -1,0 +1,39 @@
+model User {
+    id                     Int       @id @default(autoincrement())
+    email                  String    @unique
+    username               String    @unique @db.VarChar(32)
+    password               String    @db.Char(60)
+    creationDate           DateTime  @default(now())
+    lastTimeLogin          DateTime?
+    updatedAt              DateTime  @updatedAt
+    isEmailVerified        Boolean   @default(false)
+    emailVerificationToken String?   @unique
+    avatar                 String?   @unique
+
+    nbPosts  Int @default(0)
+    nbGroups Int @default(0)
+
+    usersTokens    UserToken[]
+    userPosts      Post[]
+    likes          Like[]
+    memberOf       Member[]
+    groupsAdmin    Group[]
+    comments       Comment[]
+    requestToJoins RequestToJoin[]
+    commentLikes   CommentLike[]
+    reports        Report[]
+    bans           Ban[]
+}
+
+
+
+model UserToken {
+    id             String   @id @default(uuid()) @db.Uuid()
+    creationDate   DateTime @default(now())
+    expirationDate DateTime
+    ip             String   @db.VarChar(45)
+    device         String   @db.VarChar(64)
+
+    userId Int
+    User   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}

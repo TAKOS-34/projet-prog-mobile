@@ -1,0 +1,53 @@
+model Group {
+    id             Int      @id @default(autoincrement())
+    name           String   @unique @db.VarChar(32)
+    avatar         String?  @unique
+    creationDate   DateTime @default(now())
+    admin          Int
+    isGroupPrivate Boolean
+    User           User     @relation(fields: [admin], references: [id], onDelete: Cascade)
+
+    nbMembers Int @default(0)
+    nbPosts   Int @default(0)
+
+    members        Member[]
+    requestsToJoin RequestToJoin[]
+    posts          Post[]
+    bans           Ban[]
+}
+
+
+
+model Member {
+    groupId Int
+    Group   Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+    userId Int
+    User   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    @@id([groupId, userId])
+}
+
+
+
+model RequestToJoin {
+    groupId Int
+    Group   Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+    userId Int
+    User   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    @@id([groupId, userId])
+}
+
+
+
+model Ban {
+    groupId Int
+    Group   Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+    userId Int
+    User   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    @@id([groupId, userId])
+}

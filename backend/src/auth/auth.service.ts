@@ -7,6 +7,7 @@ import { User, UserToken } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import { createHash, randomBytes } from 'crypto';
 import { ResponseMessage, TokenResponseMessage } from 'src/utils/dto/responseMessage.dto';
+import { CdnService } from 'src/cdn/cdn.service';
 
 @Injectable()
 export class AuthService {
