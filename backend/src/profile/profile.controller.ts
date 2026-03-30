@@ -16,7 +16,7 @@ export class ProfileController {
 
 
     @UseGuards(AuthGuard)
-    @Get('profile')
+    @Get()
     getProfile(@GetUser() user: User): UserProfile {
         return this.profileService.getProfile(user);
     }
@@ -69,6 +69,6 @@ export class ProfileController {
     @UseGuards(AuthGuard)
     @Delete('token/:tokenId')
     deleteToken(@Param('tokenId') tokenId: string, @GetUser() user: User): Promise<ResponseMessage> {
-        return this.profileService.deleteToken(tokenId, user);
+        return this.profileService.deleteToken(Number(tokenId), user);
     }
 }

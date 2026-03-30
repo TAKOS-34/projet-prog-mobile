@@ -22,7 +22,7 @@ nest g {module/service/controller} {nom}
 npx prisma migrate dev
 
 # Clean database
-prix prisma migrate reset
+npx prisma migrate reset
 
 # Générer le client
 npx prisma generate

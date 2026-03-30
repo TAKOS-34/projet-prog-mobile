@@ -3,11 +3,10 @@ import { CreateUserDto } from './dto/createUser.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { AppMailerService } from 'src/mailer/mailer.service';
 import { LoginUserDto } from './dto/loginUser.dto';
-import { User, UserToken } from '@prisma/client';
+import { User } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import { createHash, randomBytes } from 'crypto';
 import { ResponseMessage, TokenResponseMessage } from 'src/utils/dto/responseMessage.dto';
-import { CdnService } from 'src/cdn/cdn.service';
 
 @Injectable()
 export class AuthService {
@@ -30,14 +29,13 @@ export class AuthService {
         }
 
         const hashedPassword: string = await bcrypt.hash(user.password, this.saltRounds);
-        const token: string = randomBytes(64).toString('hex');
-        const hashedTokenVerification: string = this.hashToken(token);
+        const { token, hashedToken } = this.generateHashedToken();
 
         await this.prisma.user.create({ data: {
             email: user.email,
             username: user.username,
             password: hashedPassword,
-            emailVerificationToken: hashedTokenVerification
+            emailVerificationToken: hashedToken
         }});
 
         await this.mailer.sendConfirmationEmail(user.email, user.username, token);
@@ -68,15 +66,17 @@ export class AuthService {
         const expirationDate: Date = new Date();
         expirationDate.setDate(expirationDate.getDate() + 30);
         const realDevice: string = device ? device : 'unknow';
+        const { token, hashedToken } = this.generateHashedToken();
 
-        const token: UserToken = await this.prisma.userToken.create({ data: {
+        await this.prisma.userToken.create({ data: {
+            hashedToken,
             expirationDate: expirationDate,
             ip,
             device: realDevice,
             userId: existingUser.id,
         }});
 
-        return { status: true,  token: `Bearer ${token.id}` };
+        return { status: true,  token: `Bearer ${token}` };
     }
 
 
@@ -98,7 +98,15 @@ export class AuthService {
 
 
 
-    private hashToken(token: string): string {
+    private generateHashedToken(): { token: string, hashedToken: string } {
+        const token: string = randomBytes(32).toString('hex');
+        const hashedToken: string = createHash('sha256').update(token).digest('hex');
+        return { token, hashedToken };
+    }
+
+
+
+    hashToken(token: string): string {
         return createHash('sha256').update(token).digest('hex');
     }
 }

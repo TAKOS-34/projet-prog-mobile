@@ -28,7 +28,8 @@ model User {
 
 
 model UserToken {
-    id             String   @id @default(uuid()) @db.Uuid()
+    id             Int      @id @default(autoincrement())
+    hashedToken    String   @unique
     creationDate   DateTime @default(now())
     expirationDate DateTime
     ip             String   @db.VarChar(45)

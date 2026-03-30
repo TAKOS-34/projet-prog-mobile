@@ -1,5 +1,5 @@
 export type Token = {
-    id: string;
+    id: number;
     creationDate: Date;
     ip: string;
     device: string;

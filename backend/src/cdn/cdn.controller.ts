@@ -1,6 +1,4 @@
 import { Controller, Get, Param, StreamableFile, NotFoundException } from '@nestjs/common';
-import { createReadStream, existsSync } from 'fs';
-import { join } from 'path';
 import { CdnService } from './cdn.service';
 
 @Controller('cdn')

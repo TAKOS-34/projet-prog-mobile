@@ -27,7 +27,7 @@ model Post {
 
 
 model Tag {
-    id    String    @id @default(uuid())
+    id    Int       @id @default(autoincrement())
     name  String    @unique
     posts PostTag[]
 }
@@ -36,7 +36,7 @@ model Tag {
 
 model PostTag {
     postId String @db.Uuid()
-    tagId  String @db.Uuid()
+    tagId  Int
     post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
     tag    Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
 
@@ -46,13 +46,17 @@ model PostTag {
 
 
 model Like {
+    id Int @id @default(autoincrement())
+    
     postId String @db.Uuid()
     Post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
 
-    userId Int
-    User   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+    userId Int?
+    User   User? @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-    @@id([postId, userId])
+    anonymousUserId String? @db.Uuid()
+
+    @@unique([postId, userId, anonymousUserId])
 }
 
 

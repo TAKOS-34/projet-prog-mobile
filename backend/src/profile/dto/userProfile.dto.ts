@@ -3,4 +3,6 @@ export type UserProfile = {
     username: string;
     creationDate: Date;
     avatar: string;
+    nbGroups: number;
+    nbPosts: number;
 }

@@ -2,8 +2,7 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { randomUUID } from 'crypto';
 import sharp from 'sharp';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { join } from 'path';
-import { existsSync, mkdirSync, unlink } from 'fs';
+import { unlink } from 'fs';
 import { ResponseMessage } from 'src/utils/dto/responseMessage.dto';
 import type { User } from '@prisma/client';
 import { UpdateUserDto } from './dto/updateUser.dto';
@@ -15,18 +14,13 @@ import { CdnService } from 'src/cdn/cdn.service';
 
 @Injectable()
 export class ProfileService {
-    private readonly baseUrl: string = process.env.AVATAR_URL ?? './cdn/avatar';
     private saltRounds: number = Number(process.env.BCRYPT_SALT) ?? 10;
 
     constructor(
         private readonly prisma: PrismaService,
         private readonly mailer: AppMailerService,
         private readonly cdn: CdnService
-    ) {
-        if (!existsSync(this.baseUrl)) {
-            mkdirSync(this.baseUrl, { recursive: true });
-        }
-    }
+    ) {}
 
 
 
@@ -35,7 +29,9 @@ export class ProfileService {
             email: user.email,
             username: user.username,
             creationDate: user.creationDate,
-            avatar: this.cdn.getAvatarUrl(user.avatar)
+            avatar: this.cdn.getAvatarUrl(user.avatar),
+            nbGroups: user.nbGroups,
+            nbPosts: user.nbPosts
         };
     }
 
@@ -43,7 +39,7 @@ export class ProfileService {
 
     async updateAvatar(avatar: Express.Multer.File, user: User): Promise<ResponseMessage> {
         const avatarId: string = randomUUID() + '.jpg';
-        const url: string = join(this.baseUrl, avatarId);
+        const url: string = this.cdn.getAvatarPath(avatarId);
 
         try {
             await sharp(avatar.buffer)
@@ -52,8 +48,8 @@ export class ProfileService {
                 .toFile(url);
 
             if (user.avatar) {
-                const oldAvatarUrl = join(this.baseUrl, user.avatar);
-                await unlink(oldAvatarUrl, () => {});
+                const oldAvatarUrl = this.cdn.getAvatarPath(user.avatar);
+                unlink(oldAvatarUrl, () => {});
             }
 
             await this.prisma.user.update({
@@ -103,7 +99,7 @@ export class ProfileService {
 
     async deleteAccount(user: User): Promise<ResponseMessage> {
         if (user.avatar) {
-            unlink(join(this.baseUrl, user.avatar), () => {});
+            unlink(this.cdn.getAvatarPath(user.avatar), () => {});
         }
 
         await this.prisma.user.delete({
@@ -131,7 +127,7 @@ export class ProfileService {
 
 
 
-    async deleteToken(tokenId: string, user: User): Promise<ResponseMessage> {
+    async deleteToken(tokenId: number, user: User): Promise<ResponseMessage> {
         try {
             await this.prisma.userToken.deleteMany({
                 where: {
