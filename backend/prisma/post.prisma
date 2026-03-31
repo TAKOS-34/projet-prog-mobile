@@ -1,16 +1,13 @@
 model Post {
     id           String   @id @default(uuid()) @db.Uuid()
+    imageExt     String   @db.VarChar(4)
     date         DateTime @default(now())
-    photoUrl     String   @unique
-    title        String
-    localisation String
+    title        String   @db.VarChar(64)
+    localisation String   
     long         Float
     lat          Float
-    description  String?
+    description  String?  @db.VarChar(280)
     audioUrl     String?
-
-    groupId Int?
-    Group   Group? @relation(fields: [groupId], references: [id], onDelete: Cascade)
 
     nbLikes    Int @default(0)
     nbComments Int @default(0)
@@ -19,6 +16,9 @@ model Post {
     comments Comment[]
     reports  Report[]
     postTags PostTag[]
+
+    groupId Int?
+    Group   Group? @relation(fields: [groupId], references: [id], onDelete: Cascade)
 
     userId Int
     User   User @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -102,6 +102,8 @@ model Report {
 
     @@id([postId, userId])
 }
+
+
 
 enum ReportReason {
     INNAPROPRIATE_CONTENT

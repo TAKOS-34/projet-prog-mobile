@@ -8,6 +8,7 @@ import { HandlebarsAdapter } from '@nestjs-modules/mailer/adapters/handlebars.ad
 import { join } from 'path';
 import { ProfileModule } from './profile/profile.module';
 import { CdnModule } from './cdn/cdn.module';
+import { PostModule } from './post/post.module';
 
 @Module({
     imports: [
@@ -37,7 +38,7 @@ import { CdnModule } from './cdn/cdn.module';
                 options: { strict: true, },
             },
         }),
-        AuthModule, ProfileModule, CdnModule,
+        AuthModule, ProfileModule, CdnModule, PostModule,
     ],
     controllers: [],
     providers: [],

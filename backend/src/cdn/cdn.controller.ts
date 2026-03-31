@@ -1,4 +1,4 @@
-import { Controller, Get, Param, StreamableFile, NotFoundException } from '@nestjs/common';
+import { Controller, Get, Param, StreamableFile } from '@nestjs/common';
 import { CdnService } from './cdn.service';
 
 @Controller('cdn')
@@ -10,5 +10,12 @@ export class CdnController {
     @Get('avatar/:avatar')
     getAvatar(@Param('avatar') avatar: string): StreamableFile {
         return this.cdnService.getAvatar(avatar);
+    }
+
+
+
+    @Get('post/:image')
+    getPost(@Param('image') image: string): StreamableFile {
+        return this.cdnService.getPost(image);
     }
 }

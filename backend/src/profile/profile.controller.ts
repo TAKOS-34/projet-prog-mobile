@@ -29,7 +29,7 @@ export class ProfileController {
     updateAvatar(@UploadedFile(
         new ParseFilePipe({
             validators: [
-                new MaxFileSizeValidator({ maxSize: 4 * 1000 * 1000 }),
+                new MaxFileSizeValidator({ maxSize: 2 * 1000 * 1000 }),
                 new FileTypeValidator({
                     fileType: /^image\/(png|jpe?g)(;.*)?$/i,
                     fallbackToMimetype: true,
