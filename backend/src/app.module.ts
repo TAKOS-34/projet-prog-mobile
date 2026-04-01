@@ -9,6 +9,8 @@ import { join } from 'path';
 import { ProfileModule } from './profile/profile.module';
 import { CdnModule } from './cdn/cdn.module';
 import { PostModule } from './post/post.module';
+import { GroupModule } from './group/group.module';
+import { GroupAdminModule } from './group-admin/group-admin.module';
 
 @Module({
     imports: [
@@ -38,7 +40,7 @@ import { PostModule } from './post/post.module';
                 options: { strict: true, },
             },
         }),
-        AuthModule, ProfileModule, CdnModule, PostModule,
+        AuthModule, ProfileModule, CdnModule, PostModule, GroupModule, GroupAdminModule,
     ],
     controllers: [],
     providers: [],

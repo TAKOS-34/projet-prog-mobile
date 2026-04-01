@@ -4,9 +4,10 @@ export type PostInfos = {
     localisation: string;
     long: number;
     lat: number;
-    description?: string;
+    description?: string | null;
     nbLikes: number;
     nbComments: number;
     groupName?: string;
-    groupAvatar?: string;
+    groupAvatar?: string | null;
+    tags: string[];
 }

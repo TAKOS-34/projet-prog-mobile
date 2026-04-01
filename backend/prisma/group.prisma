@@ -2,12 +2,14 @@ model Group {
     id             Int      @id @default(autoincrement())
     name           String   @unique @db.VarChar(32)
     avatar         String?  @unique
+    description    String?
     creationDate   DateTime @default(now())
-    admin          Int
     isGroupPrivate Boolean
-    User           User     @relation(fields: [admin], references: [id], onDelete: Cascade)
 
-    nbMembers Int @default(0)
+    admin Int
+    User  User @relation(fields: [admin], references: [id], onDelete: Cascade)
+
+    nbMembers Int @default(1)
     nbPosts   Int @default(0)
 
     members        Member[]

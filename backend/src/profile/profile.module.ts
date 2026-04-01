@@ -1,13 +1,14 @@
 import { Module } from '@nestjs/common';
 import { ProfileController } from './profile.controller';
 import { ProfileService } from './profile.service';
-import { PrismaService } from 'src/prisma/prisma.service';
-import { AppMailerService } from 'src/mailer/mailer.service';
-import { CdnService } from 'src/cdn/cdn.service';
-import { AuthService } from 'src/auth/auth.service';
+import { PrismaModule } from 'src/prisma/prisma.module';
+import { AppMailerModule } from 'src/mailer/mailer.module';
+import { CdnModule } from 'src/cdn/cdn.module';
+import { AuthModule } from 'src/auth/auth.module';
 
 @Module({
+    imports: [PrismaModule, AppMailerModule, CdnModule, AuthModule],
     controllers: [ProfileController],
-    providers: [ProfileService, PrismaService, AppMailerService, CdnService, AuthService]
+    providers: [ProfileService],
 })
 export class ProfileModule {}

@@ -11,6 +11,9 @@ export class CdnService {
     private readonly postDir: string = process.env.POST_DIR ?? 'cdn/post';
     private readonly postUrl: string = process.env.POST_URL ?? '';
 
+    private readonly groupAvatarDir: string = process.env.GROUP_AVATAR_DIR ?? 'cdn/group';
+    private readonly groupAvatarUrl: string = process.env.GROUP_AVATAR_URL ?? '';
+
     constructor() {}
 
 
@@ -28,6 +31,14 @@ export class CdnService {
 
     getPostUrl(postId: string, imageExt: string): string {
         return this.postUrl + postId + '.' + imageExt;
+    }
+
+    getGroupAvatarPath(avatar: string): string {
+        return join(process.cwd(), this.groupAvatarDir, basename(avatar));
+    }
+
+    getGroupAvatarUrl(avatar: string | null): string {
+        return this.groupAvatarUrl + (avatar ?? this.defaultAvatar);
     }
 
 
@@ -52,6 +63,21 @@ export class CdnService {
 
         if (!existsSync(path)) {
             throw new NotFoundException('Invalid post');
+        }
+
+        return new StreamableFile(createReadStream(path), {
+            type: 'image/jpeg',
+            disposition: 'inline',
+        });
+    }
+
+
+
+    getGroupAvatar(avatar: string): StreamableFile {
+        const path = this.getGroupAvatarPath(avatar);
+
+        if (!existsSync(path)) {
+            throw new NotFoundException('Invalid avatar');
         }
 
         return new StreamableFile(createReadStream(path), {

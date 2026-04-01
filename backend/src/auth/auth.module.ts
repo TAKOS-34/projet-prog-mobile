@@ -1,12 +1,13 @@
 import { Module } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
-import { PrismaService } from 'src/prisma/prisma.service';
-import { AppMailerService } from 'src/mailer/mailer.service';
 import { AuthGuard } from './auth.guard';
+import { PrismaModule } from 'src/prisma/prisma.module';
+import { AppMailerModule } from 'src/mailer/mailer.module';
 
 @Module({
-    providers: [AuthService, PrismaService, AppMailerService, AuthGuard],
+    imports: [PrismaModule, AppMailerModule],
+    providers: [AuthService, AuthGuard],
     controllers: [AuthController],
     exports: [AuthService, AuthGuard],
 })

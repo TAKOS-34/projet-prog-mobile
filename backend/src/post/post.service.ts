@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import type { PostDto } from './dto/post.dto';
+import type { CreatePostDto } from './dto/createPost.dto';
 import { ResponseMessage } from 'src/utils/dto/responseMessage.dto';
 import { Post, User } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -7,6 +7,7 @@ import NodeGeocoder from 'node-geocoder';
 import sharp from 'sharp';
 import { CdnService } from 'src/cdn/cdn.service';
 import { PostInfos } from './dto/postInfos.dto';
+import * as fs from 'fs';
 
 @Injectable()
 export class PostService {
@@ -14,55 +15,103 @@ export class PostService {
 
     constructor(
         private readonly prisma: PrismaService,
-        private readonly cdnService: CdnService
+        private readonly cdn: CdnService
     ) {}
 
 
-    async createPost(image: Express.Multer.File, post: PostDto, user: User): Promise<ResponseMessage> {
+    async createPost(image: Express.Multer.File, post: CreatePostDto, user: User): Promise<ResponseMessage> {
         const { long, lat } = await this.getCoordinates(post.localisation);
         const imageExt: string = image.mimetype.replace('image/', '');
+        const cleanTags: string[] = (post.tags ?? []).map(t => t.toLowerCase().trim());
 
-        const newPost: Post = await this.prisma.post.create({ data: {
-            imageExt,
-            lat,
-            long,
-            userId: user.id,
-            ...post,
-        }});
+        try {
+            const newPost: Post = await this.prisma.post.create({ data: {
+                imageExt,
+                lat,
+                long,
+                userId: user.id,
+                title: post.title,
+                localisation: post.localisation,
+                description: post.description ?? null,
+                groupId: post.groupId ?? null,
+                postTags: {
+                    create: cleanTags.map(tagName => ({
+                        tag: {
+                            connectOrCreate: {
+                                where: { name: tagName },
+                                create: { name: tagName }
+                            }
+                        }
+                    }))
+                }
+            }});
 
-        const imagePath: string = newPost.id + '.' + imageExt;
-        const postUrl = this.cdnService.getPostPath(imagePath);
+            await this.prisma.user.update({
+                where: { id: user.id },
+                data: { nbPosts: { increment: 1 } }
+            });
 
-        await sharp(image.buffer)
-            .toFile(postUrl);
+            const imagePath: string = newPost.id + '.' + imageExt;
+            const postUrl = this.cdn.getPostPath(imagePath);
 
-        return { status: true, message: 'New post accepted' };
+            await sharp(image.buffer).toFile(postUrl);
+        } catch (error) {
+            throw new BadRequestException('Error during post creation');
+        }
+
+        return { status: true, message: 'New post created' };
     }
 
 
 
     async getPost(image: string): Promise<PostInfos> {
-        const post = await this.prisma.post.findFirst({
+        const post = await this.prisma.post.findUniqueOrThrow({
             where: { id: image },
-            include: { Group: true }
+            include: {
+                Group: true,
+                postTags: { include: { tag: true } }
+            }
         });
 
-        if (!post) {
-            throw new NotFoundException('Invalid post');
-        }
-
         return {
-            image: this.cdnService.getPostUrl(post.id, post.imageExt),
+            image: this.cdn.getPostUrl(post.id, post.imageExt),
             date: post.date,
             localisation: post.localisation,
             long: post.long,
             lat: post.lat,
-            description: post.description ?? undefined,
+            description: post.description,
             nbLikes: post.nbLikes,
             nbComments: post.nbComments,
             groupName: post.Group?.name,
-            groupAvatar: post.Group?.avatar ?? undefined
+            groupAvatar: post.Group?.avatar,
+            tags: post.postTags.map(pt => pt.tag.name)
         };
+    }
+
+
+
+    async deletePost(image: string, user: User): Promise<ResponseMessage> {
+        const post: Post | null = await this.prisma.post.delete({
+            where: {
+                id: image,
+                userId: user.id
+            }
+        });
+
+        if (!post) {
+            throw new BadRequestException('Post does not exist');
+        }
+
+        await this.prisma.user.update({
+            where: { id: user.id },
+            data: { nbPosts: { decrement: 1 } }
+        });
+
+        const imageName = image + '.' + post.imageExt;
+        const imagePath = this.cdn.getPostPath(imageName);
+        await fs.promises.unlink(imagePath);
+
+        return { status: true, message: 'Post deleted' };
     }
 
 

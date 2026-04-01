@@ -2,7 +2,6 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { randomUUID } from 'crypto';
 import sharp from 'sharp';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { unlink } from 'fs';
 import { ResponseMessage } from 'src/utils/dto/responseMessage.dto';
 import type { User } from '@prisma/client';
 import { UpdateUserDto } from './dto/updateUser.dto';
@@ -11,6 +10,7 @@ import { AppMailerService } from 'src/mailer/mailer.service';
 import { Token } from './dto/token.dto';
 import type { UserProfile } from './dto/userProfile.dto';
 import { CdnService } from 'src/cdn/cdn.service';
+import * as fs from 'fs';
 
 @Injectable()
 export class ProfileService {
@@ -48,8 +48,7 @@ export class ProfileService {
                 .toFile(url);
 
             if (user.avatar) {
-                const oldAvatarUrl = this.cdn.getAvatarPath(user.avatar);
-                unlink(oldAvatarUrl, () => {});
+                await fs.promises.unlink(this.cdn.getAvatarPath(user.avatar));
             }
 
             await this.prisma.user.update({
@@ -99,7 +98,7 @@ export class ProfileService {
 
     async deleteAccount(user: User): Promise<ResponseMessage> {
         if (user.avatar) {
-            unlink(this.cdn.getAvatarPath(user.avatar), () => {});
+            await fs.promises.unlink(this.cdn.getAvatarPath(user.avatar));
         }
 
         await this.prisma.user.delete({

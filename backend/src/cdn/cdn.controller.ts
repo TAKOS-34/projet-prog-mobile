@@ -18,4 +18,11 @@ export class CdnController {
     getPost(@Param('image') image: string): StreamableFile {
         return this.cdnService.getPost(image);
     }
+
+
+
+    @Get('group/:avatar')
+    getGroupAvatar(@Param('image') image: string): StreamableFile {
+        return this.cdnService.getGroupAvatar(image);
+    }
 }
