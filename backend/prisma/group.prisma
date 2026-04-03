@@ -9,7 +9,7 @@ model Group {
     admin Int
     User  User @relation(fields: [admin], references: [id], onDelete: Cascade)
 
-    nbMembers Int @default(1)
+    nbMembers Int @default(0)
     nbPosts   Int @default(0)
 
     members        Member[]

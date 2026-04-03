@@ -90,14 +90,10 @@ export class GroupService {
 
             return { status: true, message: 'A request to join the group has been sent' };
         } else {
-            await this.prisma.$transaction([
-                this.prisma.member.create({ data : { groupId, userId: user.id }}),
-
-                this.prisma.user.update({
-                    where: { id: user.id },
-                    data: { nbGroups: { increment: 1 } }
-                })
-            ]);
+            await this.prisma.member.create({ data : {
+                groupId,
+                userId: user.id
+            }});
 
             return { status: true, message: 'Group join' };
         }
@@ -117,26 +113,14 @@ export class GroupService {
             throw new BadRequestException('You cannot quit the group as group admin');
         }
 
-        await this.prisma.$transaction([
-            this.prisma.member.delete({
-                where: {
-                    groupId_userId: {
-                        userId: user.id,
-                        groupId
-                    }
+        await this.prisma.member.delete({
+            where: {
+                groupId_userId: {
+                    userId: user.id,
+                    groupId
                 }
-            }),
-
-            this.prisma.group.update({
-                where: { id: groupId },
-                data: { nbMembers: { decrement: 1 } }
-            }),
-
-            this.prisma.user.update({
-                where: { id: user.id },
-                data: { nbGroups: { decrement: 1 } }
-            })
-        ]);
+            }
+        });
 
         return { status: true, message: 'Group quited' };
     }

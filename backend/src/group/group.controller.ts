@@ -7,13 +7,13 @@ import { GetUser } from 'src/utils/decorator/get-user.decorator';
 import type { User, Group } from '@prisma/client';
 import { CreateGroupDto } from './dto/createGroup.dto';
 
+@UseGuards(AuthGuard)
 @Controller('group')
 export class GroupController {
     constructor(private readonly groupService: GroupService) {}
 
 
 
-    @UseGuards(AuthGuard)
     @Post()
     @UseInterceptors(FileInterceptor('avatar'))
     createGroup(@Body() createGroupDto: CreateGroupDto, @GetUser() user: User, @UploadedFile(
@@ -33,7 +33,6 @@ export class GroupController {
 
 
 
-    @UseGuards(AuthGuard)
     @HttpCode(200)
     @Post('request-to-join/:groupId')
     requestToJoin(@Param('groupId') groupId: number, @GetUser() user: User): Promise<ResponseMessage> {
@@ -42,7 +41,6 @@ export class GroupController {
 
 
 
-    @UseGuards(AuthGuard)
     @HttpCode(200)
     @Delete('quit/:groupId')
     quit(@Param('groupId') groupId: number, @GetUser() user: User): Promise<ResponseMessage> {

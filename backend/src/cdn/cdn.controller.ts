@@ -22,7 +22,7 @@ export class CdnController {
 
 
     @Get('group/:avatar')
-    getGroupAvatar(@Param('image') image: string): StreamableFile {
-        return this.cdnService.getGroupAvatar(image);
+    getGroupAvatar(@Param('avatar') avatar: string): StreamableFile {
+        return this.cdnService.getGroupAvatar(avatar);
     }
 }

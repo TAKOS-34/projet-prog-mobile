@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import type { CreatePostDto } from './dto/createPost.dto';
 import { ResponseMessage } from 'src/utils/dto/responseMessage.dto';
 import { Post, User } from '@prisma/client';
@@ -6,11 +6,10 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import NodeGeocoder from 'node-geocoder';
 import sharp from 'sharp';
 import { CdnService } from 'src/cdn/cdn.service';
-import { PostInfos } from './dto/postInfos.dto';
 import * as fs from 'fs';
 
 @Injectable()
-export class PostService {
+export class PostCommandService {
     private readonly geocoder: NodeGeocoder.Geocoder = NodeGeocoder({ provider: 'openstreetmap' });
 
     constructor(
@@ -23,6 +22,10 @@ export class PostService {
         const { long, lat } = await this.getCoordinates(post.localisation);
         const imageExt: string = image.mimetype.replace('image/', '');
         const cleanTags: string[] = (post.tags ?? []).map(t => t.toLowerCase().trim());
+
+        if (post.groupId && !await this.prisma.member.findUnique({ where: { groupId_userId: { groupId: post.groupId, userId: user.id} } })) {
+            throw new UnauthorizedException(`You're not in the group`);
+        }
 
         try {
             const newPost: Post = await this.prisma.post.create({ data: {
@@ -46,11 +49,6 @@ export class PostService {
                 }
             }});
 
-            await this.prisma.user.update({
-                where: { id: user.id },
-                data: { nbPosts: { increment: 1 } }
-            });
-
             const imagePath: string = newPost.id + '.' + imageExt;
             const postUrl = this.cdn.getPostPath(imagePath);
 
@@ -64,48 +62,24 @@ export class PostService {
 
 
 
-    async getPost(image: string): Promise<PostInfos> {
-        const post = await this.prisma.post.findUniqueOrThrow({
-            where: { id: image },
-            include: {
-                Group: true,
-                postTags: { include: { tag: true } }
-            }
-        });
-
-        return {
-            image: this.cdn.getPostUrl(post.id, post.imageExt),
-            date: post.date,
-            localisation: post.localisation,
-            long: post.long,
-            lat: post.lat,
-            description: post.description,
-            nbLikes: post.nbLikes,
-            nbComments: post.nbComments,
-            groupName: post.Group?.name,
-            groupAvatar: post.Group?.avatar,
-            tags: post.postTags.map(pt => pt.tag.name)
-        };
-    }
-
-
 
     async deletePost(image: string, user: User): Promise<ResponseMessage> {
-        const post: Post | null = await this.prisma.post.delete({
+        const post = await this.prisma.post.findFirst({
             where: {
                 id: image,
-                userId: user.id
-            }
+                OR: [
+                    { userId: user.id },
+                    { Group: { admin: user.id } }
+                ]
+            },
+            select: { id: true, imageExt: true }
         });
 
         if (!post) {
-            throw new BadRequestException('Post does not exist');
+            throw new NotFoundException('Post does not exist');
         }
 
-        await this.prisma.user.update({
-            where: { id: user.id },
-            data: { nbPosts: { decrement: 1 } }
-        });
+        await this.prisma.post.delete({ where: { id: post.id } });
 
         const imageName = image + '.' + post.imageExt;
         const imagePath = this.cdn.getPostPath(imageName);

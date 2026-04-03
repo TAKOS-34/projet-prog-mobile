@@ -1,11 +1,58 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
-import type { Group } from '@prisma/client';
+import { BadRequestException, ConflictException, Injectable } from '@nestjs/common';
+import { Prisma, type Group, type Member, type User } from '@prisma/client';
+import { CdnService } from 'src/cdn/cdn.service';
+import { AppMailerService } from 'src/mailer/mailer.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { ResponseMessage } from 'src/utils/dto/responseMessage.dto';
+import * as fs from 'fs';
 
 @Injectable()
 export class GroupAdminService {
-    constructor(private readonly prisma: PrismaService) {}
+    constructor(
+        private readonly prisma: PrismaService,
+        private readonly mailer: AppMailerService,
+        private readonly cdn: CdnService
+    ) {}
+
+
+
+    async listRequest(groupId: number): Promise<any> {
+        const request = await this.prisma.requestToJoin.findMany({
+            where: { groupId },
+            select: { User: { select: {
+                id: true,
+                username: true,
+                avatar: true
+            }}}
+        });
+
+        return request.map(user => ({
+            id: user.User.id,
+            username: user.User.username,
+            avatar: this.cdn.getAvatarUrl(user.User.avatar)
+        }));
+    }
+
+
+
+    async listBan(groupId: number): Promise<any> {
+        const request = await this.prisma.ban.findMany({
+            where: { groupId },
+            select: { User: { select: {
+                id: true,
+                username: true,
+                avatar: true
+            }}}
+        });
+
+        return request.map(user => ({
+            id: user.User.id,
+            username: user.User.username,
+            avatar: this.cdn.getAvatarUrl(user.User.avatar)
+        }));
+    }
+
+
 
     async accept(userId: number, group: Group): Promise<ResponseMessage> {
         await this.prisma.$transaction([
@@ -18,17 +65,7 @@ export class GroupAdminService {
                 }
             }),
 
-            this.prisma.member.create({ data: { groupId: group.id, userId } }),
-
-            this.prisma.user.update({
-                where: { id: userId },
-                data: { nbGroups: { increment: 1 } }
-            }),
-
-            this.prisma.group.update({
-                where: { id: group.id },
-                data: { nbMembers: { increment: 1 } }
-            })
+            this.prisma.member.create({ data: { groupId: group.id, userId } })
         ]);
 
         return { status: true, message: 'Member accepted' };
@@ -69,18 +106,11 @@ export class GroupAdminService {
             this.prisma.ban.create({ data: {
                 groupId: group.id,
                 userId
-            }}),
-
-            this.prisma.group.update({
-                where: { id: group.id },
-                data: { nbMembers: { decrement: 1 } }
-            }),
-
-            this.prisma.user.update({
-                where: { id: userId },
-                data: { nbGroups: { decrement: 1 } }
-            })
+            }})
         ]);
+
+        const user: User | null = await this.prisma.user.findUnique({ where: { id: userId } });
+        if (user) await this.mailer.sendGroupBanEmail(user.email, user.username, group.name);
 
         return { status: true, message: 'Member banned' };
     }
@@ -98,5 +128,55 @@ export class GroupAdminService {
         });
 
         return { status: true, message: 'Member debanned' };
+    }
+
+
+
+    async transferAdminRole(userId: number, group: Group, user: User): Promise<ResponseMessage> {
+        const member: Member | null = await this.prisma.member.findUnique({
+            where: {
+                groupId_userId: {
+                    groupId: group.id,
+                    userId
+                }
+            }
+        });
+
+        if (!member) {
+            throw new BadRequestException('The user is not in the group');
+        }
+
+        await this.prisma.group.update({
+            where: { id: group.id },
+            data: { admin: userId }
+        });
+
+        const newAdmin: User | null = await this.prisma.user.findUnique({ where: { id: userId } });
+        if (newAdmin) {
+            await this.mailer.sendTransferAdminRoleEmail(user.email, user.username, group.name, newAdmin.username);
+            await this.mailer.sendReceiveAdminRoleEmail(newAdmin.email, newAdmin.username, group.name, user.username);
+        }
+
+        return { status: true, message: 'Admin role transfered' };
+    }
+
+
+
+    async delete(group: Group): Promise<ResponseMessage> {
+        try {
+            await this.prisma.group.delete({
+                where: { id: group.id }
+            });
+        } catch (error) {
+            if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2003') {
+                throw new ConflictException('You need to delete all posts of the group before deleting it');
+            }
+        }
+
+        if (group.avatar) {
+            await fs.promises.unlink(this.cdn.getGroupAvatarPath(group.avatar));
+        }
+
+        return { status: true, message: 'Group deleted' };
     }
 }

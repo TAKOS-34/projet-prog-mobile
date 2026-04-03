@@ -18,7 +18,7 @@ model Post {
     postTags PostTag[]
 
     groupId Int?
-    Group   Group? @relation(fields: [groupId], references: [id], onDelete: Cascade)
+    Group   Group? @relation(fields: [groupId], references: [id], onDelete: Restrict)
 
     userId Int
     User   User @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -47,7 +47,7 @@ model PostTag {
 
 model Like {
     id Int @id @default(autoincrement())
-    
+
     postId String @db.Uuid()
     Post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
 
@@ -66,13 +66,19 @@ model Comment {
     content      String
     creationDate DateTime @default(now())
 
+    nbLikes Int @default(0)
+
     postId String @db.Uuid()
     Post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
 
     userId Int
     User   User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+    parentId Int?
+    parent   Comment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+
     commentLikes CommentLike[]
+    comments Comment[] @relation("CommentReplies")
 }
 
 

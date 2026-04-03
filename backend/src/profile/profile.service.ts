@@ -56,7 +56,7 @@ export class ProfileService {
                 data: { avatar: avatarId }
             });
 
-        return { status: true, message: "Avatar updated" };
+            return { status: true, message: 'Avatar updated' };
         } catch (error) {
             throw new BadRequestException('Error during avatar update');
         }
@@ -90,24 +90,33 @@ export class ProfileService {
 
         await this.mailer.sendUpdatedProfileEmail(user.email, user.username, { emailChanged: !!email, usernameChanged: !!username, passwordChanged: !!password });
 
-        const message: string = password ? "Password changed, please reconnecte to your account" : "Profile updated";
+        const message: string = password ? 'Password changed, please reconnecte to your account' : 'Profile updated';
         return { status: true, message };
     }
 
 
 
     async deleteAccount(user: User): Promise<ResponseMessage> {
-        if (user.avatar) {
-            await fs.promises.unlink(this.cdn.getAvatarPath(user.avatar));
+        const deletedUser = await this.prisma.user.delete({
+            where: { id: user.id },
+            include: { userPosts: true }
+        });
+
+        const pathsToDelete = deletedUser.userPosts.map(
+            post => this.cdn.getPostPath(`${post.id}.${post.imageExt}`)
+        );
+
+        if (deletedUser.avatar) {
+            pathsToDelete.push(this.cdn.getAvatarPath(deletedUser.avatar));
         }
 
-        await this.prisma.user.delete({
-            where: { id: user.id }
-        });
+        await Promise.allSettled(
+            pathsToDelete.map(path => fs.promises.unlink(path))
+        );
 
         await this.mailer.sendDeleteAccountEmail(user.email, user.username);
 
-        return { status: true, message: "Account deleted" };
+        return { status: true, message: 'Account deleted' };
     }
 
 
@@ -138,6 +147,6 @@ export class ProfileService {
             throw new BadRequestException('Error during session suppression');
         }
 
-        return { status: true, message: "Session removed" };
+        return { status: true, message: 'Session removed' };
     }
 }

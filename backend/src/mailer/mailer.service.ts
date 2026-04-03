@@ -35,7 +35,7 @@ export class AppMailerService {
                 context: { username, changes }
             });
         } catch (error) {
-            console.error(error)
+            console.error(error);
         }
     }
 
@@ -50,7 +50,52 @@ export class AppMailerService {
                 context: { username }
             });
         } catch (error) {
-            console.error(error)
+            console.error(error);
+        }
+    }
+
+
+
+    async sendGroupBanEmail(email: string, username: string, groupName: string): Promise<void> {
+        try {
+            await this.mailerService.sendMail({
+                to: email,
+                subject: 'Ban from group | 7N',
+                template: 'group-ban',
+                context: { username, groupName }
+            });
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+
+
+    async sendTransferAdminRoleEmail(email: string, username: string, groupName: string, newUser: string): Promise<void> {
+        try {
+            await this.mailerService.sendMail({
+                to: email,
+                subject: 'You transferred admin role | 7N',
+                template: 'transfer-admin-role',
+                context: { username, groupName, newUser }
+            });
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+
+
+    async sendReceiveAdminRoleEmail(email: string, username: string, groupName: string, oldAdmin: string): Promise<void> {
+        try {
+            await this.mailerService.sendMail({
+                to: email,
+                subject: 'You receive admin role | 7N',
+                template: 'receive-admin-role',
+                context: { username, groupName, oldAdmin }
+            });
+        } catch (error) {
+            console.error(error);
         }
     }
 }

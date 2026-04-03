@@ -8,6 +8,6 @@ export type PostInfos = {
     nbLikes: number;
     nbComments: number;
     groupName?: string;
-    groupAvatar?: string | null;
+    groupAvatar?: string;
     tags: string[];
 }

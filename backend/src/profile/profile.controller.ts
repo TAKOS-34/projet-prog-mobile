@@ -9,13 +9,13 @@ import { UpdateUserDto } from './dto/updateUser.dto';
 import { Token } from './dto/token.dto';
 import type { UserProfile } from './dto/userProfile.dto';
 
+@UseGuards(AuthGuard)
 @Controller('profile')
 export class ProfileController {
     constructor(private readonly profileService: ProfileService) {}
 
 
 
-    @UseGuards(AuthGuard)
     @Get()
     getProfile(@GetUser() user: User): UserProfile {
         return this.profileService.getProfile(user);
@@ -23,7 +23,6 @@ export class ProfileController {
 
 
 
-    @UseGuards(AuthGuard)
     @Patch('/avatar')
     @UseInterceptors(FileInterceptor('avatar'))
     updateAvatar(@UploadedFile(
@@ -42,7 +41,6 @@ export class ProfileController {
 
 
 
-    @UseGuards(AuthGuard)
     @Patch('/infos')
     updateInfos(@Body() updateUserDto: UpdateUserDto, @GetUser() user: User): Promise<ResponseMessage> {
         return this.profileService.updateInfos(updateUserDto, user);
@@ -50,7 +48,6 @@ export class ProfileController {
 
 
 
-    @UseGuards(AuthGuard)
     @Delete()
     deleteAccount(@GetUser() user: User): Promise<ResponseMessage> {
         return this.profileService.deleteAccount(user);
@@ -58,7 +55,6 @@ export class ProfileController {
 
 
 
-    @UseGuards(AuthGuard)
     @Get('tokens')
     getTokens(@GetUser() user: User): Promise<Array<Token>> {
         return this.profileService.getTokens(user);
@@ -66,7 +62,6 @@ export class ProfileController {
 
 
 
-    @UseGuards(AuthGuard)
     @Delete('token/:tokenId')
     deleteToken(@Param('tokenId') tokenId: string, @GetUser() user: User): Promise<ResponseMessage> {
         return this.profileService.deleteToken(Number(tokenId), user);

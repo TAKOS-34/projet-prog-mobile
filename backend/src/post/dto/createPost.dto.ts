@@ -14,6 +14,7 @@ export class CreatePostDto {
     description?: string;
 
     @IsOptional()
+    @Transform(({ value }) => Number(value))
     groupId?: number;
 
     @IsOptional()
