@@ -1,13 +1,17 @@
 export type PostInfos = {
+    id: string;
     image: string;
-    date: Date;
+    creationDate: Date;
+    isEdited: boolean;
+    updatedAt: Date | null;
     localisation: string;
     long: number;
     lat: number;
-    description?: string | null;
+    title: string;
+    description: string | null;
     nbLikes: number;
     nbComments: number;
-    groupName?: string;
-    groupAvatar?: string;
+    groupName: string | null;
+    groupAvatar: string | null;
     tags: string[];
 }

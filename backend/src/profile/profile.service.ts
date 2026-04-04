@@ -39,13 +39,13 @@ export class ProfileService {
 
     async updateAvatar(avatar: Express.Multer.File, user: User): Promise<ResponseMessage> {
         const avatarId: string = randomUUID() + '.jpg';
-        const url: string = this.cdn.getAvatarPath(avatarId);
+        const path: string = this.cdn.getAvatarPath(avatarId);
 
         try {
             await sharp(avatar.buffer)
                 .resize(500)
                 .jpeg()
-                .toFile(url);
+                .toFile(path);
 
             if (user.avatar) {
                 await fs.promises.unlink(this.cdn.getAvatarPath(user.avatar));
@@ -85,7 +85,11 @@ export class ProfileService {
 
         await this.prisma.user.update({
             where: { id: user.id },
-            data: updateUserDto
+            data: {
+                ...(email && { email }),
+                ...(username && { username }),
+                ...(password && { password: updateUserDto.password }),
+            }
         });
 
         await this.mailer.sendUpdatedProfileEmail(user.email, user.username, { emailChanged: !!email, usernameChanged: !!username, passwordChanged: !!password });
@@ -136,16 +140,12 @@ export class ProfileService {
 
 
     async deleteToken(tokenId: number, user: User): Promise<ResponseMessage> {
-        try {
-            await this.prisma.userToken.deleteMany({
-                where: {
-                    id: tokenId,
-                    userId: user.id
-                }
-            });
-        } catch (error) {
-            throw new BadRequestException('Error during session suppression');
-        }
+        await this.prisma.userToken.deleteMany({
+            where: {
+                id: tokenId,
+                userId: user.id
+            }
+        });
 
         return { status: true, message: 'Session removed' };
     }

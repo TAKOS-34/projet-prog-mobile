@@ -1,4 +1,4 @@
-import { Controller, Delete, Get, HttpCode, Param, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, FileTypeValidator, Get, HttpCode, MaxFileSizeValidator, Param, ParseFilePipe, Patch, Post, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { GroupAdminService } from './group-admin.service';
 import { GroupAdminGuard } from './group-admin.guard';
 import { GetGroup } from 'src/utils/decorator/get-group.decorator';
@@ -6,6 +6,8 @@ import { ResponseMessage } from 'src/utils/dto/responseMessage.dto';
 import { AuthGuard } from 'src/auth/auth.guard';
 import type { Group, User } from '@prisma/client';
 import { GetUser } from 'src/utils/decorator/get-user.decorator';
+import { UpdateGroupDto } from './dto/updateGroup.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @UseGuards(AuthGuard, GroupAdminGuard)
 @Controller('group/admin')
@@ -59,6 +61,31 @@ export class GroupAdminController {
 
 
 
+    @Patch('/:groupId')
+    updateGroup(@Param('groupId') groupId: number, @Body() updateGroupDto: UpdateGroupDto, @GetGroup() group: Group): Promise<ResponseMessage> {
+        return this.groupAdminService.updateGroup(updateGroupDto, group);
+    }
+
+
+
+    @Patch('/avatar/:groupId')
+    @UseInterceptors(FileInterceptor('avatar'))
+    updateGroupAvatar(@Param('groupId') groupId: number, @GetGroup() group: Group, @UploadedFile(
+            new ParseFilePipe({
+                validators: [
+                    new MaxFileSizeValidator({ maxSize: 2 * 1000 * 1000 }),
+                    new FileTypeValidator({
+                        fileType: /^image\/(png|jpe?g)(;.*)?$/i,
+                        fallbackToMimetype: true,
+                    }),
+                ]
+            })
+        ) avatar: Express.Multer.File): Promise<ResponseMessage> {
+        return this.groupAdminService.updateGroupAvatar(group, avatar);
+    }
+
+
+
     @Patch('/transfer-admin-role/:groupId/:userId')
     transferAdminRole(@Param('groupId') groupId: number, @Param('userId') userId: number, @GetGroup() group: Group, @GetUser() user: User): Promise<ResponseMessage> {
         return this.groupAdminService.transferAdminRole(userId, group, user);
@@ -67,7 +94,7 @@ export class GroupAdminController {
 
 
     @Delete('/:groupId')
-    delete(@Param('groupId') groupId: number, @GetGroup() group: Group): Promise<ResponseMessage> {
-        return this.groupAdminService.delete(group);
+    deleteGroup(@Param('groupId') groupId: number, @GetGroup() group: Group): Promise<ResponseMessage> {
+        return this.groupAdminService.deleteGroup(group);
     }
 }

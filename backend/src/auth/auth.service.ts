@@ -90,9 +90,9 @@ export class AuthService {
                 data: { isEmailVerified: true, emailVerificationToken: null }
             });
 
-            return 'Email verified, you can login';
+            return '<h3>7N</h3><p style="color:green;">Email verified, you can login</p>';
         } catch (error) {
-            return 'Invalid token';
+            return '<h3>7N</h3><p style="color:red;">Invalid token</p>';
         }
     }
 
@@ -102,6 +102,32 @@ export class AuthService {
         const token: string = randomBytes(32).toString('hex');
         const hashedToken: string = createHash('sha256').update(token).digest('hex');
         return { token, hashedToken };
+    }
+
+
+
+    async getUserSession(token: string | null): Promise<User | null> {
+        if (!token) return null;
+
+        const hashedToken = this.hashToken(token);
+        const session = await this.prisma.userToken.findUnique({
+            where: { hashedToken },
+            include: { User: true }
+        });
+
+        if (!session || !session.User || new Date() > session.expirationDate) {
+            if (session) await this.prisma.userToken.delete({ where: { hashedToken } });
+            return null;
+        }
+
+        return session.User;
+    }
+
+
+
+    extractBearerToken(request: any): string | null {
+        const [type, token] = request.headers.authorization?.split(' ') ?? [];
+        return type === 'Bearer' ? token : null;
     }
 
 

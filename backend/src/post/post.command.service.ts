@@ -1,4 +1,4 @@
-import { BadRequestException, ForbiddenException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import type { CreatePostDto } from './dto/createPost.dto';
 import { ResponseMessage } from 'src/utils/dto/responseMessage.dto';
 import { Post, User } from '@prisma/client';
@@ -7,6 +7,8 @@ import NodeGeocoder from 'node-geocoder';
 import sharp from 'sharp';
 import { CdnService } from 'src/cdn/cdn.service';
 import * as fs from 'fs';
+import { ReportDto } from './dto/report.dto';
+import { UpdatePostDto } from './dto/updatePost.dto';
 
 @Injectable()
 export class PostCommandService {
@@ -62,11 +64,34 @@ export class PostCommandService {
 
 
 
+    async updatePost(postId: string, post: UpdatePostDto, user: User): Promise<ResponseMessage> {
+        const { title, description, localisation } = post;
+        const coords = localisation ? await this.getCoordinates(localisation) : undefined;
 
-    async deletePost(image: string, user: User): Promise<ResponseMessage> {
+        await this.prisma.post.updateMany({
+            data: {
+                isEdited: true,
+                updatedAt: new Date(),
+                ...(title && { title }),
+                ...(description && { description }),
+                ...(localisation && { localisation }),
+                ...(coords && { long: coords.long, lat: coords.lat })
+            },
+            where: {
+                id: postId,
+                userId: user.id,
+            }
+        });
+
+        return { status: true, message: 'Post updated' };
+    }
+
+
+
+    async deletePost(postId: string, user: User): Promise<ResponseMessage> {
         const post = await this.prisma.post.findFirst({
             where: {
-                id: image,
+                id: postId,
                 OR: [
                     { userId: user.id },
                     { Group: { admin: user.id } }
@@ -81,11 +106,26 @@ export class PostCommandService {
 
         await this.prisma.post.delete({ where: { id: post.id } });
 
-        const imageName = image + '.' + post.imageExt;
+        const imageName = postId + '.' + post.imageExt;
         const imagePath = this.cdn.getPostPath(imageName);
         await fs.promises.unlink(imagePath);
 
         return { status: true, message: 'Post deleted' };
+    }
+
+
+
+    async reportPost(postId: string, report: ReportDto, user: User): Promise<ResponseMessage> {
+        await this.prisma.report.create({ data: {
+            reason: report.reason,
+            details: report.details ?? null,
+            postId,
+            userId: user.id
+        }});
+
+        // Notification to admins
+
+        return { status: true, message: 'Post reported' };
     }
 
 

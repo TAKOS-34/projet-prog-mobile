@@ -12,9 +12,9 @@ export class PostQueryService {
 
 
 
-    async getPost(image: string): Promise<PostInfos> {
+    async getPost(postId: string): Promise<PostInfos> {
         const post = await this.prisma.post.findUniqueOrThrow({
-            where: { id: image },
+            where: { id: postId },
             include: {
                 Group: true,
                 postTags: { include: { tag: true } }
@@ -22,16 +22,20 @@ export class PostQueryService {
         });
 
         return {
+            id: post.id,
             image: this.cdn.getPostUrl(post.id, post.imageExt),
-            date: post.date,
+            creationDate: post.creationDate,
+            isEdited: post.isEdited,
+            updatedAt: post.updatedAt,
+            title: post.title,
             localisation: post.localisation,
             long: post.long,
             lat: post.lat,
             description: post.description,
             nbLikes: post.nbLikes,
             nbComments: post.nbComments,
-            groupName: post.Group?.name,
-            groupAvatar: post.Group?.avatar ? this.cdn.getGroupAvatarUrl(post.Group.avatar) : undefined,
+            groupName: post.Group?.name ?? null,
+            groupAvatar: post.Group?.avatar ? this.cdn.getGroupAvatarUrl(post.Group.avatar) : null,
             tags: post.postTags.map(pt => pt.tag.name)
         };
     }

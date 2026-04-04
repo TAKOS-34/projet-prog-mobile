@@ -4,10 +4,10 @@ import { Transform } from 'class-transformer';
 export class CreatePostDto {
     @IsNotEmpty()
     @MaxLength(64, { message: "Title must not be longer than 64 characters" })
-    title: string;
+    title!: string;
 
     @IsNotEmpty()
-    localisation: string;
+    localisation!: string;
 
     @IsOptional()
     @MaxLength(280, { message: "Description must not be longer than 280 characters" })
@@ -27,5 +27,5 @@ export class CreatePostDto {
         }
         return value;
     })
-    tags: string[];
+    tags?: string[];
 }

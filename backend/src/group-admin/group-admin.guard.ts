@@ -1,5 +1,5 @@
 import { BadRequestException, CanActivate, ExecutionContext, ForbiddenException, Injectable } from '@nestjs/common';
-import type { Group } from '@prisma/client';
+import type { Group, User } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
@@ -8,8 +8,8 @@ export class GroupAdminGuard implements CanActivate {
 
     async canActivate(context: ExecutionContext): Promise<boolean> {
         const request = context.switchToHttp().getRequest();
-        const user = request.user;
-        const groupId = parseInt(request.params.groupId);
+        const user: User | null = request.user;
+        const groupId: number | null = parseInt(request.params.groupId);
 
         if (!groupId || !user) {
             throw new BadRequestException('Error during admin verification');

@@ -2,7 +2,7 @@ model Group {
     id             Int      @id @default(autoincrement())
     name           String   @unique @db.VarChar(32)
     avatar         String?  @unique
-    description    String?
+    description    String?  @db.VarChar(280)
     creationDate   DateTime @default(now())
     isGroupPrivate Boolean
 

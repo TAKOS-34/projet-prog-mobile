@@ -11,6 +11,8 @@ import { CdnModule } from './cdn/cdn.module';
 import { PostModule } from './post/post.module';
 import { GroupModule } from './group/group.module';
 import { GroupAdminModule } from './group-admin/group-admin.module';
+import { LikeModule } from './like/like.module';
+import { CommentModule } from './comment/comment.module';
 
 @Module({
     imports: [
@@ -20,8 +22,8 @@ import { GroupAdminModule } from './group-admin/group-admin.module';
                 {
                     ttl: 60000,
                     limit: 10,
-                },
-            ],
+                }
+            ]
         }),
         ScheduleModule.forRoot(),
         MailerModule.forRoot({
@@ -32,17 +34,17 @@ import { GroupAdminModule } from './group-admin/group-admin.module';
                 auth: {
                     user: process.env.MAILER_USERNAME,
                     pass: process.env.MAILER_PASSWORD,
-                },
+                }
             },
             template: {
                 dir: join(__dirname, 'mailer', 'views'),
                 adapter: new HandlebarsAdapter(),
-                options: { strict: true, },
-            },
+                options: { strict: true }
+            }
         }),
-        AuthModule, ProfileModule, CdnModule, PostModule, GroupModule, GroupAdminModule,
+        AuthModule, ProfileModule, CdnModule, PostModule, GroupModule, GroupAdminModule, LikeModule, CommentModule,
     ],
     controllers: [],
-    providers: [],
+    providers: []
 })
 export class AppModule {}

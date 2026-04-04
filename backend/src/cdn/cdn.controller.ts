@@ -1,5 +1,6 @@
-import { Controller, Get, Param, StreamableFile } from '@nestjs/common';
+import { Controller, Get, Param, StreamableFile, UseGuards } from '@nestjs/common';
 import { CdnService } from './cdn.service';
+import { GroupProtectGuard } from 'src/group/group.protect.guard';
 
 @Controller('cdn')
 export class CdnController {
@@ -14,9 +15,10 @@ export class CdnController {
 
 
 
-    @Get('post/:image')
-    getPost(@Param('image') image: string): StreamableFile {
-        return this.cdnService.getPost(image);
+    @UseGuards(GroupProtectGuard)
+    @Get('post/:postId')
+    getPost(@Param('postId') postId: string): StreamableFile {
+        return this.cdnService.getPost(postId);
     }
 
 

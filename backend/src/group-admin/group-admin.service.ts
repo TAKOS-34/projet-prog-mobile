@@ -5,6 +5,9 @@ import { AppMailerService } from 'src/mailer/mailer.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { ResponseMessage } from 'src/utils/dto/responseMessage.dto';
 import * as fs from 'fs';
+import { UpdateGroupDto } from './dto/updateGroup.dto';
+import { randomUUID } from 'crypto';
+import sharp from 'sharp';
 
 @Injectable()
 export class GroupAdminService {
@@ -162,7 +165,55 @@ export class GroupAdminService {
 
 
 
-    async delete(group: Group): Promise<ResponseMessage> {
+    async updateGroup(updateGroup: UpdateGroupDto, group: Group): Promise<ResponseMessage> {
+        const { name, description, isGroupPrivate } = updateGroup;
+
+        if (await this.prisma.group.findUnique({ where: { name }})) {
+            throw new BadRequestException('A group with this name already exists');
+        }
+
+        await this.prisma.group.update({
+            where: { id: group.id },
+            data: {
+                ...(name && { name }),
+                ...(description && { description }),
+                ...(isGroupPrivate && { isGroupPrivate })
+            }
+        });
+
+        return { status: true, message: 'Group updated' };
+    }
+
+
+
+    async updateGroupAvatar(group: Group, avatar: Express.Multer.File): Promise<ResponseMessage> {
+        const avatarId: string = randomUUID() + '.jpg';
+        const path: string = this.cdn.getGroupAvatarPath(avatarId);
+
+        try {
+            await sharp(avatar.buffer)
+                .resize(500)
+                .jpeg()
+                .toFile(path);
+
+            if (group.avatar) {
+                await fs.promises.unlink(this.cdn.getGroupAvatarPath(group.avatar));
+            }
+
+            await this.prisma.group.update({
+                where: { id: group.id },
+                data: { avatar: avatarId }
+            });
+
+            return { status: true, message: 'Group avatar updated' };
+        } catch (error) {
+            throw new BadRequestException('Error during avatar update');
+        }
+    }
+
+
+
+    async deleteGroup(group: Group): Promise<ResponseMessage> {
         try {
             await this.prisma.group.delete({
                 where: { id: group.id }

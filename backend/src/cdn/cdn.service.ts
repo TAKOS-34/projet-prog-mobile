@@ -58,8 +58,8 @@ export class CdnService {
 
 
 
-    getPost(image: string): StreamableFile {
-        const path = this.getPostPath(image);
+    getPost(postId: string): StreamableFile {
+        const path = this.getPostPath(postId);
 
         if (!existsSync(path)) {
             throw new NotFoundException('Invalid post');

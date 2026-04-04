@@ -1,8 +1,10 @@
 model Post {
-    id           String   @id @default(uuid()) @db.Uuid()
-    imageExt     String   @db.VarChar(4)
-    date         DateTime @default(now())
-    title        String   @db.VarChar(64)
+    id           String    @id @default(uuid()) @db.Uuid()
+    imageExt     String    @db.VarChar(4)
+    creationDate DateTime  @default(now())
+    updatedAt    DateTime?
+    isEdited     Boolean   @default(false)
+    title        String    @db.VarChar(64)
     localisation String   
     long         Float
     lat          Float
@@ -55,16 +57,16 @@ model Like {
     User   User? @relation(fields: [userId], references: [id], onDelete: Cascade)
 
     anonymousUserId String? @db.Uuid()
-
-    @@unique([postId, userId, anonymousUserId])
 }
 
 
 
 model Comment {
-    id           Int      @id @default(autoincrement())
-    content      String
-    creationDate DateTime @default(now())
+    id           Int       @id @default(autoincrement())
+    content      String    @db.VarChar(280)
+    creationDate DateTime  @default(now())
+    updatedAt    DateTime?
+    isEdited     Boolean   @default(false)
 
     nbLikes Int @default(0)
 
@@ -84,13 +86,15 @@ model Comment {
 
 
 model CommentLike {
+    id Int @id @default(autoincrement())
+
     commentId Int
     Comment   Comment @relation(fields: [commentId], references: [id], onDelete: Cascade)
 
-    userId Int
-    User   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+    userId Int?
+    User   User? @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-    @@id([commentId, userId])
+    anonymousUserId String? @db.Uuid()
 }
 
 
@@ -98,7 +102,7 @@ model CommentLike {
 model Report {
     creationDate DateTime     @default(now())
     reason       ReportReason
-    details      String?
+    details      String?      @db.VarChar(300)
 
     postId String @db.Uuid()
     Post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
