@@ -23,6 +23,14 @@ export class CdnController {
 
 
 
+    @UseGuards(GroupProtectGuard)
+    @Get('audio/:audio')
+    getAudio(@Param('audio') audio: string): StreamableFile {
+        return this.cdnService.getAudio(audio);
+    }
+
+
+
     @Get('group/:avatar')
     getGroupAvatar(@Param('avatar') avatar: string): StreamableFile {
         return this.cdnService.getGroupAvatar(avatar);

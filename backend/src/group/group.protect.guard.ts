@@ -14,8 +14,9 @@ export class GroupProtectGuard implements CanActivate {
         const request = context.switchToHttp().getRequest();
         const commendId: number | null = request.params.commentId;
         const rawId: string | null = request.params.postId;
+        const audio: string | null = request.params.audio;
 
-        if (!commendId && !rawId) {
+        if (!commendId && !rawId && !audio) {
             throw new BadRequestException('Invalid URI ressources');
         }
 
@@ -39,6 +40,19 @@ export class GroupProtectGuard implements CanActivate {
 
             const post = await this.prisma.post.findUnique({
                 where: { id: postId },
+                include: { Group: true },
+            });
+
+            if (!post) {
+                throw new NotFoundException('Invalid URI ressources');
+            }
+
+            group = post.Group;
+        }
+
+        if (audio) {
+            const post = await this.prisma.post.findFirst({
+                where: { audio },
                 include: { Group: true },
             });
 

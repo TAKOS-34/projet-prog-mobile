@@ -9,6 +9,7 @@ import { CdnService } from 'src/cdn/cdn.service';
 import * as fs from 'fs';
 import { ReportDto } from './dto/report.dto';
 import { UpdatePostDto } from './dto/updatePost.dto';
+import { randomUUID } from 'crypto';
 
 @Injectable()
 export class PostCommandService {
@@ -20,10 +21,11 @@ export class PostCommandService {
     ) {}
 
 
-    async createPost(image: Express.Multer.File, post: CreatePostDto, user: User): Promise<ResponseMessage> {
+    async createPost(image: Express.Multer.File, post: CreatePostDto, user: User, audio?: Express.Multer.File): Promise<ResponseMessage> {
         const { long, lat } = await this.getCoordinates(post.localisation);
         const imageExt: string = image.mimetype.replace('image/', '');
         const cleanTags: string[] = (post.tags ?? []).map(t => t.toLowerCase().trim());
+        const audioName = audio ? (randomUUID() + '.' + audio.mimetype.replace('audio/', '')) : null;
 
         if (post.groupId && !await this.prisma.member.findUnique({ where: { groupId_userId: { groupId: post.groupId, userId: user.id} } })) {
             throw new UnauthorizedException(`You're not in the group`);
@@ -39,6 +41,7 @@ export class PostCommandService {
                 localisation: post.localisation,
                 description: post.description ?? null,
                 groupId: post.groupId ?? null,
+                audio: audioName,
                 postTags: {
                     create: cleanTags.map(tagName => ({
                         tag: {
@@ -55,6 +58,11 @@ export class PostCommandService {
             const postUrl = this.cdn.getPostPath(imagePath);
 
             await sharp(image.buffer).toFile(postUrl);
+
+            if (audio && audioName) {
+                const audioPath: string = this.cdn.getAudioPath(audioName);
+                await fs.promises.writeFile(audioPath, audio.buffer);
+            }
         } catch (error) {
             throw new BadRequestException('Error during post creation');
         }
@@ -97,7 +105,7 @@ export class PostCommandService {
                     { Group: { admin: user.id } }
                 ]
             },
-            select: { id: true, imageExt: true }
+            select: { id: true, imageExt: true, audio: true }
         });
 
         if (!post) {
@@ -106,9 +114,14 @@ export class PostCommandService {
 
         await this.prisma.post.delete({ where: { id: post.id } });
 
-        const imageName = postId + '.' + post.imageExt;
-        const imagePath = this.cdn.getPostPath(imageName);
+        const imageName: string = postId + '.' + post.imageExt;
+        const imagePath: string = this.cdn.getPostPath(imageName);
         await fs.promises.unlink(imagePath);
+
+        if (post.audio) {
+            const audioPath: string = this.cdn.getAudioPath(post.audio);
+            await fs.promises.unlink(audioPath);
+        }
 
         return { status: true, message: 'Post deleted' };
     }

@@ -11,10 +11,14 @@ export class CdnService {
     private readonly postDir: string = process.env.POST_DIR ?? 'cdn/post';
     private readonly postUrl: string = process.env.POST_URL ?? '';
 
+    private readonly audioDir: string = process.env.POST_AUDIO_DIR ?? 'cdn/audio';
+    private readonly audioUrl: string = process.env.POST_AUDIO_URL ?? '';
+
     private readonly groupAvatarDir: string = process.env.GROUP_AVATAR_DIR ?? 'cdn/group';
     private readonly groupAvatarUrl: string = process.env.GROUP_AVATAR_URL ?? '';
 
     constructor() {}
+
 
 
     getAvatarPath(avatar: string): string {
@@ -31,6 +35,14 @@ export class CdnService {
 
     getPostUrl(postId: string, imageExt: string): string {
         return this.postUrl + postId + '.' + imageExt;
+    }
+
+    getAudioPath(audio: string): string {
+        return join(process.cwd(), this.audioDir, basename(audio));
+    }
+
+    getAudioUrl(audio: string): string {
+        return this.audioUrl + audio;
     }
 
     getGroupAvatarPath(avatar: string): string {
@@ -67,6 +79,21 @@ export class CdnService {
 
         return new StreamableFile(createReadStream(path), {
             type: 'image/jpeg',
+            disposition: 'inline',
+        });
+    }
+
+
+
+    getAudio(audio: string): StreamableFile {
+        const path = this.getAudioPath(audio);
+
+        if (!existsSync(path)) {
+            throw new NotFoundException('Invalid post');
+        }
+
+        return new StreamableFile(createReadStream(path), {
+            type: 'audio/mp3',
             disposition: 'inline',
         });
     }

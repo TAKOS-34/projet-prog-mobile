@@ -9,6 +9,7 @@ export type PostInfos = {
     lat: number;
     title: string;
     description: string | null;
+    audio: string | null;
     nbLikes: number;
     nbComments: number;
     groupName: string | null;

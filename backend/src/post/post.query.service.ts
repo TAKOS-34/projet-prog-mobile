@@ -32,6 +32,7 @@ export class PostQueryService {
             long: post.long,
             lat: post.lat,
             description: post.description,
+            audio: post.audio ? this.cdn.getAudioUrl(post.audio) : null,
             nbLikes: post.nbLikes,
             nbComments: post.nbComments,
             groupName: post.Group?.name ?? null,

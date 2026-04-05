@@ -8,8 +8,8 @@ model Post {
     localisation String   
     long         Float
     lat          Float
-    description  String?  @db.VarChar(280)
-    audioUrl     String?
+    description  String?   @db.VarChar(280)
+    audio        String?
 
     nbLikes    Int @default(0)
     nbComments Int @default(0)
