@@ -2,10 +2,10 @@ CREATE OR REPLACE FUNCTION update_member_count() RETURNS TRIGGER AS $$
 BEGIN
     IF (TG_OP = 'INSERT') THEN
         UPDATE "Group" SET "nbMembers" = "nbMembers" + 1 WHERE id = NEW."groupId";
-        UPDATE "User" SET "nbGroups" = "nbGroups" + 1 WHERE id = NEW."userId";
+        UPDATE "UserSession" SET "nbGroups" = "nbGroups" + 1 WHERE id = NEW."userId";
     ELSIF (TG_OP = 'DELETE') THEN
         UPDATE "Group" SET "nbMembers" = "nbMembers" - 1 WHERE id = OLD."groupId";
-        UPDATE "User" SET "nbGroups" = "nbGroups" - 1 WHERE id = OLD."userId";
+        UPDATE "UserSession" SET "nbGroups" = "nbGroups" - 1 WHERE id = OLD."userId";
     END IF;
     RETURN NULL;
 END;
@@ -19,12 +19,12 @@ CREATE TRIGGER tr_member_count AFTER INSERT OR DELETE ON "Member" FOR EACH ROW E
 CREATE OR REPLACE FUNCTION update_post_count() RETURNS TRIGGER AS $$
 BEGIN
     IF (TG_OP = 'INSERT') THEN
-        UPDATE "User" SET "nbPosts" = "nbPosts" + 1 WHERE id = NEW."userId";
+        UPDATE "UserSession" SET "nbPosts" = "nbPosts" + 1 WHERE id = NEW."userId";
         IF NEW."groupId" IS NOT NULL THEN
             UPDATE "Group" SET "nbPosts" = "nbPosts" + 1 WHERE id = NEW."groupId";
         END IF;
     ELSIF (TG_OP = 'DELETE') THEN
-        UPDATE "User" SET "nbPosts" = "nbPosts" - 1 WHERE id = OLD."userId";
+        UPDATE "UserSession" SET "nbPosts" = "nbPosts" - 1 WHERE id = OLD."userId";
         IF OLD."groupId" IS NOT NULL THEN
             UPDATE "Group" SET "nbPosts" = "nbPosts" - 1 WHERE id = OLD."groupId";
         END IF;
@@ -103,3 +103,19 @@ $$ LANGUAGE plpgsql;
 
 DROP TRIGGER IF EXISTS tr_comment_reply_count ON "Comment";
 CREATE TRIGGER tr_comment_reply_count AFTER INSERT OR DELETE ON "Comment" FOR EACH ROW EXECUTE FUNCTION update_comment_reply_count();
+
+
+
+CREATE OR REPLACE FUNCTION update_tag_usage_count() RETURNS TRIGGER AS $$
+BEGIN
+    IF (TG_OP = 'INSERT') THEN
+        UPDATE "Tag" SET "nbUses" = "nbUses" + 1 WHERE id = NEW."tagId";
+    ELSIF (TG_OP = 'DELETE') THEN
+        UPDATE "Tag" SET "nbUses" = "nbUses" - 1 WHERE id = OLD."tagId";
+    END IF;
+    RETURN NULL;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS tr_tag_usage_count ON "PostTag";
+CREATE TRIGGER tr_tag_usage_count AFTER INSERT OR DELETE ON "PostTag" FOR EACH ROW EXECUTE FUNCTION update_tag_usage_count();

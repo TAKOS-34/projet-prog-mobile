@@ -1,7 +1,8 @@
 import { BadRequestException, CanActivate, ExecutionContext, ForbiddenException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import type { User } from '@prisma/client';
 import { AuthService } from 'src/auth/auth.service';
+import { UserSession } from 'src/utils/dto/userSession.dto';
+
 
 @Injectable()
 export class GroupProtectGuard implements CanActivate {
@@ -15,22 +16,30 @@ export class GroupProtectGuard implements CanActivate {
         const commendId: number | null = request.params.commentId;
         const rawId: string | null = request.params.postId;
         const audio: string | null = request.params.audio;
+        const groupId: number | null = Number(request.params.groupId);
 
-        if (!commendId && !rawId && !audio) {
+        if (!commendId && !rawId && !audio && !groupId) {
             throw new BadRequestException('Invalid URI ressources');
         }
 
-        let group: any = null;
+        let group: { id: number; isGroupPrivate: boolean } | null = null;
 
         if (commendId) {
-            const comment = await this.prisma.comment.findUnique({
+            const comment = await this.prisma.comment.findUniqueOrThrow({
                 where: { id: Number(commendId) },
-                include: { Post: { include: { Group: true } } },
+                select: {
+                    Post: {
+                        select: {
+                            Group: {
+                                select: {
+                                    id: true,
+                                    isGroupPrivate: true
+                                }
+                            }
+                        }
+                    }
+                },
             });
-
-            if (!comment) {
-                throw new NotFoundException('Invalid URI ressources');
-            }
 
             group = comment.Post?.Group;
         }
@@ -38,32 +47,45 @@ export class GroupProtectGuard implements CanActivate {
         if (rawId) {
             const postId = rawId.split('.')[0];
 
-            const post = await this.prisma.post.findUnique({
+            const post = await this.prisma.post.findUniqueOrThrow({
                 where: { id: postId },
-                include: { Group: true },
+                select: {
+                    Group: {
+                        select: {
+                            id: true,
+                            isGroupPrivate: true
+                        }
+                    }
+                },
             });
-
-            if (!post) {
-                throw new NotFoundException('Invalid URI ressources');
-            }
 
             group = post.Group;
         }
 
         if (audio) {
-            const post = await this.prisma.post.findFirst({
+            const post = await this.prisma.post.findFirstOrThrow({
                 where: { audio },
-                include: { Group: true },
+                select: {
+                    Group: {
+                        select: {
+                            id: true,
+                            isGroupPrivate: true
+                        }
+                    }
+                },
             });
-
-            if (!post) {
-                throw new NotFoundException('Invalid URI ressources');
-            }
 
             group = post.Group;
         }
 
-        let user: User | null = request['user'];
+        if (groupId) {
+            group = await this.prisma.group.findUniqueOrThrow({
+                where: { id: groupId },
+                select: { id: true, isGroupPrivate: true }
+            });
+        }
+
+        let user: UserSession | null = request['user'];
         if (!user) {
             const token: string | null = this.authService.extractBearerToken(request);
             if (token) {
@@ -80,7 +102,10 @@ export class GroupProtectGuard implements CanActivate {
             throw new UnauthorizedException('Authentication required for private group post');
         }
 
-        if (!await this.prisma.member.findUnique({ where: { groupId_userId: { groupId: group.id, userId: user.id, }}})) {
+        if (!await this.prisma.member.findUnique({
+            where: { groupId_userId: { groupId: group.id, userId: user.id } },
+            select: { groupId: true }
+        })) {
             throw new ForbiddenException(`You're not in the group`);
         }
 

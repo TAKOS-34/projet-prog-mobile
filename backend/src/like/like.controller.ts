@@ -2,9 +2,9 @@ import { Controller, Post, Param, Delete, UseGuards } from '@nestjs/common';
 import { LikeService } from './like.service';
 import { ResponseMessage } from 'src/utils/dto/responseMessage.dto';
 import { GetUser } from 'src/utils/decorator/get-user.decorator';
-import type { User } from '@prisma/client';
+import type { UserSession } from 'src/utils/dto/userSession.dto';
 import { GetAnonymous } from 'src/utils/decorator/get-anonymous.decorator';
-import { AuthLikeGuard } from './auth.like.guard';
+import { AuthOptionalGuard } from '../auth/auth.optionnal.guard';
 import { GroupProtectGuard } from 'src/group/group.protect.guard';
 
 @Controller('like')
@@ -12,32 +12,32 @@ export class LikeController {
     constructor(private readonly likeService: LikeService) {}
 
 
-    @UseGuards(GroupProtectGuard, AuthLikeGuard)
+    @UseGuards(GroupProtectGuard, AuthOptionalGuard)
     @Post('/post/:postId')
-    addLikePost(@Param('postId') postId: string, @GetUser() user: User, @GetAnonymous() anonymous: string): Promise<ResponseMessage> {
+    addLikePost(@Param('postId') postId: string, @GetUser() user: UserSession, @GetAnonymous() anonymous: string): Promise<ResponseMessage> {
         return this.likeService.addLikePost(postId, user, anonymous);
     }
 
 
-    @UseGuards(GroupProtectGuard, AuthLikeGuard)
+    @UseGuards(GroupProtectGuard, AuthOptionalGuard)
     @Delete('/post/:postId')
-    deleteLikePost(@Param('postId') postId: string, @GetUser() user: User, @GetAnonymous() anonymous: string): Promise<ResponseMessage> {
+    deleteLikePost(@Param('postId') postId: string, @GetUser() user: UserSession, @GetAnonymous() anonymous: string): Promise<ResponseMessage> {
         return this.likeService.deleteLikePost(postId, user, anonymous);
     }
 
 
 
-    @UseGuards(GroupProtectGuard, AuthLikeGuard)
+    @UseGuards(GroupProtectGuard, AuthOptionalGuard)
     @Post('/comment/:commentId')
-    addLikeComment(@Param('commentId') commentId: number, @GetUser() user: User, @GetAnonymous() anonymous: string): Promise<ResponseMessage> {
+    addLikeComment(@Param('commentId') commentId: number, @GetUser() user: UserSession, @GetAnonymous() anonymous: string): Promise<ResponseMessage> {
         return this.likeService.addLikeComment(commentId, user, anonymous);
     }
 
 
 
-    @UseGuards(GroupProtectGuard, AuthLikeGuard)
+    @UseGuards(GroupProtectGuard, AuthOptionalGuard)
     @Delete('/comment/:commentId')
-    deleteLikeComment(@Param('commentId') commentId: number, @GetUser() user: User, @GetAnonymous() anonymous: string): Promise<ResponseMessage> {
+    deleteLikeComment(@Param('commentId') commentId: number, @GetUser() user: UserSession, @GetAnonymous() anonymous: string): Promise<ResponseMessage> {
         return this.likeService.deleteLikeComment(commentId, user, anonymous);
     }
 }

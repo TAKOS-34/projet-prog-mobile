@@ -3,7 +3,7 @@ import { CommentService } from './comment.service';
 import { ResponseMessage } from 'src/utils/dto/responseMessage.dto';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { GetUser } from 'src/utils/decorator/get-user.decorator';
-import type { User } from '@prisma/client';
+import type { UserSession } from 'src/utils/dto/userSession.dto';
 import { CreateCommentDto } from './dto/createComment.dto';
 import { UpdateCommentDto } from './dto/updateComment.dto';
 import { GroupProtectGuard } from 'src/group/group.protect.guard';
@@ -16,7 +16,7 @@ export class CommentController {
 
     @UseGuards(AuthGuard, GroupProtectGuard)
     @Post('/:postId')
-    createComment(@Param('postId') postId: string, @Body() createCommentDto: CreateCommentDto, @GetUser() user: User): Promise<ResponseMessage> {
+    createComment(@Param('postId') postId: string, @Body() createCommentDto: CreateCommentDto, @GetUser() user: UserSession): Promise<ResponseMessage> {
         return this.commentService.createComment(postId, createCommentDto, user);
     }
 
@@ -24,7 +24,7 @@ export class CommentController {
 
     @UseGuards(AuthGuard, GroupProtectGuard)
     @Patch('/:commentId')
-    updateComment(@Param('commentId') commentId: string, @Body() content: UpdateCommentDto, @GetUser() user: User): Promise<ResponseMessage> {
+    updateComment(@Param('commentId') commentId: string, @Body() content: UpdateCommentDto, @GetUser() user: UserSession): Promise<ResponseMessage> {
         return this.commentService.updateComment(+commentId, content, user);
     }
 
@@ -32,7 +32,7 @@ export class CommentController {
 
     @UseGuards(AuthGuard, GroupProtectGuard)
     @Delete('/:commentId')
-    deleteComment(@Param('commentId') commentId: string, @GetUser() user: User): Promise<ResponseMessage> {
+    deleteComment(@Param('commentId') commentId: string, @GetUser() user: UserSession): Promise<ResponseMessage> {
         return this.commentService.deleteComment(+commentId, user);
     }
 }

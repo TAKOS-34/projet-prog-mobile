@@ -3,10 +3,10 @@ import { CreateUserDto } from './dto/createUser.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { AppMailerService } from 'src/mailer/mailer.service';
 import { LoginUserDto } from './dto/loginUser.dto';
-import { User } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import { createHash, randomBytes } from 'crypto';
 import { ResponseMessage, TokenResponseMessage } from 'src/utils/dto/responseMessage.dto';
+import { UserSession } from 'src/utils/dto/userSession.dto';
 
 @Injectable()
 export class AuthService {
@@ -20,8 +20,9 @@ export class AuthService {
 
 
     async signUp(user: CreateUserDto): Promise<ResponseMessage> {
-        const existingUser: User | null = await this.prisma.user.findFirst({
-            where: { OR : [{ email: user.email }, { username: user.username }] }
+        const existingUser = await this.prisma.user.findFirst({
+            where: { OR : [{ email: user.email }, { username: user.username }] },
+            select: { id: true }
         });
 
         if (existingUser) {
@@ -46,8 +47,13 @@ export class AuthService {
 
 
     async login(user: LoginUserDto, ip: string, device: string): Promise<TokenResponseMessage> {
-        const existingUser: User | null = await this.prisma.user.findUnique({
-            where: { username: user.username }
+        const existingUser = await this.prisma.user.findUnique({
+            where: { username: user.username },
+            select: {
+                id: true,
+                password: true,
+                isEmailVerified: true
+            }
         });
 
         if (!existingUser || !(await bcrypt.compare(user.password, existingUser.password))) {
@@ -60,7 +66,8 @@ export class AuthService {
 
         await this.prisma.user.update({
             where: { id: existingUser.id },
-            data: { lastTimeLogin: new Date() }
+            data: { lastTimeLogin: new Date() },
+            select: { id: true }
         });
 
         const expirationDate: Date = new Date();
@@ -87,7 +94,8 @@ export class AuthService {
         try {
             await this.prisma.user.update({
                 where: { emailVerificationToken: hashedToken},
-                data: { isEmailVerified: true, emailVerificationToken: null }
+                data: { isEmailVerified: true, emailVerificationToken: null },
+                select: { id: true }
             });
 
             return '<h3>7N</h3><p style="color:green;">Email verified, you can login</p>';
@@ -106,13 +114,27 @@ export class AuthService {
 
 
 
-    async getUserSession(token: string | null): Promise<User | null> {
+    async getUserSession(token: string | null): Promise<UserSession | null> {
         if (!token) return null;
 
         const hashedToken = this.hashToken(token);
         const session = await this.prisma.userToken.findUnique({
             where: { hashedToken },
-            include: { User: true }
+            select: {
+                expirationDate: true,
+                User: {
+                    select: {
+                        id: true,
+                        email: true,
+                        username: true,
+                        creationDate: true,
+                        avatar: true,
+                        nbPosts: true,
+                        nbGroups: true,
+                        isEmailVerified: true
+                    }
+                }
+            }
         });
 
         if (!session || !session.User || new Date() > session.expirationDate) {

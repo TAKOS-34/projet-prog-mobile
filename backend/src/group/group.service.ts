@@ -1,11 +1,14 @@
 import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
-import type { User, Group, Ban } from '@prisma/client';
+import { UserSession } from 'src/utils/dto/userSession.dto';
 import { ResponseMessage } from 'src/utils/dto/responseMessage.dto';
 import { CreateGroupDto } from './dto/createGroup.dto';
 import { CdnService } from 'src/cdn/cdn.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { randomUUID } from 'crypto';
 import sharp from 'sharp';
+import { UserList } from 'src/group/dto/userList.dto';
+import { GroupInfos } from './dto/groupInfos.dto';
+import { PostInfos } from 'src/post/dto/postInfos.dto';
 
 @Injectable()
 export class GroupService {
@@ -16,9 +19,97 @@ export class GroupService {
 
 
 
-    async createGroup(group: CreateGroupDto, user: User, avatar?: Express.Multer.File): Promise<ResponseMessage> {
-        const existingGroup: Group | null = await this.prisma.group.findUnique({
-            where: { name: group.name }
+    async getGroupInfos(groupId: number, user?: UserSession): Promise<GroupInfos> {
+        const group = await this.prisma.group.findUniqueOrThrow({
+            where: { id: groupId },
+            select: { 
+                id: true,
+                name: true,
+                avatar: true,
+                description: true,
+                creationDate: true,
+                isGroupPrivate: true,
+                admin: true,
+                nbMembers: true,
+                nbPosts: true,
+                members: user ? { where: { userId: user.id }, select: { userId: true } } : false
+            }});
+
+        return {
+            id: group.id,
+            name: group.name,
+            avatar: this.cdn.getGroupAvatarUrl(group.avatar),
+            description: group.description ?? undefined,
+            creationDate: group.creationDate,
+            isGroupPrivate: group.isGroupPrivate,
+            nbMembers: group.nbMembers,
+            nbPosts: group.nbPosts,
+            isMember: user ? group.members.length > 0 : false,
+            isAdmin: user ? group.admin === user.id : false
+        }
+    }
+
+    async getGroupMembers(groupId: number): Promise<UserList[]> {
+        const group = await this.prisma.group.findUniqueOrThrow({
+            where: { id: groupId },
+            select: { members: { select: { User: { select: {
+                id: true,
+                username: true,
+                avatar: true
+            }}}}}
+        });
+
+        return group.members.map(member => ({
+            id: member.User.id,
+            username: member.User.username,
+            avatar: this.cdn.getAvatarUrl(member.User.avatar)
+        }));
+    }
+
+    async getGroupPosts(groupId: number, userId?: number, anonymousToken?: string): Promise<PostInfos[]> {
+        const realUser = userId ? { userId } : anonymousToken ? { anonymousUserId: anonymousToken } : null;
+
+        const posts = await this.prisma.post.findMany({
+            where: { groupId },
+            include: {
+                Group: { select: { id: true, name: true, avatar: true } },
+                User: { select: { id: true, username: true, avatar: true } },
+                postTags: { select: { tag: { select: { name: true } } } },
+                likes: realUser ? { where: realUser, select: { id: true } } : false
+            }
+        });
+
+        return posts.map(post => ({
+            id: post.id,
+            image: this.cdn.getPostUrl(post.id, post.imageExt),
+            creationDate: post.creationDate,
+            isEdited: post.isEdited,
+            updatedAt: post.updatedAt ?? undefined,
+            title: post.title,
+            localisation: post.localisation,
+            long: post.long,
+            lat: post.lat,
+            description: post.description ?? undefined,
+            audio: post.audio ? this.cdn.getAudioUrl(post.audio) : undefined,
+            nbLikes: post.nbLikes,
+            nbComments: post.nbComments,
+            userId: post.User.id,
+            username: post.User.username,
+            avatar: this.cdn.getAvatarUrl(post.User.avatar),
+            groupId: post.Group?.id ?? undefined,
+            groupName: post.Group?.name ?? undefined,
+            groupAvatar: post.Group?.avatar ? this.cdn.getGroupAvatarUrl(post.Group.avatar) : undefined,
+            tags: post.postTags.map(pt => pt.tag.name),
+            isLiked: post.likes?.length > 0
+        }));
+    }
+
+
+
+    async createGroup(group: CreateGroupDto, user: UserSession, avatar?: Express.Multer.File): Promise<ResponseMessage> {
+        const existingGroup = await this.prisma.group.findUnique({
+            where: { name: group.name },
+            select: { id: true }
         });
 
         if (existingGroup) {
@@ -29,13 +120,16 @@ export class GroupService {
         const avatarPath: string | null = avatarId ? this.cdn.getGroupAvatarPath(avatarId) : null;
 
         try {
-            const newGroup: Group = await this.prisma.group.create({ data: {
+            const newGroup = await this.prisma.group.create({
+                data: {
                 name: group.name,
                 description: group.description ?? null,
                 avatar: avatarId,
                 isGroupPrivate: group.isGroupPrivate,
                 admin: user.id
-            }});
+                },
+                select: { id: true }
+            });
 
             await this.prisma.member.create({ data: {
                 groupId: newGroup.id,
@@ -57,10 +151,15 @@ export class GroupService {
 
 
 
-    async requestToJoin(groupId: number, user: User): Promise<ResponseMessage> {
+    async requestToJoin(groupId: number, user: UserSession): Promise<ResponseMessage> {
         const group = await this.prisma.group.findUnique({
             where: { id: groupId },
-            include: { members: true }
+            select: {
+                isGroupPrivate: true,
+                members: {
+                    select: { userId: true }
+                }
+            }
         });
 
         if (!group) {
@@ -71,7 +170,7 @@ export class GroupService {
             throw new BadRequestException('You are already a member of this group');
         }
 
-        const isUserBanned: Ban | null = await this.prisma.ban.findFirst({
+        const isUserBanned = await this.prisma.ban.findFirst({
             where: {
                 groupId,
                 userId: user.id
@@ -101,12 +200,13 @@ export class GroupService {
 
 
 
-    async quit(groupId: number, user: User): Promise<ResponseMessage> {
-        const isUserAdmin: Group | null = await this.prisma.group.findUnique({
+    async quit(groupId: number, user: UserSession): Promise<ResponseMessage> {
+        const isUserAdmin = await this.prisma.group.findFirst({
             where: {
                 id: groupId,
                 admin: user.id
-            }
+            },
+            select: { id: true }
         });
 
         if (isUserAdmin) {

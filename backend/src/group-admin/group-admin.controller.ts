@@ -4,10 +4,12 @@ import { GroupAdminGuard } from './group-admin.guard';
 import { GetGroup } from 'src/utils/decorator/get-group.decorator';
 import { ResponseMessage } from 'src/utils/dto/responseMessage.dto';
 import { AuthGuard } from 'src/auth/auth.guard';
-import type { Group, User } from '@prisma/client';
+import type { Group } from '@prisma/client';
 import { GetUser } from 'src/utils/decorator/get-user.decorator';
 import { UpdateGroupDto } from './dto/updateGroup.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { UserList } from '../group/dto/userList.dto';
+import type { UserSession } from 'src/utils/dto/userSession.dto';
 
 @UseGuards(AuthGuard, GroupAdminGuard)
 @Controller('group/admin')
@@ -17,20 +19,19 @@ export class GroupAdminController {
 
 
     @Get('/:groupId/list/request')
-    listRequest(@Param('groupId') groupId: number): Promise<any> {
+    listRequest(@Param('groupId') groupId: number): Promise<UserList[]> {
         return this.groupAdminService.listRequest(groupId);
     }
 
 
 
     @Get('/:groupId/list/ban')
-    listBan(@Param('groupId') groupId: number): Promise<any> {
+    listBan(@Param('groupId') groupId: number): Promise<UserList[]> {
         return this.groupAdminService.listBan(groupId);
     }
 
 
 
-    @HttpCode(200)
     @Post('accept/:groupId/:userId')
     accept(@Param('groupId') groupId: number, @Param('userId') userId: number, @GetGroup() group: Group): Promise<ResponseMessage> {
         return this.groupAdminService.accept(userId, group);
@@ -46,7 +47,6 @@ export class GroupAdminController {
 
 
 
-    @HttpCode(200)
     @Post('ban/:groupId/:userId')
     ban(@Param('groupId') groupId: number, @Param('userId') userId: number, @GetGroup() group: Group): Promise<ResponseMessage> {
         return this.groupAdminService.ban(userId, group);
@@ -87,7 +87,7 @@ export class GroupAdminController {
 
 
     @Patch('/transfer-admin-role/:groupId/:userId')
-    transferAdminRole(@Param('groupId') groupId: number, @Param('userId') userId: number, @GetGroup() group: Group, @GetUser() user: User): Promise<ResponseMessage> {
+    transferAdminRole(@Param('groupId') groupId: number, @Param('userId') userId: number, @GetGroup() group: Group, @GetUser() user: UserSession): Promise<ResponseMessage> {
         return this.groupAdminService.transferAdminRole(userId, group, user);
     }
 

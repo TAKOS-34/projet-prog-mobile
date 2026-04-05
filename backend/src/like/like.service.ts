@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import type { User } from '@prisma/client';
+import type { UserSession } from 'src/utils/dto/userSession.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { ResponseMessage } from 'src/utils/dto/responseMessage.dto';
 
@@ -11,7 +11,7 @@ export class LikeService {
 
 
 
-    async addLikePost(postId: string, user: User, anonymousToken: string): Promise<ResponseMessage> {
+    async addLikePost(postId: string, user: UserSession, anonymousToken: string): Promise<ResponseMessage> {
         if (user) {
             await this.prisma.like.create({ data: {
                 postId,
@@ -19,7 +19,7 @@ export class LikeService {
             }});
         }
 
-        if (anonymousToken) {
+        else if (anonymousToken) {
             await this.prisma.like.create({ data: {
                 postId,
                 anonymousUserId: anonymousToken
@@ -31,7 +31,7 @@ export class LikeService {
 
 
 
-    async deleteLikePost(postId: string, user: User, anonymousToken: string): Promise<ResponseMessage> {
+    async deleteLikePost(postId: string, user: UserSession, anonymousToken: string): Promise<ResponseMessage> {
         if (user) {
             await this.prisma.like.deleteMany({ where: {
                 postId,
@@ -39,7 +39,7 @@ export class LikeService {
             }});
         }
 
-        if (anonymousToken) {
+        else if (anonymousToken) {
             await this.prisma.like.deleteMany({ where: {
                 postId,
                 anonymousUserId: anonymousToken
@@ -51,7 +51,7 @@ export class LikeService {
 
 
 
-    async addLikeComment(commentId: number, user: User, anonymousToken: string): Promise<ResponseMessage> {
+    async addLikeComment(commentId: number, user: UserSession, anonymousToken: string): Promise<ResponseMessage> {
         if (user) {
             await this.prisma.commentLike.create({ data: {
                 commentId,
@@ -59,7 +59,7 @@ export class LikeService {
             }});
         }
 
-        if (anonymousToken) {
+        else if (anonymousToken) {
             await this.prisma.commentLike.create({ data: {
                 commentId,
                 anonymousUserId: anonymousToken
@@ -71,7 +71,7 @@ export class LikeService {
 
 
 
-    async deleteLikeComment(commentId: number, user: User, anonymousToken: string): Promise<ResponseMessage> {
+    async deleteLikeComment(commentId: number, user: UserSession, anonymousToken: string): Promise<ResponseMessage> {
         if (user) {
             await this.prisma.commentLike.deleteMany({ where: {
                 commentId,
@@ -79,7 +79,7 @@ export class LikeService {
             }});
         }
 
-        if (anonymousToken) {
+        else if (anonymousToken) {
             await this.prisma.commentLike.deleteMany({ where: {
                 commentId,
                 anonymousUserId: anonymousToken

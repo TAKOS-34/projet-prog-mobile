@@ -3,16 +3,21 @@ export type PostInfos = {
     image: string;
     creationDate: Date;
     isEdited: boolean;
-    updatedAt: Date | null;
+    updatedAt?: Date;
     localisation: string;
     long: number;
     lat: number;
     title: string;
-    description: string | null;
-    audio: string | null;
+    description?: string;
+    audio?: string;
     nbLikes: number;
     nbComments: number;
-    groupName: string | null;
-    groupAvatar: string | null;
+    userId: number,
+    username: string;
+    avatar: string;
+    groupId?: number;
+    groupName?: string;
+    groupAvatar?: string;
     tags: string[];
+    isLiked: boolean;
 }

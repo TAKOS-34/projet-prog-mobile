@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import type { CreatePostDto } from './dto/createPost.dto';
 import { ResponseMessage } from 'src/utils/dto/responseMessage.dto';
-import { Post, User } from '@prisma/client';
+import type { UserSession } from 'src/utils/dto/userSession.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import NodeGeocoder from 'node-geocoder';
 import sharp from 'sharp';
@@ -21,18 +21,22 @@ export class PostCommandService {
     ) {}
 
 
-    async createPost(image: Express.Multer.File, post: CreatePostDto, user: User, audio?: Express.Multer.File): Promise<ResponseMessage> {
+    async createPost(image: Express.Multer.File, post: CreatePostDto, user: UserSession, audio?: Express.Multer.File): Promise<ResponseMessage> {
         const { long, lat } = await this.getCoordinates(post.localisation);
         const imageExt: string = image.mimetype.replace('image/', '');
         const cleanTags: string[] = (post.tags ?? []).map(t => t.toLowerCase().trim());
         const audioName = audio ? (randomUUID() + '.' + audio.mimetype.replace('audio/', '')) : null;
 
-        if (post.groupId && !await this.prisma.member.findUnique({ where: { groupId_userId: { groupId: post.groupId, userId: user.id} } })) {
+        if (post.groupId && !await this.prisma.member.findUnique({
+            where: { groupId_userId: { groupId: post.groupId, userId: user.id } },
+            select: { groupId: true }
+        })) {
             throw new UnauthorizedException(`You're not in the group`);
         }
 
         try {
-            const newPost: Post = await this.prisma.post.create({ data: {
+            const newPost = await this.prisma.post.create({
+                data: {
                 imageExt,
                 lat,
                 long,
@@ -52,7 +56,9 @@ export class PostCommandService {
                         }
                     }))
                 }
-            }});
+                },
+                select: { id: true }
+            });
 
             const imagePath: string = newPost.id + '.' + imageExt;
             const postUrl = this.cdn.getPostPath(imagePath);
@@ -72,7 +78,7 @@ export class PostCommandService {
 
 
 
-    async updatePost(postId: string, post: UpdatePostDto, user: User): Promise<ResponseMessage> {
+    async updatePost(postId: string, post: UpdatePostDto, user: UserSession): Promise<ResponseMessage> {
         const { title, description, localisation } = post;
         const coords = localisation ? await this.getCoordinates(localisation) : undefined;
 
@@ -96,7 +102,7 @@ export class PostCommandService {
 
 
 
-    async deletePost(postId: string, user: User): Promise<ResponseMessage> {
+    async deletePost(postId: string, user: UserSession): Promise<ResponseMessage> {
         const post = await this.prisma.post.findFirst({
             where: {
                 id: postId,
@@ -128,7 +134,7 @@ export class PostCommandService {
 
 
 
-    async reportPost(postId: string, report: ReportDto, user: User): Promise<ResponseMessage> {
+    async reportPost(postId: string, report: ReportDto, user: UserSession): Promise<ResponseMessage> {
         await this.prisma.report.create({ data: {
             reason: report.reason,
             details: report.details ?? null,

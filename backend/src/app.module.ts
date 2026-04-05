@@ -13,6 +13,8 @@ import { GroupModule } from './group/group.module';
 import { GroupAdminModule } from './group-admin/group-admin.module';
 import { LikeModule } from './like/like.module';
 import { CommentModule } from './comment/comment.module';
+import { TagModule } from './tag/tag.module';
+import { SearchModule } from './search/search.module';
 
 @Module({
     imports: [
@@ -42,7 +44,7 @@ import { CommentModule } from './comment/comment.module';
                 options: { strict: true }
             }
         }),
-        AuthModule, ProfileModule, CdnModule, PostModule, GroupModule, GroupAdminModule, LikeModule, CommentModule,
+        AuthModule, ProfileModule, CdnModule, PostModule, GroupModule, GroupAdminModule, LikeModule, CommentModule, TagModule, SearchModule,
     ],
     controllers: [],
     providers: []

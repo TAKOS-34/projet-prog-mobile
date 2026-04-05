@@ -1,5 +1,6 @@
 import { BadRequestException, ConflictException, Injectable } from '@nestjs/common';
-import { Prisma, type Group, type Member, type User } from '@prisma/client';
+import { Prisma, type Group } from '@prisma/client';
+import { UserSession } from 'src/utils/dto/userSession.dto';
 import { CdnService } from 'src/cdn/cdn.service';
 import { AppMailerService } from 'src/mailer/mailer.service';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -8,6 +9,7 @@ import * as fs from 'fs';
 import { UpdateGroupDto } from './dto/updateGroup.dto';
 import { randomUUID } from 'crypto';
 import sharp from 'sharp';
+import { UserList } from '../group/dto/userList.dto';
 
 @Injectable()
 export class GroupAdminService {
@@ -19,7 +21,7 @@ export class GroupAdminService {
 
 
 
-    async listRequest(groupId: number): Promise<any> {
+    async listRequest(groupId: number): Promise<UserList[]> {
         const request = await this.prisma.requestToJoin.findMany({
             where: { groupId },
             select: { User: { select: {
@@ -38,7 +40,7 @@ export class GroupAdminService {
 
 
 
-    async listBan(groupId: number): Promise<any> {
+    async listBan(groupId: number): Promise<UserList[]> {
         const request = await this.prisma.ban.findMany({
             where: { groupId },
             select: { User: { select: {
@@ -112,7 +114,10 @@ export class GroupAdminService {
             }})
         ]);
 
-        const user: User | null = await this.prisma.user.findUnique({ where: { id: userId } });
+        const user = await this.prisma.user.findUnique({
+            where: { id: userId },
+            select: { email: true, username: true }
+        });
         if (user) await this.mailer.sendGroupBanEmail(user.email, user.username, group.name);
 
         return { status: true, message: 'Member banned' };
@@ -135,14 +140,15 @@ export class GroupAdminService {
 
 
 
-    async transferAdminRole(userId: number, group: Group, user: User): Promise<ResponseMessage> {
-        const member: Member | null = await this.prisma.member.findUnique({
+    async transferAdminRole(userId: number, group: Group, user: UserSession): Promise<ResponseMessage> {
+        const member = await this.prisma.member.findUnique({
             where: {
                 groupId_userId: {
                     groupId: group.id,
                     userId
                 }
-            }
+            },
+            select: { groupId: true }
         });
 
         if (!member) {
@@ -151,10 +157,17 @@ export class GroupAdminService {
 
         await this.prisma.group.update({
             where: { id: group.id },
-            data: { admin: userId }
+            data: { admin: userId },
+            select: { id: true }
         });
 
-        const newAdmin: User | null = await this.prisma.user.findUnique({ where: { id: userId } });
+        const newAdmin = await this.prisma.user.findUnique({
+            where: { id: userId },
+            select: {
+                email: true,
+                username: true
+            }
+        });
         if (newAdmin) {
             await this.mailer.sendTransferAdminRoleEmail(user.email, user.username, group.name, newAdmin.username);
             await this.mailer.sendReceiveAdminRoleEmail(newAdmin.email, newAdmin.username, group.name, user.username);
@@ -168,7 +181,7 @@ export class GroupAdminService {
     async updateGroup(updateGroup: UpdateGroupDto, group: Group): Promise<ResponseMessage> {
         const { name, description, isGroupPrivate } = updateGroup;
 
-        if (await this.prisma.group.findUnique({ where: { name }})) {
+        if (await this.prisma.group.findUnique({ where: { name }, select: { id: true } })) {
             throw new BadRequestException('A group with this name already exists');
         }
 
@@ -178,7 +191,8 @@ export class GroupAdminService {
                 ...(name && { name }),
                 ...(description && { description }),
                 ...(isGroupPrivate && { isGroupPrivate })
-            }
+            },
+            select: { id: true }
         });
 
         return { status: true, message: 'Group updated' };
@@ -202,7 +216,8 @@ export class GroupAdminService {
 
             await this.prisma.group.update({
                 where: { id: group.id },
-                data: { avatar: avatarId }
+                data: { avatar: avatarId },
+                select: { id: true }
             });
 
             return { status: true, message: 'Group avatar updated' };

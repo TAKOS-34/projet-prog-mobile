@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateCommentDto } from './dto/createComment.dto';
 import { ResponseMessage } from 'src/utils/dto/responseMessage.dto';
-import type { User } from '@prisma/client';
+import type { UserSession } from 'src/utils/dto/userSession.dto';
 import { UpdateCommentDto } from './dto/updateComment.dto';
 
 @Injectable()
@@ -11,7 +11,7 @@ export class CommentService {
 
 
 
-    async createComment(postId: string, comment: CreateCommentDto, user: User): Promise<ResponseMessage> {
+    async createComment(postId: string, comment: CreateCommentDto, user: UserSession): Promise<ResponseMessage> {
         await this.prisma.comment.create({ data: {
             content: comment.content,
             postId,
@@ -24,7 +24,7 @@ export class CommentService {
 
 
 
-    async updateComment(commentId: number, comment: UpdateCommentDto, user: User): Promise<ResponseMessage> {
+    async updateComment(commentId: number, comment: UpdateCommentDto, user: UserSession): Promise<ResponseMessage> {
         const { content } = comment;
 
         await this.prisma.comment.update({
@@ -37,7 +37,7 @@ export class CommentService {
 
 
 
-    async deleteComment(commentId: number, user: User): Promise<ResponseMessage> {
+    async deleteComment(commentId: number, user: UserSession): Promise<ResponseMessage> {
         await this.prisma.comment.delete({
             where: { id: commentId, userId: user.id }
         });
