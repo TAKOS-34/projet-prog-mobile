@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <color name="primary">#E2725B</color>
+    <color name="primary_dark">#8B3A2A</color>
+    <color name="primary_light">#EFA08E</color>
+    <color name="on_primary">#FFFFFF</color>
+
+    <color name="secondary">#84A98C</color>
+    <color name="secondary_dark">#2D4A38</color>
+    <color name="secondary_light">#B8D4BC</color>
+    <color name="on_secondary">#FFFFFF</color>
+
+    <color name="tertiary">#FF8C00</color>
+    <color name="tertiary_dark">#7A4000</color>
+    <color name="tertiary_light">#FFB84D</color>
+    <color name="on_tertiary">#FFFFFF</color>
+
+    <color name="neutral">#F5F5DC</color>
+    <color name="neutral_dark">#3A3A2A</color>
+    <color name="neutral_medium">#A0A08A</color>
+    <color name="neutral_light">#FAFAF0</color>
+
+    <color name="background">#F5F5DC</color>
+    <color name="surface">#FAFAF0</color>
+    <color name="surface_variant">#EEEEDD</color>
+    <color name="on_background">#2A2A1A</color>
+    <color name="on_surface">#2A2A1A</color>
+    <color name="on_surface_variant">#6A6A5A</color>
+
+    <color name="error">#B00020</color>
+    <color name="on_error">#FFFFFF</color>
+    <color name="success">#4CAF50</color>
+    <color name="warning">#FF8C00</color>
+
+    <color name="text_primary">#2A2A1A</color>
+    <color name="text_secondary">#6A6A5A</color>
+    <color name="text_hint">#A0A08A</color>
+    <color name="text_on_dark">#FFFFFF</color>
+
+    <color name="divider">#DDDDC8</color>
+    <color name="outline">#C0C0A8</color>
+
+    <color name="scrim">#80000000</color>
+    <color name="ripple_primary">#33E2725B</color>
+    <color name="ripple_dark">#1F2A2A1A</color>
+
+</resources>

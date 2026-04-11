@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="Theme.TravelApp" parent="Theme.MaterialComponents.Light.NoActionBar">
+
+        <item name="colorPrimary">@color/primary</item>
+        <item name="colorPrimaryVariant">@color/primary_dark</item>
+        <item name="colorOnPrimary">@color/on_primary</item>
+
+        <item name="colorSecondary">@color/secondary</item>
+        <item name="colorSecondaryVariant">@color/secondary_dark</item>
+        <item name="colorOnSecondary">@color/on_secondary</item>
+
+        <item name="android:colorBackground">@color/background</item>
+        <item name="colorSurface">@color/surface</item>
+        <item name="colorOnBackground">@color/on_background</item>
+        <item name="colorOnSurface">@color/on_surface</item>
+
+        <item name="colorError">@color/error</item>
+        <item name="colorOnError">@color/on_error</item>
+
+        <item name="android:statusBarColor">@color/background</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:navigationBarColor">@color/background</item>
+
+        <item name="textAppearanceHeadlineLarge">@style/TextAppearance.TravelApp.HeadlineLarge</item>
+        <item name="textAppearanceHeadlineMedium">@style/TextAppearance.TravelApp.HeadlineMedium</item>
+        <item name="textAppearanceHeadlineSmall">@style/TextAppearance.TravelApp.HeadlineSmall</item>
+        <item name="textAppearanceTitleLarge">@style/TextAppearance.TravelApp.TitleLarge</item>
+        <item name="textAppearanceTitleMedium">@style/TextAppearance.TravelApp.TitleMedium</item>
+        <item name="textAppearanceBodyLarge">@style/TextAppearance.TravelApp.BodyLarge</item>
+        <item name="textAppearanceBodyMedium">@style/TextAppearance.TravelApp.BodyMedium</item>
+        <item name="textAppearanceLabelLarge">@style/TextAppearance.TravelApp.LabelLarge</item>
+        <item name="textAppearanceLabelMedium">@style/TextAppearance.TravelApp.LabelMedium</item>
+
+        <item name="shapeAppearanceSmallComponent">@style/ShapeAppearance.TravelApp.Small</item>
+        <item name="shapeAppearanceMediumComponent">@style/ShapeAppearance.TravelApp.Medium</item>
+        <item name="shapeAppearanceLargeComponent">@style/ShapeAppearance.TravelApp.Large</item>
+
+        <item name="materialButtonStyle">@style/Widget.TravelApp.Button.Primary</item>
+        <item name="borderlessButtonStyle">@style/Widget.TravelApp.Button.Text</item>
+        <item name="bottomNavigationStyle">@style/Widget.TravelApp.BottomNavigation</item>
+        <item name="materialCardViewStyle">@style/Widget.TravelApp.Card</item>
+
+    </style>
+
+
+    <style name="TextAppearance.TravelApp.HeadlineLarge" parent="TextAppearance.MaterialComponents.Headline4">
+        <item name="fontFamily">@font/plus_jakarta_sans_bold</item>
+        <item name="android:fontFamily">@font/plus_jakarta_sans_bold</item>
+        <item name="android:textSize">32sp</item>
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:letterSpacing">-0.02</item>
+    </style>
+
+    <style name="TextAppearance.TravelApp.HeadlineMedium" parent="TextAppearance.MaterialComponents.Headline5">
+        <item name="fontFamily">@font/plus_jakarta_sans_bold</item>
+        <item name="android:fontFamily">@font/plus_jakarta_sans_bold</item>
+        <item name="android:textSize">24sp</item>
+        <item name="android:textColor">@color/text_primary</item>
+    </style>
+
+    <style name="TextAppearance.TravelApp.HeadlineSmall" parent="TextAppearance.MaterialComponents.Headline6">
+        <item name="fontFamily">@font/plus_jakarta_sans_semibold</item>
+        <item name="android:fontFamily">@font/plus_jakarta_sans_semibold</item>
+        <item name="android:textSize">20sp</item>
+        <item name="android:textColor">@color/text_primary</item>
+    </style>
+
+    <style name="TextAppearance.TravelApp.TitleLarge" parent="TextAppearance.MaterialComponents.Subtitle1">
+        <item name="fontFamily">@font/plus_jakarta_sans_semibold</item>
+        <item name="android:fontFamily">@font/plus_jakarta_sans_semibold</item>
+        <item name="android:textSize">18sp</item>
+        <item name="android:textColor">@color/text_primary</item>
+    </style>
+
+    <style name="TextAppearance.TravelApp.TitleMedium" parent="TextAppearance.MaterialComponents.Subtitle2">
+        <item name="fontFamily">@font/plus_jakarta_sans_medium</item>
+        <item name="android:fontFamily">@font/plus_jakarta_sans_medium</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">@color/text_primary</item>
+    </style>
+
+    <style name="TextAppearance.TravelApp.BodyLarge" parent="TextAppearance.MaterialComponents.Body1">
+        <item name="fontFamily">@font/be_vietnam_pro_regular</item>
+        <item name="android:fontFamily">@font/be_vietnam_pro_regular</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">@color/text_primary</item>
+    </style>
+
+    <style name="TextAppearance.TravelApp.BodyMedium" parent="TextAppearance.MaterialComponents.Body2">
+        <item name="fontFamily">@font/be_vietnam_pro_regular</item>
+        <item name="android:fontFamily">@font/be_vietnam_pro_regular</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@color/text_secondary</item>
+    </style>
+
+    <style name="TextAppearance.TravelApp.LabelLarge" parent="TextAppearance.MaterialComponents.Caption">
+        <item name="fontFamily">@font/be_vietnam_pro_medium</item>
+        <item name="android:fontFamily">@font/be_vietnam_pro_medium</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:textColor">@color/text_secondary</item>
+        <item name="android:letterSpacing">0.04</item>
+        <item name="android:textAllCaps">true</item>
+    </style>
+
+    <style name="TextAppearance.TravelApp.LabelMedium" parent="TextAppearance.MaterialComponents.Caption">
+        <item name="fontFamily">@font/be_vietnam_pro_regular</item>
+        <item name="android:fontFamily">@font/be_vietnam_pro_regular</item>
+        <item name="android:textSize">11sp</item>
+        <item name="android:textColor">@color/text_hint</item>
+    </style>
+
+
+    <style name="ShapeAppearance.TravelApp.Small" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">8dp</item>
+    </style>
+
+    <style name="ShapeAppearance.TravelApp.Medium" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">16dp</item>
+    </style>
+
+    <style name="ShapeAppearance.TravelApp.Large" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">24dp</item>
+    </style>
+
+    <style name="ShapeAppearance.TravelApp.ExtraLarge" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">32dp</item>
+    </style>
+
+    <style name="ShapeAppearance.TravelApp.Pill" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">50%</item>
+    </style>
+
+
+    <style name="Widget.TravelApp.Button.Primary" parent="Widget.MaterialComponents.Button">
+        <item name="backgroundTint">@color/primary</item>
+        <item name="android:textColor">@color/on_primary</item>
+        <item name="shapeAppearance">@style/ShapeAppearance.TravelApp.Pill</item>
+        <item name="android:paddingStart">24dp</item>
+        <item name="android:paddingEnd">24dp</item>
+        <item name="android:paddingTop">14dp</item>
+        <item name="android:paddingBottom">14dp</item>
+        <item name="android:minHeight">52dp</item>
+        <item name="android:textAppearance">@style/TextAppearance.TravelApp.TitleMedium</item>
+        <item name="rippleColor">@color/ripple_primary</item>
+        <item name="elevation">0dp</item>
+        <item name="android:stateListAnimator">@null</item>
+    </style>
+
+    <style name="Widget.TravelApp.Button.Outlined" parent="Widget.MaterialComponents.Button.OutlinedButton">
+        <item name="strokeColor">@color/primary</item>
+        <item name="android:textColor">@color/primary</item>
+        <item name="shapeAppearance">@style/ShapeAppearance.TravelApp.Pill</item>
+        <item name="android:paddingStart">24dp</item>
+        <item name="android:paddingEnd">24dp</item>
+        <item name="android:minHeight">52dp</item>
+        <item name="android:textAppearance">@style/TextAppearance.TravelApp.TitleMedium</item>
+    </style>
+
+    <style name="Widget.TravelApp.Button.Text" parent="Widget.MaterialComponents.Button.TextButton">
+        <item name="android:textColor">@color/primary</item>
+        <item name="android:textAppearance">@style/TextAppearance.TravelApp.TitleMedium</item>
+    </style>
+
+    <style name="Widget.TravelApp.Button.Tertiary" parent="Widget.MaterialComponents.Button">
+        <item name="backgroundTint">@color/tertiary</item>
+        <item name="android:textColor">@color/on_tertiary</item>
+        <item name="shapeAppearance">@style/ShapeAppearance.TravelApp.Pill</item>
+        <item name="android:minHeight">52dp</item>
+        <item name="elevation">0dp</item>
+        <item name="android:stateListAnimator">@null</item>
+    </style>
+
+
+    <style name="Widget.TravelApp.Card" parent="Widget.MaterialComponents.CardView">
+        <item name="cardBackgroundColor">@color/surface</item>
+        <item name="cardCornerRadius">16dp</item>
+        <item name="cardElevation">0dp</item>
+        <item name="strokeWidth">1dp</item>
+        <item name="strokeColor">@color/divider</item>
+        <item name="contentPadding">16dp</item>
+    </style>
+
+    <style name="Widget.TravelApp.Card.Highlighted" parent="Widget.TravelApp.Card">
+        <item name="cardBackgroundColor">@color/neutral_light</item>
+        <item name="strokeColor">@color/primary</item>
+        <item name="strokeWidth">2dp</item>
+    </style>
+
+
+    <style name="Widget.TravelApp.BottomNavigation" parent="Widget.MaterialComponents.BottomNavigationView">
+        <item name="backgroundTint">@color/background</item>
+        <item name="itemIconTint">@color/secondary_dark</item>
+        <item name="itemTextColor">@color/secondary_dark</item>
+        <item name="elevation">8dp</item>
+        <item name="labelVisibilityMode">labeled</item>
+    </style>
+
+
+    <style name="Widget.TravelApp.TextField" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+        <item name="boxStrokeColor">@color/outline</item>
+        <item name="boxStrokeWidth">1dp</item>
+        <item name="boxCornerRadiusTopStart">12dp</item>
+        <item name="boxCornerRadiusTopEnd">12dp</item>
+        <item name="boxCornerRadiusBottomStart">12dp</item>
+        <item name="boxCornerRadiusBottomEnd">12dp</item>
+        <item name="boxBackgroundColor">@color/surface</item>
+        <item name="hintTextColor">@color/text_hint</item>
+        <item name="android:textColorHint">@color/text_hint</item>
+    </style>
+
+    <style name="Widget.TravelApp.TextField.Filled" parent="Widget.MaterialComponents.TextInputLayout.FilledBox">
+        <item name="boxBackgroundColor">@color/surface_variant</item>
+        <item name="boxCornerRadiusTopStart">50dp</item>
+        <item name="boxCornerRadiusTopEnd">50dp</item>
+        <item name="boxCornerRadiusBottomStart">50dp</item>
+        <item name="boxCornerRadiusBottomEnd">50dp</item>
+        <item name="hintTextColor">@color/text_hint</item>
+        <item name="boxStrokeWidth">0dp</item>
+        <item name="boxStrokeWidthFocused">0dp</item>
+    </style>
+
+
+    <style name="Theme.TravelApp.Splash" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/background</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_launcher_foreground</item>
+        <item name="postSplashScreenTheme">@style/Theme.TravelApp</item>
+    </style>
+
+    <style name="Widget.TravelApp.Icon.Close" parent="">
+        <item name="android:layout_width">48dp</item>
+        <item name="android:layout_height">48dp</item>
+        <item name="android:padding">12dp</item>
+        <item name="android:src">@android:drawable/ic_menu_close_clear_cancel</item>
+    </style>
+
+</resources>
