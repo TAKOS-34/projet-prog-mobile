@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateCommentDto } from './dto/createComment.dto';
 import { ResponseMessage } from 'src/utils/dto/responseMessage.dto';
@@ -12,6 +12,13 @@ export class CommentService {
 
 
     async createComment(postId: string, comment: CreateCommentDto, user: UserSession): Promise<ResponseMessage> {
+        if (comment.parentId && (await this.prisma.comment.findUnique({
+            where: { id: comment.parentId },
+            select: { parentId: true }
+        }))?.parentId != null) {
+            throw new BadRequestException('Nested comments are not allowed');
+        }
+
         await this.prisma.comment.create({ data: {
             content: comment.content,
             postId,

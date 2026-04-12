@@ -70,6 +70,7 @@ export class PostCommandService {
                 await fs.promises.writeFile(audioPath, audio.buffer);
             }
         } catch (error) {
+            console.error(error)
             throw new BadRequestException('Error during post creation');
         }
 

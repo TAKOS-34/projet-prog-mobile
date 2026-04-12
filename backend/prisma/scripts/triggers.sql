@@ -2,10 +2,10 @@ CREATE OR REPLACE FUNCTION update_member_count() RETURNS TRIGGER AS $$
 BEGIN
     IF (TG_OP = 'INSERT') THEN
         UPDATE "Group" SET "nbMembers" = "nbMembers" + 1 WHERE id = NEW."groupId";
-        UPDATE "UserSession" SET "nbGroups" = "nbGroups" + 1 WHERE id = NEW."userId";
+        UPDATE "User" SET "nbGroups" = "nbGroups" + 1 WHERE id = NEW."userId";
     ELSIF (TG_OP = 'DELETE') THEN
         UPDATE "Group" SET "nbMembers" = "nbMembers" - 1 WHERE id = OLD."groupId";
-        UPDATE "UserSession" SET "nbGroups" = "nbGroups" - 1 WHERE id = OLD."userId";
+        UPDATE "User" SET "nbGroups" = "nbGroups" - 1 WHERE id = OLD."userId";
     END IF;
     RETURN NULL;
 END;
@@ -19,12 +19,12 @@ CREATE TRIGGER tr_member_count AFTER INSERT OR DELETE ON "Member" FOR EACH ROW E
 CREATE OR REPLACE FUNCTION update_post_count() RETURNS TRIGGER AS $$
 BEGIN
     IF (TG_OP = 'INSERT') THEN
-        UPDATE "UserSession" SET "nbPosts" = "nbPosts" + 1 WHERE id = NEW."userId";
+        UPDATE "User" SET "nbPosts" = "nbPosts" + 1 WHERE id = NEW."userId";
         IF NEW."groupId" IS NOT NULL THEN
             UPDATE "Group" SET "nbPosts" = "nbPosts" + 1 WHERE id = NEW."groupId";
         END IF;
     ELSIF (TG_OP = 'DELETE') THEN
-        UPDATE "UserSession" SET "nbPosts" = "nbPosts" - 1 WHERE id = OLD."userId";
+        UPDATE "User" SET "nbPosts" = "nbPosts" - 1 WHERE id = OLD."userId";
         IF OLD."groupId" IS NOT NULL THEN
             UPDATE "Group" SET "nbPosts" = "nbPosts" - 1 WHERE id = OLD."groupId";
         END IF;

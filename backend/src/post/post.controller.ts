@@ -42,6 +42,12 @@ export class PostController {
         return this.postQueryService.getPostComments(postId, user?.id, anonymous);
     }
 
+    @UseGuards(GroupProtectGuard, AuthOptionalGuard)
+    @Get('/:postId/:commentId/replies/')
+    getPostCommentsReplies(@Param('postId') postId: string, @Param('commentId') commentId: number, @GetUser() user?: UserSession, @GetAnonymous() anonymous?: string): Promise<CommentInfos[]> {
+        return this.postQueryService.getPostCommentsReplies(postId, commentId, user?.id, anonymous);
+    }
+
 
 
     @UseGuards(AuthGuard)

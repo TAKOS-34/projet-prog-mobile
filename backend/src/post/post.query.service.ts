@@ -111,7 +111,7 @@ export class PostQueryService {
         const realUser = userId ? { userId } : anonymousToken ? { anonymousUserId: anonymousToken } : null;
 
         const comments = await this.prisma.comment.findMany({
-            where: { postId },
+            where: { postId, parentId: null },
             select: {
                 id: true,
                 content: true,
@@ -119,8 +119,9 @@ export class PostQueryService {
                 isEdited: true,
                 updatedAt: true,
                 nbLikes: true,
+                nbReplies: true,
                 User: { select: { id: true, username: true, avatar: true } },
-                commentLikes: realUser ? { where: realUser, select: { id: true } } : false
+                commentLikes: realUser ? { where: realUser, select: { id: true } } : false,
             },
             orderBy: { creationDate: "asc" }
         });
@@ -132,6 +133,43 @@ export class PostQueryService {
             isEdited: c.isEdited,
             updatedAt: c.updatedAt ?? undefined,
             nbLikes: c.nbLikes,
+            nbReplies: c.nbReplies,
+            userId: c.User.id,
+            username: c.User.username,
+            avatar: this.cdn.getAvatarUrl(c.User.avatar),
+            isLiked: c.commentLikes?.length > 0
+        }));
+    }
+
+
+
+    async getPostCommentsReplies(postId: string, commentId: number, userId?: number, anonymousToken?: string): Promise<CommentInfos[]> {
+        const realUser = userId ? { userId } : anonymousToken ? { anonymousUserId: anonymousToken } : null;
+
+        const comments = await this.prisma.comment.findMany({
+            where: { postId, parentId: commentId },
+            select: {
+                id: true,
+                content: true,
+                creationDate: true,
+                isEdited: true,
+                updatedAt: true,
+                nbLikes: true,
+                nbReplies: true,
+                User: { select: { id: true, username: true, avatar: true } },
+                commentLikes: realUser ? { where: realUser, select: { id: true } } : false,
+            },
+            orderBy: { creationDate: "asc" }
+        });
+
+        return comments.map(c => ({
+            id: c.id,
+            content: c.content,
+            creationDate: c.creationDate,
+            isEdited: c.isEdited,
+            updatedAt: c.updatedAt ?? undefined,
+            nbLikes: c.nbLikes,
+            nbReplies: c.nbReplies,
             userId: c.User.id,
             username: c.User.username,
             avatar: this.cdn.getAvatarUrl(c.User.avatar),
