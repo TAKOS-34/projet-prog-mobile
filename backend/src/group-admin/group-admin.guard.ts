@@ -18,11 +18,11 @@ export class GroupAdminGuard implements CanActivate {
         const group = await this.prisma.group.findUnique({
             where: {
                 id: groupId,
-                admin: user.id
+                adminId: user.id
             },
             select: {
                 id: true,
-                admin: true,
+                adminId: true,
                 name: true,
                 avatar: true
             }

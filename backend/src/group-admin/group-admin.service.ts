@@ -94,7 +94,7 @@ export class GroupAdminService {
 
 
     async ban(userId: number, group: Group): Promise<ResponseMessage> {
-        if (group.admin === userId) {
+        if (group.adminId === userId) {
             throw new BadRequestException('You cannot ban the actual admin (yourself)');
         }
 
@@ -157,7 +157,7 @@ export class GroupAdminService {
 
         await this.prisma.group.update({
             where: { id: group.id },
-            data: { admin: userId },
+            data: { adminId: userId },
             select: { id: true }
         });
 

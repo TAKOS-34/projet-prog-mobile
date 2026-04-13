@@ -6,8 +6,8 @@ model Group {
     creationDate   DateTime @default(now())
     isGroupPrivate Boolean
 
-    admin Int
-    User  User @relation(fields: [admin], references: [id], onDelete: Cascade)
+    adminId Int
+    User  User @relation(fields: [adminId], references: [id], onDelete: Cascade)
 
     nbMembers Int @default(0)
     nbPosts   Int @default(0)
@@ -16,6 +16,8 @@ model Group {
     requestsToJoin RequestToJoin[]
     posts          Post[]
     bans           Ban[]
+    followers      GroupFollow[]
+    notifications  Notification[]
 }
 
 

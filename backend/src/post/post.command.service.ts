@@ -42,7 +42,7 @@ export class PostCommandService {
                 long,
                 userId: user.id,
                 title: post.title,
-                localisation: post.localisation,
+                localisation: post.localisation.toLowerCase().trim(),
                 description: post.description ?? null,
                 groupId: post.groupId ?? null,
                 audio: audioName,
@@ -89,7 +89,7 @@ export class PostCommandService {
                 updatedAt: new Date(),
                 ...(title && { title }),
                 ...(description && { description }),
-                ...(localisation && { localisation }),
+                ...(localisation && { localisation: localisation.toLowerCase().trim() }),
                 ...(coords && { long: coords.long, lat: coords.lat })
             },
             where: {
@@ -109,7 +109,7 @@ export class PostCommandService {
                 id: postId,
                 OR: [
                     { userId: user.id },
-                    { Group: { admin: user.id } }
+                    { Group: { adminId: user.id } }
                 ]
             },
             select: { id: true, imageExt: true, audio: true }

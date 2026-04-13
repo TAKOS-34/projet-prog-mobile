@@ -29,7 +29,7 @@ export class GroupService {
                 description: true,
                 creationDate: true,
                 isGroupPrivate: true,
-                admin: true,
+                adminId: true,
                 nbMembers: true,
                 nbPosts: true,
                 members: user ? { where: { userId: user.id }, select: { userId: true } } : false
@@ -45,7 +45,7 @@ export class GroupService {
             nbMembers: group.nbMembers,
             nbPosts: group.nbPosts,
             isMember: user ? group.members.length > 0 : false,
-            isAdmin: user ? group.admin === user.id : false
+            isAdmin: user ? group.adminId === user.id : false
         }
     }
 
@@ -126,7 +126,7 @@ export class GroupService {
                 description: group.description ?? null,
                 avatar: avatarId,
                 isGroupPrivate: group.isGroupPrivate,
-                admin: user.id
+                adminId: user.id
                 },
                 select: { id: true }
             });
@@ -204,7 +204,7 @@ export class GroupService {
         const isUserAdmin = await this.prisma.group.findFirst({
             where: {
                 id: groupId,
-                admin: user.id
+                adminId: user.id
             },
             select: { id: true }
         });

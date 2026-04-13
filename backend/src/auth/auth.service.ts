@@ -6,7 +6,7 @@ import { LoginUserDto } from './dto/loginUser.dto';
 import * as bcrypt from 'bcrypt';
 import { createHash, randomBytes } from 'crypto';
 import { ResponseMessage, TokenResponseMessage } from 'src/utils/dto/responseMessage.dto';
-import { UserSession } from 'src/utils/dto/userSession.dto';
+import type { UserSession } from 'src/utils/dto/userSession.dto';
 
 @Injectable()
 export class AuthService {
@@ -64,24 +64,32 @@ export class AuthService {
             throw new UnauthorizedException('Please verify your email before login');
         }
 
-        await this.prisma.user.update({
-            where: { id: existingUser.id },
-            data: { lastTimeLogin: new Date() },
-            select: { id: true }
-        });
-
         const expirationDate: Date = new Date();
         expirationDate.setDate(expirationDate.getDate() + 30);
-        const realDevice: string = device ? device : 'unknow';
+        const realDevice: string = device ? device : 'unknown';
         const { token, hashedToken } = this.generateHashedToken();
 
-        await this.prisma.userToken.create({ data: {
-            hashedToken,
-            expirationDate: expirationDate,
-            ip,
-            device: realDevice,
-            userId: existingUser.id,
-        }});
+        await this.prisma.$transaction([
+            this.prisma.user.update({
+                where: { id: existingUser.id },
+                data: { lastTimeLogin: new Date() },
+                select: { id: true }
+            }),
+
+            this.prisma.userToken.create({ data: {
+                hashedToken,
+                expirationDate: expirationDate,
+                ip,
+                device: realDevice,
+                userId: existingUser.id,
+            }}),
+
+            this.prisma.fcmToken.upsert({
+                where: { fcmToken: user.fcmToken },
+                update: { userId: existingUser.id },
+                create: { fcmToken: user.fcmToken, userId: existingUser.id }
+            })
+        ]);
 
         return { status: true,  token: `Bearer ${token}` };
     }
@@ -102,6 +110,25 @@ export class AuthService {
         } catch (error) {
             return '<h3>7N</h3><p style="color:red;">Invalid token</p>';
         }
+    }
+
+
+
+    async logout(fcmToken: string, auth: string, user: UserSession): Promise<ResponseMessage> {
+        await this.prisma.$transaction([
+            this.prisma.userToken.delete({
+                where: { hashedToken: this.hashToken(auth.replace('Bearer ', '')) }
+            }),
+
+            this.prisma.fcmToken.deleteMany({
+                where: {
+                    fcmToken: fcmToken,
+                    userId: user.id
+                }
+            })
+        ]);
+
+        return { status: true, message: 'User logout succesfully' };
     }
 
 

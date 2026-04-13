@@ -31,7 +31,7 @@ export class PostQueryService {
                     } : {}
                 ]
             },
-            orderBy: { creationDate: 'desc' },
+            orderBy: { creationDate: 'desc', id: 'desc' },
             include: {
                 Group: { select: { id: true, name: true, avatar: true } },
                 User: { select: { id: true, username: true, avatar: true } },

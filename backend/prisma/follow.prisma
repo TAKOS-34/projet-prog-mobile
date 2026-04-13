@@ -1,0 +1,30 @@
+model UserFollow {
+    followerId  Int
+    followingId Int
+    follower    User @relation("UserFollowsGiven", fields: [followerId], references: [id])
+    following   User @relation("UserFollowsReceived", fields: [followingId], references: [id])
+
+    @@id([followerId, followingId])
+}
+
+
+
+model GroupFollow {
+    followerId  Int
+    groupId     Int
+    follower    User @relation(fields: [followerId], references: [id])
+    following   Group @relation(fields: [groupId], references: [id])
+
+    @@id([followerId, groupId])
+}
+
+
+
+model TagFollow {
+    followerId  Int
+    tagId       Int
+    follower    User @relation(fields: [followerId], references: [id])
+    following   Tag  @relation(fields: [tagId], references: [id])
+
+    @@id([followerId, tagId])
+}

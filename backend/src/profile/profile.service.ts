@@ -56,7 +56,7 @@ export class ProfileService {
     async getGroups(user: UserSession): Promise<UserGroup[]> {
         const groups = await this.prisma.group.findMany({
             where: { members: { some: { userId: user.id } } },
-            select: { id: true, name: true, avatar: true, description: true, creationDate: true, isGroupPrivate: true, admin: true, nbMembers: true, nbPosts: true }
+            select: { id: true, name: true, avatar: true, description: true, creationDate: true, isGroupPrivate: true, adminId: true, nbMembers: true, nbPosts: true }
         });
 
         return groups.map(g => ({
@@ -68,7 +68,7 @@ export class ProfileService {
             isGroupPrivate: g.isGroupPrivate,
             nbMembers: g.nbMembers,
             nbPosts: g.nbPosts,
-            isAdmin: g.admin === user.id
+            isAdmin: g.adminId === user.id
         }));
     }
 

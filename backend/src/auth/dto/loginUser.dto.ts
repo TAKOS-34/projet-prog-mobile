@@ -6,4 +6,7 @@ export class LoginUserDto {
 
     @IsNotEmpty()
     password!: string;
+
+    @IsNotEmpty()
+    fcmToken!: string;
 }

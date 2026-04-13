@@ -13,7 +13,8 @@ model User {
     nbPosts  Int @default(0)
     nbGroups Int @default(0)
 
-    usersTokens    UserToken[]
+    userTokens     UserToken[]
+    FcmTokens      FcmToken[]
     userPosts      Post[]
     likes          Like[]
     memberOf       Member[]
@@ -23,6 +24,12 @@ model User {
     commentLikes   CommentLike[]
     reports        Report[]
     bans           Ban[]
+    notifications  Notification[]
+    senderNotifications Notification[] @relation("sender")
+    userFollowers  UserFollow[]  @relation("UserFollowsReceived")
+    userFollowing  UserFollow[]  @relation("UserFollowsGiven")
+    groupFollowing GroupFollow[]
+    tagFollowing   TagFollow[]
 }
 
 
@@ -37,4 +44,19 @@ model UserToken {
 
     userId Int
     User   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    @@index([userId])
+}
+
+
+
+model FcmToken {
+    id           Int      @id @default(autoincrement())
+    fcmToken     String   @unique
+    creationDate DateTime @default(now())
+
+    userId Int
+    User   User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    @@index([userId])
 }

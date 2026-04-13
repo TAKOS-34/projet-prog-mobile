@@ -1,0 +1,33 @@
+model Notification {
+    id           Int              @id @default(autoincrement())
+    type         NotificationType
+    creationDate DateTime         @default(now())
+    isRead       Boolean          @default(false)
+
+    senderId     Int?
+    sender       User? @relation("sender", fields: [senderId], references: [id])
+
+    targetPostId String?
+    post         Post?   @relation(fields: [targetPostId], references: [id])
+
+    targetGroupId Int?
+    group        Group? @relation(fields: [targetGroupId], references: [id])
+
+    targetTagId Int?
+    tag         Tag? @relation(fields: [targetTagId], references: [id])
+
+    userId Int
+    User   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    @@index([userId, creationDate(sort: Desc), id(sort: Desc)])
+}
+
+
+
+enum NotificationType {
+    LIKE
+    NEW_POST_USER
+    NEW_POST_GROUP
+    NEW_POST_PLACE
+    NEW_POST_TAG
+}

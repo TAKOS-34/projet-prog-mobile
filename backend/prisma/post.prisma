@@ -17,6 +17,7 @@ model Post {
     likes    Like[]
     comments Comment[]
     reports  Report[]
+    notifications Notification[]
     postTags PostTag[]
 
     groupId Int?
@@ -24,6 +25,8 @@ model Post {
 
     userId Int
     User   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    @@index([creationDate(sort: Desc), id(sort: Desc)])
 }
 
 
@@ -34,7 +37,9 @@ model Tag {
 
     nbUses Int @default(0)
 
-    posts PostTag[]
+    posts     PostTag[]
+    followers TagFollow[]
+    notifications Notification[]
 }
 
 
