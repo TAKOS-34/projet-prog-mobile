@@ -16,6 +16,7 @@ import { CommentModule } from './comment/comment.module';
 import { TagModule } from './tag/tag.module';
 import { SearchModule } from './search/search.module';
 import { NotificationModule } from './notification/notification.module';
+import { FollowModule } from './follow/follow.module';
 
 @Module({
     imports: [
@@ -45,7 +46,7 @@ import { NotificationModule } from './notification/notification.module';
                 options: { strict: true }
             }
         }),
-        AuthModule, ProfileModule, CdnModule, PostModule, GroupModule, GroupAdminModule, LikeModule, CommentModule, TagModule, SearchModule, NotificationModule,
+        AuthModule, ProfileModule, CdnModule, PostModule, GroupModule, GroupAdminModule, LikeModule, CommentModule, TagModule, SearchModule, NotificationModule, FollowModule,
     ],
     controllers: [],
     providers: []
