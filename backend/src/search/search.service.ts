@@ -65,7 +65,7 @@ export class SearchService {
             take: 20,
             skip: cursor ? 1 : 0,
             ...(cursor ? { cursor: { id: cursor } } : {}),
-            orderBy: { creationDate: 'desc' },
+            orderBy: { creationDate: 'desc', id: 'desc' },
             select: {
                 id: true,
                 imageExt: true,

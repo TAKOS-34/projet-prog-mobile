@@ -24,8 +24,8 @@ model User {
     commentLikes   CommentLike[]
     reports        Report[]
     bans           Ban[]
-    notifications  Notification[]
-    senderNotifications Notification[] @relation("sender")
+    notifications  Notification[] @relation("NotificationUser")
+    targetedNotifications Notification[] @relation("NotificationTargetUser")
     userFollowers  UserFollow[]  @relation("UserFollowsReceived")
     userFollowing  UserFollow[]  @relation("UserFollowsGiven")
     groupFollowing GroupFollow[]

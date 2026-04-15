@@ -20,8 +20,8 @@ export class SearchController {
 
 
 
-    @Get('/posts')
     @UseGuards(AuthOptionalGuard)
+    @Get('/posts')
     searchPosts(
         @Query('q') q?: string,
         @Query('tag') tag?: string,

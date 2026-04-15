@@ -10,6 +10,7 @@ import * as fs from 'fs';
 import { ReportDto } from './dto/report.dto';
 import { UpdatePostDto } from './dto/updatePost.dto';
 import { randomUUID } from 'crypto';
+import { NotificationService } from 'src/notification/notification.service';
 
 @Injectable()
 export class PostCommandService {
@@ -17,7 +18,8 @@ export class PostCommandService {
 
     constructor(
         private readonly prisma: PrismaService,
-        private readonly cdn: CdnService
+        private readonly cdn: CdnService,
+        private readonly notification: NotificationService
     ) {}
 
 
@@ -68,6 +70,16 @@ export class PostCommandService {
             if (audio && audioName) {
                 const audioPath: string = this.cdn.getAudioPath(audioName);
                 await fs.promises.writeFile(audioPath, audio.buffer);
+            }
+
+            this.notification.notifyNewPostUser(user.id, newPost.id, post.title, post.groupId);
+
+            if (post.groupId) {
+                this.notification.notifyNewPostGroup(post.groupId, user.id, newPost.id, post.title);
+            }
+
+            if (post.tags && post.tags.length > 0) {
+                this.notification.notifyNewPostTags(post.tags, user.id, newPost.id, post.title, post.groupId);
             }
         } catch (error) {
             console.error(error)

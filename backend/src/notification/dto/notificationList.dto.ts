@@ -4,14 +4,16 @@ export type NotificationList = {
     creationDate: Date;
     isRead: boolean;
 
-    senderId?: number;
-    senderName?: string;
-    senderAvatar?: string;
-
     postId?: string;
     postImage?: string;
+    postUserId?: number;
+    postUsername?: string;
+    postUserAvatar?: string;
+
     groupId?: number;
     groupName?: string;
     groupAvatar?: string;
+
+    tagId?: number;
     tagName?: string;
 }

@@ -6,9 +6,10 @@ import { CdnModule } from 'src/cdn/cdn.module';
 import { PrismaModule } from 'src/prisma/prisma.module';
 import { PostQueryService } from './post.query.service';
 import { GroupModule } from 'src/group/group.module';
+import { NotificationModule } from 'src/notification/notification.module';
 
 @Module({
-    imports: [AuthModule, CdnModule, PrismaModule, GroupModule],
+    imports: [AuthModule, CdnModule, PrismaModule, GroupModule, NotificationModule],
     controllers: [PostController],
     providers: [PostCommandService, PostQueryService],
 })
