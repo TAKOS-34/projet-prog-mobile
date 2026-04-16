@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fillViewport="true"
-    android:background="@color/background">
+    android:background="@color/background"
+    android:fillViewport="true">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -13,52 +14,74 @@
         android:paddingVertical="16dp">
 
         <ImageView
-            android:id="@+id/btnClose"
-            style="@style/Widget.TravelApp.Icon.Close"
+            android:id="@+id/btnBack"
+            style="@style/Widget.TravelApp.Icon.Back"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
 
-        <ImageView
-            android:id="@+id/ivIllustration"
-            android:layout_width="160dp"
-            android:layout_height="90dp"
-            android:layout_marginTop="8dp"
-            android:background="#E5E5E5"
-            android:scaleType="centerCrop"
-            app:layout_constraintTop_toBottomOf="@id/btnClose"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
-
         <TextView
-            android:id="@+id/tvRegisterTitle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Inscription"
-            android:textAppearance="@style/TextAppearance.TravelApp.HeadlineLarge"
-            android:layout_marginTop="8dp"
-            app:layout_constraintTop_toBottomOf="@id/ivIllustration"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
-
-        <TextView
-            android:id="@+id/tvRegisterSubtitle"
+            android:id="@+id/tvEditTitle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="Rejoignez notre communauté de nomades."
-            android:textAppearance="@style/TextAppearance.TravelApp.BodyMedium"
-            android:textColor="@color/text_secondary"
+            android:text="Modifier le profil"
             android:textAlignment="center"
-            android:layout_marginTop="4dp"
-            app:layout_constraintTop_toBottomOf="@id/tvRegisterTitle"
+            android:textAppearance="@style/TextAppearance.TravelApp.HeadlineMedium"
+            android:layout_marginTop="8dp"
+            app:layout_constraintTop_toBottomOf="@id/btnBack"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
+
+        <TextView
+            android:id="@+id/tvEditSubtitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Personnalisez votre carnet de voyage."
+            android:textAlignment="center"
+            android:textAppearance="@style/TextAppearance.TravelApp.BodyMedium"
+            android:textColor="@color/text_secondary"
+            app:layout_constraintTop_toBottomOf="@id/tvEditTitle"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/layoutAvatar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            app:layout_constraintTop_toBottomOf="@id/tvEditSubtitle"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/ivAvatarEdit"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:scaleType="centerCrop"
+                android:background="#D1D5DB"
+                app:shapeAppearanceOverlay="@style/Widget.TravelApp.Avatar"
+                tools:src="@tools:sample/avatars"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="-8dp"
+                android:layout_marginBottom="-8dp"
+                app:fabSize="mini"
+                app:backgroundTint="@color/primary"
+                app:tint="@android:color/white"
+                android:src="@android:drawable/ic_menu_edit"
+                app:layout_constraintBottom_toBottomOf="@id/ivAvatarEdit"
+                app:layout_constraintEnd_toEndOf="@id/ivAvatarEdit" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
         <TextView
             android:id="@+id/tvLoginLabel"
             style="@style/Widget.TravelApp.TextView.InputLabel"
-            android:text="LOGIN"
-            android:layout_marginTop="16dp"
-            app:layout_constraintTop_toBottomOf="@id/tvRegisterSubtitle"
+            android:text="LOGIN/USERNAME"
+            android:layout_marginTop="24dp"
+            app:layout_constraintTop_toBottomOf="@id/layoutAvatar"
             app:layout_constraintStart_toStartOf="parent" />
 
         <com.google.android.material.textfield.TextInputLayout
@@ -73,21 +96,18 @@
                 style="@style/Widget.TravelApp.TextInputEditText.Line"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="votre_pseudo"
-                android:inputType="textPersonName" />
+                android:text="elena_adventurer" />
         </com.google.android.material.textfield.TextInputLayout>
 
-        <View
-            android:id="@+id/lineLogin"
-            style="@style/Widget.TravelApp.View.Divider"
+        <View style="@style/Widget.TravelApp.View.Divider"
             app:layout_constraintTop_toBottomOf="@id/tilLogin" />
 
         <TextView
             android:id="@+id/tvEmailLabel"
             style="@style/Widget.TravelApp.TextView.InputLabel"
             android:text="EMAIL"
-            android:layout_marginTop="12dp"
-            app:layout_constraintTop_toBottomOf="@id/lineLogin"
+            android:layout_marginTop="16dp"
+            app:layout_constraintTop_toBottomOf="@id/tilLogin"
             app:layout_constraintStart_toStartOf="parent" />
 
         <com.google.android.material.textfield.TextInputLayout
@@ -102,21 +122,18 @@
                 style="@style/Widget.TravelApp.TextInputEditText.Line"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="email@exemple.com"
-                android:inputType="textEmailAddress" />
+                android:text="elena.travels@gmail.com" />
         </com.google.android.material.textfield.TextInputLayout>
 
-        <View
-            android:id="@+id/lineEmail"
-            style="@style/Widget.TravelApp.View.Divider"
+        <View style="@style/Widget.TravelApp.View.Divider"
             app:layout_constraintTop_toBottomOf="@id/tilEmail" />
 
         <TextView
             android:id="@+id/tvPasswordLabel"
             style="@style/Widget.TravelApp.TextView.InputLabel"
             android:text="MOT DE PASSE"
-            android:layout_marginTop="12dp"
-            app:layout_constraintTop_toBottomOf="@id/lineEmail"
+            android:layout_marginTop="16dp"
+            app:layout_constraintTop_toBottomOf="@id/tilEmail"
             app:layout_constraintStart_toStartOf="parent" />
 
         <com.google.android.material.textfield.TextInputLayout
@@ -124,7 +141,7 @@
             style="@style/Widget.TravelApp.TextInputLayout.Line"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:passwordToggleEnabled="false"
+            app:passwordToggleEnabled="true"
             app:layout_constraintTop_toBottomOf="@id/tvPasswordLabel">
 
             <com.google.android.material.textfield.TextInputEditText
@@ -136,29 +153,27 @@
                 android:inputType="textPassword" />
         </com.google.android.material.textfield.TextInputLayout>
 
-        <View
-            android:id="@+id/linePassword"
-            style="@style/Widget.TravelApp.View.Divider"
+        <View style="@style/Widget.TravelApp.View.Divider"
             app:layout_constraintTop_toBottomOf="@id/tilPassword" />
 
         <TextView
-            android:id="@+id/tvConfirmLabel"
+            android:id="@+id/tvConfirmPasswordLabel"
             style="@style/Widget.TravelApp.TextView.InputLabel"
-            android:text="CONFIRMER"
-            android:layout_marginTop="12dp"
-            app:layout_constraintTop_toBottomOf="@id/linePassword"
+            android:text="CONFIRMER MOT DE PASSE"
+            android:layout_marginTop="16dp"
+            app:layout_constraintTop_toBottomOf="@id/tilPassword"
             app:layout_constraintStart_toStartOf="parent" />
 
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/tilConfirm"
+            android:id="@+id/tilConfirmPassword"
             style="@style/Widget.TravelApp.TextInputLayout.Line"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:passwordToggleEnabled="false"
-            app:layout_constraintTop_toBottomOf="@id/tvConfirmLabel">
+            app:passwordToggleEnabled="true"
+            app:layout_constraintTop_toBottomOf="@id/tvConfirmPasswordLabel">
 
             <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etConfirm"
+                android:id="@+id/etConfirmPassword"
                 style="@style/Widget.TravelApp.TextInputEditText.Line"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -166,42 +181,31 @@
                 android:inputType="textPassword" />
         </com.google.android.material.textfield.TextInputLayout>
 
-        <View
-            android:id="@+id/lineConfirm"
-            style="@style/Widget.TravelApp.View.Divider"
-            app:layout_constraintTop_toBottomOf="@id/tilConfirm" />
+        <View style="@style/Widget.TravelApp.View.Divider"
+            app:layout_constraintTop_toBottomOf="@id/tilConfirmPassword" />
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnRegister"
+            android:id="@+id/btnUpdate"
             style="@style/Widget.TravelApp.Button.Primary"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="S'inscrire"
-            android:layout_marginTop="40dp"
-            app:layout_constraintTop_toBottomOf="@id/lineConfirm" />
+            android:text="Modifier"
+            android:layout_marginTop="24dp"
+            app:layout_constraintTop_toBottomOf="@id/tilConfirmPassword" />
 
-        <LinearLayout
+        <TextView
+            android:id="@+id/tvDeleteAccount"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
+            android:text="Supprimer mon compte"
+            android:textColor="#EF4444"
+            android:textStyle="bold"
             android:layout_marginTop="16dp"
             android:layout_marginBottom="16dp"
-            app:layout_constraintTop_toBottomOf="@id/btnRegister"
+            app:layout_constraintTop_toBottomOf="@id/btnUpdate"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent">
+            app:layout_constraintEnd_toEndOf="parent" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Déjà un compte ? "
-                android:textAppearance="@style/TextAppearance.TravelApp.BodyMedium"
-                android:textColor="@color/text_secondary" />
-
-            <TextView
-                android:id="@+id/tvGoToLogin"
-                style="@style/Widget.TravelApp.TextView.Link"
-                android:text="Se connecter" />
-        </LinearLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>
