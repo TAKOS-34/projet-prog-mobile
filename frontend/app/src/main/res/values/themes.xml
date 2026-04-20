@@ -253,6 +253,9 @@
         <item name="android:paddingBottom">4dp</item>
     </style>
 
+    <style name="Widget.TravelApp.View" parent="android:Widget" />
+    <style name="Widget.TravelApp.TextView" parent="android:Widget.TextView" />
+
     <style name="Widget.TravelApp.View.Divider">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">1dp</item>

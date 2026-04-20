@@ -48,7 +48,7 @@ export class AuthService {
 
     async login(user: LoginUserDto, ip: string, device: string): Promise<TokenResponseMessage> {
         const existingUser = await this.prisma.user.findUnique({
-            where: { username: user.username },
+            where: { email: user.email },
             select: {
                 id: true,
                 password: true,
