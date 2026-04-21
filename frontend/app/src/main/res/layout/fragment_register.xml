@@ -56,7 +56,7 @@
         <TextView
             android:id="@+id/tvLoginLabel"
             style="@style/Widget.TravelApp.TextView.InputLabel"
-            android:text="LOGIN"
+            android:text="@string/label_username"
             android:layout_marginTop="16dp"
             app:layout_constraintTop_toBottomOf="@id/tvRegisterSubtitle"
             app:layout_constraintStart_toStartOf="parent" />
@@ -85,7 +85,7 @@
         <TextView
             android:id="@+id/tvEmailLabel"
             style="@style/Widget.TravelApp.TextView.InputLabel"
-            android:text="EMAIL"
+            android:text="@string/label_email"
             android:layout_marginTop="12dp"
             app:layout_constraintTop_toBottomOf="@id/lineLogin"
             app:layout_constraintStart_toStartOf="parent" />
@@ -114,7 +114,7 @@
         <TextView
             android:id="@+id/tvPasswordLabel"
             style="@style/Widget.TravelApp.TextView.InputLabel"
-            android:text="MOT DE PASSE"
+            android:text="@string/label_password"
             android:layout_marginTop="12dp"
             app:layout_constraintTop_toBottomOf="@id/lineEmail"
             app:layout_constraintStart_toStartOf="parent" />
@@ -144,7 +144,7 @@
         <TextView
             android:id="@+id/tvConfirmLabel"
             style="@style/Widget.TravelApp.TextView.InputLabel"
-            android:text="CONFIRMER"
+            android:text="@string/label_confirm_password"
             android:layout_marginTop="12dp"
             app:layout_constraintTop_toBottomOf="@id/linePassword"
             app:layout_constraintStart_toStartOf="parent" />

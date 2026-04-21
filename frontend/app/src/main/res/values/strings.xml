@@ -1,3 +1,62 @@
 <resources>
     <string name="app_name">7N</string>
+    <string name="error_network">Erreur réseau. Veuillez réessayer</string>
+    <string name="error_global">Erreur réseau. Veuillez réessayer</string>
+    <string name="error_unauthorized">Session expirée. Veuillez vous reconnecter</string>
+    <string name="error_login_failed">Indentifiants incorrect</string>
+    <string name="error_login_unauthorized">Vérifier votre email</string>
+    <string name="error_signup_failed">Email ou username déjà pris</string>
+    <string name="success_login">Connexion réussie !</string>
+    <string name="btn_login">Se connecter</string>
+    <string name="btn_register">S\'inscrire</string>
+    <string name="profile_not_logged_in">Vous n\'êtes pas connecté</string>
+    <string name="error_invalid_email">Veuillez entrer une adresse e-mail valide</string>
+    <string name="error_invalid_password">Le mot de passe doit contenir au moins 6 caractères et un chiffre</string>
+    <string name="error_field_required">Ce champ est obligatoire</string>
+    <string name="error_invalid_username">Le pseudo doit faire entre 4 et 32 caractères</string>
+    <string name="error_password_mismatch">Les mots de passe ne correspondent pas</string>
+    <string name="success_register">Compte créé avec succès ! Veuillez vérifier votre email</string>
+    <string name="edit_profile">Modifier votre profile</string>
+    <string name="edit_profile_title">Modifier le profil</string>
+    <string name="edit_profile_subtitle">Personnalisez votre carnet de voyage.</string>
+    <string name="label_username">USERNAME</string>
+    <string name="label_email">EMAIL</string>
+    <string name="label_password">MOT DE PASSE</string>
+    <string name="label_confirm_password">CONFIRMER MOT DE PASSE</string>
+    <string name="btn_update_profile">Modifier</string>
+    <string name="btn_delete_account">Supprimer mon compte</string>
+    <string name="success_profile_update">Profil mis à jour !</string>
+    <string name="error_profile_update">Erreur lors de la mise à jour</string>
+    <string name="profile_member_since">Membre depuis le</string>
+    <string name="logout">Se déconnecter</string>
+    <string name="profile_logout">Déconnexion</string>
+    <string name="profile_update_already_taken">Email ou username déjà pris</string>
+
+    <string name="btn_save_avatar">Enregistrer la photo</string>
+    <string name="success_avatar_upload">Photo mise à jour !</string>
+    <string name="error_avatar_upload">Erreur lors de l\'envoi de la photo</string>
+
+    <string name="btn_active_sessions">Sessions actives</string>
+    <string name="sessions_title">Sessions actives</string>
+    <string name="sessions_subtitle">Appareils actuellement connectés à votre compte.</string>
+    <string name="sessions_empty">Aucune session active</string>
+    <string name="btn_delete_session">Supprimer la session</string>
+    <string name="session_unknown_device">Appareil inconnu</string>
+    <string name="session_current_badge">Session actuelle</string>
+    <string name="success_session_deleted">Session supprimée</string>
+    <string name="error_session_delete">Erreur lors de la suppression</string>
+
+    <string name="time_just_now">à l\'instant</string>
+    <plurals name="time_minutes_ago">
+        <item name="one" quantity="one">il y a %d minute</item>
+        <item name="other" quantity="many">il y a %d minutes</item>
+    </plurals>
+    <plurals name="time_hours_ago">
+        <item name="one" quantity="one">il y a %d heure</item>
+        <item name="other" quantity="many">il y a %d heures</item>
+    </plurals>
+    <plurals name="time_days_ago">
+        <item name="one" quantity="one">il y a %d jour</item>
+        <item name="other" quantity="many">il y a %d jours</item>
+    </plurals>
 </resources>

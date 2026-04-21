@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/nav_groups">
+
+    <fragment
+        android:id="@+id/nav_search"
+        android:name="com.example.myapplication.fragment.SearchGroupsFragment"
+        android:label="Recherche"
+        tools:layout="@layout/fragment_search_groups" />
+
+    <fragment
+        android:id="@+id/nav_groups"
+        android:name="com.example.myapplication.fragment.HomeFragment"
+        android:label="Groupes"
+        tools:layout="@layout/fragment_home" />
+
+    <fragment
+        android:id="@+id/nav_menu"
+        android:name="com.example.myapplication.fragment.ReportFragment"
+        android:label="Signalement"
+        tools:layout="@layout/fragment_report" />
+
+    <fragment
+        android:id="@+id/nav_notifications"
+        android:name="com.example.myapplication.fragment.HomeFragment"
+        android:label="Notifications"
+        tools:layout="@layout/fragment_home" />
+
+    <fragment
+        android:id="@+id/nav_profile"
+        android:name="com.example.myapplication.fragment.profile.ProfileFragment"
+        android:label="Profile"
+        tools:layout="@layout/fragment_profile" />
+
+    <fragment
+        android:id="@+id/loginFragment"
+        android:name="com.example.myapplication.fragment.auth.LoginFragment"
+        android:label="Connexion"
+        tools:layout="@layout/fragment_login" />
+
+    <fragment
+        android:id="@+id/registerFragment"
+        android:name="com.example.myapplication.fragment.auth.RegisterFragment"
+        android:label="Inscription"
+        tools:layout="@layout/fragment_register" />
+
+    <fragment
+        android:id="@+id/editProfileFragment"
+        android:name="com.example.myapplication.fragment.profile.EditProfileFragment"
+        android:label="Modifier le profil"
+        tools:layout="@layout/fragment_edit_profile" />
+
+    <fragment
+        android:id="@+id/sessionsFragment"
+        android:name="com.example.myapplication.fragment.profile.SessionsFragment"
+        android:label="Sessions actives"
+        tools:layout="@layout/fragment_sessions" />
+
+</navigation>

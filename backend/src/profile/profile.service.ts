@@ -13,6 +13,7 @@ import * as fs from 'fs';
 import { UserPublicProfile } from './dto/userPublicProfile.dto';
 import type { UserSession } from 'src/utils/dto/userSession.dto';
 import { UserGroup } from './dto/userGroup.dto';
+import { AuthService } from 'src/auth/auth.service';
 
 @Injectable()
 export class ProfileService {
@@ -21,7 +22,8 @@ export class ProfileService {
     constructor(
         private readonly prisma: PrismaService,
         private readonly mailer: AppMailerService,
-        private readonly cdn: CdnService
+        private readonly cdn: CdnService,
+        private readonly auth: AuthService
     ) {}
 
 
@@ -72,11 +74,18 @@ export class ProfileService {
         }));
     }
 
-    async getTokens(user: UserSession): Promise<Token[]> {
-        return await this.prisma.userToken.findMany({
+    async getTokens(user: UserSession, req: string): Promise<Token[]> {
+        const hashedToken: string = this.auth.hashToken(req.split(' ')[1]);
+
+        const tokens = await this.prisma.userToken.findMany({
             where: { userId: user.id },
-            select: { id: true, creationDate: true, ip: true, device: true }
+            select: { id: true, creationDate: true, ip: true, device: true, hashedToken: true }
         });
+
+        return tokens.map(({ hashedToken: storedHashedToken, ...token }) => ({
+            ...token,
+            isYourSession: storedHashedToken === hashedToken
+        }));
     }
 
 

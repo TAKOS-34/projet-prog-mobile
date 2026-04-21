@@ -50,7 +50,7 @@
     <TextView
         android:id="@+id/tvEmailLabel"
         style="@style/Widget.TravelApp.TextView.InputLabel"
-        android:text="E-MAIL"
+        android:text="@string/label_email"
         android:layout_marginTop="48dp"
         app:layout_constraintTop_toBottomOf="@id/tvLoginSubtitle"
         app:layout_constraintStart_toStartOf="parent" />
@@ -79,17 +79,10 @@
     <TextView
         android:id="@+id/tvPasswordLabel"
         style="@style/Widget.TravelApp.TextView.InputLabel"
-        android:text="MOT DE PASSE"
+        android:text="@string/label_password"
         android:layout_marginTop="24dp"
         app:layout_constraintTop_toBottomOf="@id/lineEmail"
         app:layout_constraintStart_toStartOf="parent" />
-
-    <TextView
-        android:id="@+id/tvForgotPassword"
-        style="@style/Widget.TravelApp.TextView.Link"
-        android:text="OUBLIÉ ?"
-        app:layout_constraintBaseline_toBaselineOf="@id/tvPasswordLabel"
-        app:layout_constraintEnd_toEndOf="parent" />
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/tilPassword"

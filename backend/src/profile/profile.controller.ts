@@ -1,4 +1,4 @@
-import { Param, Controller, Get, Patch, Delete, UseGuards, UseInterceptors, UploadedFile, ParseFilePipe, MaxFileSizeValidator, FileTypeValidator, Body, ParseIntPipe, } from '@nestjs/common';
+import { Param, Controller, Get, Patch, Delete, UseGuards, UseInterceptors, UploadedFile, ParseFilePipe, MaxFileSizeValidator, FileTypeValidator, Body, ParseIntPipe, Req, } from '@nestjs/common';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { ResponseMessage } from 'src/utils/dto/responseMessage.dto';
 import { ProfileService } from './profile.service';
@@ -31,8 +31,8 @@ export class ProfileController {
 
     @UseGuards(AuthGuard)
     @Get('tokens')
-    getTokens(@GetUser() user: UserSession): Promise<Array<Token>> {
-        return this.profileService.getTokens(user);
+    getTokens(@GetUser() user: UserSession, @Req() req: any): Promise<Array<Token>> {
+        return this.profileService.getTokens(user, req.headers.authorization);
     }
 
     @Get('/:userId')

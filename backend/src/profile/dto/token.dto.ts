@@ -3,4 +3,5 @@ export type Token = {
     creationDate: Date;
     ip: string;
     device: string;
+    isYourSession: boolean;
 }
