@@ -10,6 +10,7 @@ model Post {
     lat          Float
     description  String?   @db.VarChar(280)
     audio        String?
+    audioDuration Int?
 
     nbLikes    Int @default(0)
     nbComments Int @default(0)

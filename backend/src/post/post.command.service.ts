@@ -11,6 +11,7 @@ import { ReportDto } from './dto/report.dto';
 import { UpdatePostDto } from './dto/updatePost.dto';
 import { randomUUID } from 'crypto';
 import { NotificationService } from 'src/notification/notification.service';
+import { parseBuffer } from 'music-metadata';
 
 @Injectable()
 export class PostCommandService {
@@ -28,6 +29,11 @@ export class PostCommandService {
         const imageExt: string = image.mimetype.replace('image/', '');
         const cleanTags: string[] = (post.tags ?? []).map(t => t.toLowerCase().trim());
         const audioName = audio ? (randomUUID() + '.' + audio.mimetype.replace('audio/', '')) : null;
+        const audioDurationMs = audio ? await this.extractAudioDuration(audio.buffer, audio.mimetype) : null;
+
+        if (audioName && !audioDurationMs) {
+            throw new BadRequestException('Error with audio file');
+        }
 
         if (post.groupId && !await this.prisma.member.findUnique({
             where: { groupId_userId: { groupId: post.groupId, userId: user.id } },
@@ -48,6 +54,7 @@ export class PostCommandService {
                 description: post.description ?? null,
                 groupId: post.groupId ?? null,
                 audio: audioName,
+                audioDuration: audioDurationMs,
                 postTags: {
                     create: cleanTags.map(tagName => ({
                         tag: {
@@ -170,5 +177,17 @@ export class PostCommandService {
         }
 
         return { long: res[0].longitude, lat: res[0].latitude };
+    }
+
+
+
+    private async extractAudioDuration(buffer: Buffer, mimetype: string): Promise<number | null> {
+        try {
+            const metadata = await parseBuffer(buffer, { mimeType: mimetype });
+            const seconds = metadata.format.duration;
+            return typeof seconds === 'number' && Number.isFinite(seconds) ? Math.round(seconds * 1000) : null;
+        } catch {
+            return null;
+        }
     }
 }

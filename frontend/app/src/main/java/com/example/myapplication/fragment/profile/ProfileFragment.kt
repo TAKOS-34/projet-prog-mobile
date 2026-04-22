@@ -9,6 +9,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
@@ -32,6 +33,9 @@ class ProfileFragment : Fragment() {
     private var pickedAvatarUri: Uri? = null
     private var ivProfileCover: ImageView? = null
     private var btnSaveAvatar: MaterialButton? = null
+
+    private var currentUsername: String = ""
+    private var currentEmail: String = ""
 
     private val pickAvatarLauncher = registerForActivityResult(
         ActivityResultContracts.GetContent()
@@ -87,7 +91,11 @@ class ProfileFragment : Fragment() {
         }
 
         view.findViewById<MaterialButton>(R.id.btnEditProfile).setOnClickListener {
-            findNavController().navigate(R.id.editProfileFragment)
+            val args = bundleOf(
+                EditProfileFragment.ARG_USERNAME to currentUsername,
+                EditProfileFragment.ARG_EMAIL to currentEmail
+            )
+            findNavController().navigate(R.id.editProfileFragment, args)
         }
 
         view.findViewById<MaterialButton>(R.id.btnSessions).setOnClickListener {
@@ -139,6 +147,9 @@ class ProfileFragment : Fragment() {
                 if (error == null && body != null) {
                     try {
                         val profile = Gson().fromJson(body, ProfileResponseDto::class.java)
+
+                        currentUsername = profile.username
+                        currentEmail = profile.email
 
                         view.findViewById<TextView>(R.id.tvProfileName).text = profile.username
                         view.findViewById<TextView>(R.id.tvProfileBio).text = profile.email

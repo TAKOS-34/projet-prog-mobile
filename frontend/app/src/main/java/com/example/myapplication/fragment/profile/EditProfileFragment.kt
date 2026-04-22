@@ -8,17 +8,21 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import com.example.myapplication.R
-import com.example.myapplication.dto.profile.ProfileResponseDto
 import com.example.myapplication.dto.profile.UpdateProfileRequestDto
 import com.example.myapplication.utils.ApiClient
+import com.example.myapplication.utils.AuthViewModel
+import com.example.myapplication.utils.FcmToken
 import com.google.android.material.button.MaterialButton
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
-import com.google.gson.Gson
 
 class EditProfileFragment : Fragment() {
+
+    private val authViewModel: AuthViewModel by activityViewModels()
 
     private lateinit var tilUsername: TextInputLayout
     private lateinit var etUsername: TextInputEditText
@@ -40,6 +44,7 @@ class EditProfileFragment : Fragment() {
         val view = inflater.inflate(R.layout.fragment_edit_profile, container, false)
 
         initViews(view)
+        applyInitialHints()
 
         view.findViewById<ImageView>(R.id.btnBack).setOnClickListener {
             findNavController().navigateUp()
@@ -51,9 +56,18 @@ class EditProfileFragment : Fragment() {
             }
         }
 
-        fetchCurrentProfile()
+        view.findViewById<MaterialButton>(R.id.tvDeleteAccount).setOnClickListener {
+            confirmDeleteAccount()
+        }
 
         return view
+    }
+
+    private fun applyInitialHints() {
+        initialUsername = arguments?.getString(ARG_USERNAME).orEmpty()
+        initialEmail = arguments?.getString(ARG_EMAIL).orEmpty()
+        etUsername.hint = initialUsername
+        etEmail.hint = initialEmail
     }
 
     private fun initViews(view: View) {
@@ -66,24 +80,6 @@ class EditProfileFragment : Fragment() {
         tilConfirm = view.findViewById(R.id.tilConfirmPassword)
         etConfirm = view.findViewById(R.id.etConfirmPassword)
         btnUpdate = view.findViewById(R.id.btnUpdate)
-    }
-
-    private fun fetchCurrentProfile() {
-        ApiClient.get("profile") { body, _, error ->
-            activity?.runOnUiThread {
-                if (error == null && body != null) {
-                    try {
-                        val profile = Gson().fromJson(body, ProfileResponseDto::class.java)
-                        initialUsername = profile.username
-                        initialEmail = profile.email
-                        etUsername.setText(profile.username)
-                        etEmail.setText(profile.email)
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                    }
-                }
-            }
-        }
     }
 
     private fun validateFields(): Boolean {
@@ -146,6 +142,38 @@ class EditProfileFragment : Fragment() {
         }
     }
 
+    private fun confirmDeleteAccount() {
+        val ctx = context ?: return
+        MaterialAlertDialogBuilder(ctx)
+            .setTitle(R.string.delete_account_confirm_title)
+            .setMessage(R.string.delete_account_confirm_message)
+            .setNegativeButton(R.string.cancel, null)
+            .setPositiveButton(R.string.btn_delete_account) { _, _ -> performDeleteAccount() }
+            .show()
+    }
+
+    private fun performDeleteAccount() {
+        ApiClient.delete("profile") { _, _, error ->
+            activity?.runOnUiThread {
+                if (error == null) {
+                    performLogout()
+                } else {
+                    Toast.makeText(context, R.string.error_global, Toast.LENGTH_LONG).show()
+                }
+            }
+        }
+    }
+
+    private fun performLogout() {
+        FcmToken.fetchFcmToken { fcmToken ->
+            authViewModel.logout(fcmToken) {
+                activity?.runOnUiThread {
+                    findNavController().navigate(R.id.loginFragment)
+                }
+            }
+        }
+    }
+
     private fun handleUpdateResponse(code: Int, error: String?) {
         if (error == null) {
             Toast.makeText(context, R.string.success_profile_update, Toast.LENGTH_SHORT).show()
@@ -158,5 +186,10 @@ class EditProfileFragment : Fragment() {
             }
             Toast.makeText(context, messageRes, Toast.LENGTH_LONG).show()
         }
+    }
+
+    companion object {
+        const val ARG_USERNAME = "username"
+        const val ARG_EMAIL = "email"
     }
 }

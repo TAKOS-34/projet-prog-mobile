@@ -10,6 +10,7 @@ export type PostInfos = {
     title: string;
     description?: string;
     audio?: string;
+    audioDuration?: number;
     nbLikes: number;
     nbComments: number;
     userId: number,
@@ -20,4 +21,10 @@ export type PostInfos = {
     groupAvatar?: string;
     tags: string[];
     isLiked: boolean;
+    isYours: boolean;
+}
+
+export type FeedInfos = {
+    posts: PostInfos[];
+    nextCursor?: string;
 }

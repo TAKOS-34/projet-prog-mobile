@@ -121,6 +121,81 @@ object ApiClient {
         client.newCall(request).enqueue(createCallback(url, onResult))
     }
 
+    fun postMultipart(
+        path: String,
+        parts: Map<String, Any?>,
+        imageBytes: ByteArray,
+        imageName: String,
+        imageMediaType: String,
+        audioBytes: ByteArray? = null,
+        audioName: String? = null,
+        audioMediaType: String? = null,
+        onResult: (String?, Int, String?) -> Unit
+    ) {
+        val url = "${BuildConfig.BACKEND_URL}$path"
+        val builder = MultipartBody.Builder()
+            .setType(MultipartBody.FORM)
+
+        parts.forEach { (key, value) ->
+            if (value != null) {
+                val stringValue = if (value is List<*>) gson.toJson(value) else value.toString()
+                builder.addFormDataPart(key, stringValue)
+            }
+        }
+
+        builder.addFormDataPart(
+            "image",
+            imageName,
+            imageBytes.toRequestBody(imageMediaType.toMediaType())
+        )
+
+        if (audioBytes != null && audioName != null && audioMediaType != null) {
+            builder.addFormDataPart(
+                "audio",
+                audioName,
+                audioBytes.toRequestBody(audioMediaType.toMediaType())
+            )
+        }
+
+        val body = builder.build()
+        Log.d(TAG, ">>> EXECUTING POST MULTIPART $url")
+
+        val request = OkHttpRequest.Builder()
+            .url(url)
+            .post(body)
+            .build()
+
+        client.newCall(request).enqueue(createCallback(url, onResult))
+    }
+
+    fun getMultipart(
+        path: String,
+        fileKey: String,
+        fileName: String,
+        fileBytes: ByteArray,
+        fileMediaType: String,
+        onResult: (String?, Int, String?) -> Unit
+    ) {
+        val url = "${BuildConfig.BACKEND_URL}$path"
+        val body = MultipartBody.Builder()
+            .setType(MultipartBody.FORM)
+            .addFormDataPart(
+                fileKey,
+                fileName,
+                fileBytes.toRequestBody(fileMediaType.toMediaType())
+            )
+            .build()
+
+        Log.d(TAG, ">>> EXECUTING POST (IA SUGGESTIONS) $url")
+
+        val request = OkHttpRequest.Builder()
+            .url(url)
+            .post(body)
+            .build()
+
+        client.newCall(request).enqueue(createCallback(url, onResult))
+    }
+
     private fun createCallback(url: String, onResult: (String?, Int, String?) -> Unit) = object : Callback {
         override fun onFailure(call: Call, e: IOException) {
             Log.e(TAG, "<<< FAILURE (Network/Connection) $url", e)
@@ -130,9 +205,7 @@ object ApiClient {
         override fun onResponse(call: Call, response: Response) {
             val bodyString = response.body?.string()
             val code = response.code
-
-            Log.d(TAG, "<<< RESPONSE RECEIVED | Code: $code | URL: $url")
-
+            Log.d(TAG, "<<< RESPONSE RECEIVED | Code: $code | URL: $url | Message : ${bodyString}")
             var errorMessage: String? = null
             if (!response.isSuccessful) {
                 errorMessage = try {
@@ -141,9 +214,7 @@ object ApiClient {
                 } catch (e: Exception) {
                     "Server error : $code"
                 }
-                Log.e(TAG, "Error Response: $errorMessage")
             }
-
             onResult(bodyString, code, errorMessage)
         }
     }

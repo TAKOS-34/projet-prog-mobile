@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background"
+    android:fillViewport="true">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="24dp"
+        android:paddingVertical="16dp">
+
+        <ImageView
+            android:id="@+id/btnBack"
+            style="@style/Widget.TravelApp.Icon.Back"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <TextView
+            android:id="@+id/tvCreatePostTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/create_post_title"
+            android:textAlignment="center"
+            android:textAppearance="@style/TextAppearance.TravelApp.HeadlineMedium"
+            android:layout_marginTop="8dp"
+            app:layout_constraintTop_toBottomOf="@id/btnBack"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <TextView
+            android:id="@+id/tvCreatePostSubtitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/create_post_subtitle"
+            android:textAlignment="center"
+            android:textAppearance="@style/TextAppearance.TravelApp.BodyMedium"
+            android:textColor="@color/text_secondary"
+            app:layout_constraintTop_toBottomOf="@id/tvCreatePostTitle"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/cvPreview"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:layout_marginTop="24dp"
+            android:visibility="gone"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="0dp"
+            app:layout_constraintTop_toBottomOf="@id/tvCreatePostSubtitle">
+            
+            <ImageView
+                android:id="@+id/ivPreview"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"
+                android:background="@color/surface_variant" />
+        </androidx.cardview.widget.CardView>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnIaTags"
+            style="@style/Widget.TravelApp.Button.Outlined"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Suggérer par IA"
+            android:visibility="gone"
+            android:textSize="10sp"
+            app:layout_constraintTop_toBottomOf="@id/cvPreview"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <ProgressBar
+            android:id="@+id/pbIaLoading"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginEnd="8dp"
+            android:visibility="gone"
+            app:layout_constraintTop_toTopOf="@id/btnIaTags"
+            app:layout_constraintBottom_toBottomOf="@id/btnIaTags"
+            app:layout_constraintEnd_toStartOf="@id/btnIaTags" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnSelectImage"
+            style="@style/Widget.TravelApp.Button.Outlined"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/btn_select_image"
+            android:layout_marginTop="16dp"
+            app:layout_constraintTop_toBottomOf="@id/btnIaTags" />
+
+        <TextView
+            android:id="@+id/tvTitleLabel"
+            style="@style/Widget.TravelApp.TextView.InputLabel"
+            android:text="@string/label_post_title"
+            android:layout_marginTop="24dp"
+            app:layout_constraintTop_toBottomOf="@id/btnSelectImage"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilTitle"
+            style="@style/Widget.TravelApp.TextInputLayout.Line"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@id/tvTitleLabel">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etTitle"
+                style="@style/Widget.TravelApp.TextInputEditText.Line"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="text" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <View
+            android:id="@+id/div1"
+            style="@style/Widget.TravelApp.View.Divider"
+            app:layout_constraintTop_toBottomOf="@id/tilTitle" />
+
+        <TextView
+            android:id="@+id/tvLocationLabel"
+            style="@style/Widget.TravelApp.TextView.InputLabel"
+            android:text="@string/label_post_location"
+            android:layout_marginTop="16dp"
+            app:layout_constraintTop_toBottomOf="@id/div1"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilLocation"
+            style="@style/Widget.TravelApp.TextInputLayout.Line"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@id/tvLocationLabel">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etLocation"
+                style="@style/Widget.TravelApp.TextInputEditText.Line"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="text" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <View
+            android:id="@+id/div2"
+            style="@style/Widget.TravelApp.View.Divider"
+            app:layout_constraintTop_toBottomOf="@id/tilLocation" />
+
+        <TextView
+            android:id="@+id/tvDescriptionLabel"
+            style="@style/Widget.TravelApp.TextView.InputLabel"
+            android:text="@string/label_post_description"
+            android:layout_marginTop="16dp"
+            app:layout_constraintTop_toBottomOf="@id/div2"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilDescription"
+            style="@style/Widget.TravelApp.TextInputLayout.Line"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@id/tvDescriptionLabel">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etDescription"
+                style="@style/Widget.TravelApp.TextInputEditText.Line"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textMultiLine"
+                android:minLines="2" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <View
+            android:id="@+id/div3"
+            style="@style/Widget.TravelApp.View.Divider"
+            app:layout_constraintTop_toBottomOf="@id/tilDescription" />
+
+        <TextView
+            android:id="@+id/tvTagsLabel"
+            style="@style/Widget.TravelApp.TextView.InputLabel"
+            android:text="@string/label_post_tags"
+            android:layout_marginTop="16dp"
+            app:layout_constraintTop_toBottomOf="@id/div3"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilTags"
+            style="@style/Widget.TravelApp.TextInputLayout.Line"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@id/tvTagsLabel">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etTags"
+                style="@style/Widget.TravelApp.TextInputEditText.Line"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="text" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/cgSuggestedTags"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            app:layout_constraintTop_toBottomOf="@id/tilTags" />
+
+        <View
+            android:id="@+id/div4"
+            style="@style/Widget.TravelApp.View.Divider"
+            app:layout_constraintTop_toBottomOf="@id/cgSuggestedTags" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnSelectAudio"
+            style="@style/Widget.TravelApp.Button.Outlined"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/btn_select_audio"
+            android:layout_marginTop="16dp"
+            app:layout_constraintTop_toBottomOf="@id/div4" />
+
+        <TextView
+            android:id="@+id/tvAudioStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/TextAppearance.TravelApp.BodyMedium"
+            android:textColor="@color/primary"
+            android:layout_marginTop="4dp"
+            android:visibility="gone"
+            app:layout_constraintTop_toBottomOf="@id/btnSelectAudio"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnPublish"
+            style="@style/Widget.TravelApp.Button.Primary"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/btn_create_post"
+            android:layout_marginTop="4dp"
+            app:layout_constraintTop_toBottomOf="@id/tvAudioStatus"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_marginBottom="24dp"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>

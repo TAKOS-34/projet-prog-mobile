@@ -1,4 +1,4 @@
-import { Controller, FileTypeValidator, Get, MaxFileSizeValidator, ParseFilePipe, Query, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Controller, FileTypeValidator, Get, MaxFileSizeValidator, ParseFilePipe, Post, Query, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { TagService } from './tag.service';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -25,7 +25,7 @@ export class TagController {
 
 
     @UseGuards(AuthGuard)
-    @Get('/ia-suggestions')
+    @Post('/ia-suggestions')
     @UseInterceptors(FileInterceptor('post'))
     iaSuggestions(@UploadedFile(
         new ParseFilePipe({

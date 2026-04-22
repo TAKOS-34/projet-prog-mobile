@@ -48,6 +48,20 @@ android {
     kotlinOptions {
         jvmTarget = "11"
     }
+
+    sourceSets {
+        getByName("main") {
+            res.srcDirs(
+                "src/main/res/layouts/auth",
+                "src/main/res/layouts/profile",
+                "src/main/res/layouts/home",
+                "src/main/res/layouts/post",
+                "src/main/res/layouts/common",
+                "src/main/res"
+            )
+        }
+    }
+
     buildFeatures {
         compose = true
     }

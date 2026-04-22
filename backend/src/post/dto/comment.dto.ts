@@ -10,4 +10,5 @@ export type CommentInfos = {
     username: string;
     avatar: string;
     parentId?: number;
+    isYours: boolean;
 }

@@ -10,7 +10,7 @@
 
     <ImageView
         android:id="@+id/btnClose"
-        style="@style/Widget.TravelApp.Icon.Close"
+        style="@style/Widget.TravelApp.Icon.Back"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 

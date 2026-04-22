@@ -100,7 +100,8 @@ export class GroupService {
             groupName: post.Group?.name ?? undefined,
             groupAvatar: post.Group?.avatar ? this.cdn.getGroupAvatarUrl(post.Group.avatar) : undefined,
             tags: post.postTags.map(pt => pt.tag.name),
-            isLiked: post.likes?.length > 0
+            isLiked: post.likes?.length > 0,
+            isYours: userId ? userId === post.User.id : false
         }));
     }
 

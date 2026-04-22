@@ -159,6 +159,8 @@
         <item name="shapeAppearance">@style/ShapeAppearance.TravelApp.Pill</item>
         <item name="android:paddingStart">24dp</item>
         <item name="android:paddingEnd">24dp</item>
+        <item name="android:paddingTop">14dp</item>
+        <item name="android:paddingBottom">14dp</item>
         <item name="android:minHeight">52dp</item>
         <item name="android:textAppearance">@style/TextAppearance.TravelApp.TitleMedium</item>
     </style>

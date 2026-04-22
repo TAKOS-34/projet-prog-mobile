@@ -1,5 +1,6 @@
 <resources>
     <string name="app_name">7N</string>
+    <string name="cancel">Annuler</string>
     <string name="error_network">Erreur réseau. Veuillez réessayer</string>
     <string name="error_global">Erreur réseau. Veuillez réessayer</string>
     <string name="error_unauthorized">Session expirée. Veuillez vous reconnecter</string>
@@ -25,12 +26,45 @@
     <string name="label_confirm_password">CONFIRMER MOT DE PASSE</string>
     <string name="btn_update_profile">Modifier</string>
     <string name="btn_delete_account">Supprimer mon compte</string>
+    <string name="delete_account_confirm_title">Supprimer votre compte ?</string>
+    <string name="delete_account_confirm_message">Cette action est irréversible. Toutes vos données seront définitivement supprimées.</string>
     <string name="success_profile_update">Profil mis à jour !</string>
     <string name="error_profile_update">Erreur lors de la mise à jour</string>
     <string name="profile_member_since">Membre depuis le</string>
     <string name="logout">Se déconnecter</string>
     <string name="profile_logout">Déconnexion</string>
     <string name="profile_update_already_taken">Email ou username déjà pris</string>
+    <string name="profile_stat_posts">POSTS</string>
+    <string name="profile_stat_groups">GROUPES</string>
+
+    <string name="create_post_title">Créer un post</string>
+    <string name="create_post_subtitle">Partagez votre aventure</string>
+    <string name="label_post_title">TITRE</string>
+    <string name="label_post_location">LOCALISATION</string>
+    <string name="label_post_description">DESCRIPTION</string>
+    <string name="label_post_tags">TAGS (séparés par des virgules)</string>
+    <string name="btn_select_image">Choisir une image</string>
+    <string name="btn_select_audio">Ajouter un audio (optionnel)</string>
+    <string name="btn_create_post">Publier</string>
+    <string name="success_post_created">Post publié avec succès !</string>
+    <string name="error_post_failed">Erreur lors de la publication</string>
+    <string name="error_location_required">La localisation est requise</string>
+    <string name="error_image_required">Une image est requise</string>
+    <string name="error_title_required">Le titre est requis</string>
+    <string name="report_title">Signaler un post</string>
+    <string name="report_subtitle">Aidez-nous à garder la communauté sûre.</string>
+    <string name="report_reason_inappropriate">Contenu inapproprié</string>
+    <string name="report_reason_wrong_loc">Localisation erronée</string>
+    <string name="report_reason_spam">Spam</string>
+    <string name="report_reason_privacy">Violation de la vie privée</string>
+    <string name="report_reason_dangerous">Informations dangereuses</string>
+    <string name="report_reason_other">Autre</string>
+    <string name="label_report_details">DÉTAILS (OPTIONNEL)</string>
+    <string name="btn_submit_report">Envoyer le signalement</string>
+    <string name="success_report_sent">Signalement envoyé avec succès</string>
+    <string name="error_report_failed">Échec de l\'envoi du signalement</string>
+    <string name="error_report_reason_required">Veuillez choisir une raison</string>
+    <string name="write_comment">Écrire un commentaire...</string>
 
     <string name="btn_save_avatar">Enregistrer la photo</string>
     <string name="success_avatar_upload">Photo mise à jour !</string>
@@ -38,7 +72,7 @@
 
     <string name="btn_active_sessions">Sessions actives</string>
     <string name="sessions_title">Sessions actives</string>
-    <string name="sessions_subtitle">Appareils actuellement connectés à votre compte.</string>
+    <string name="sessions_subtitle">Appareils actuellement connectés à votre compte</string>
     <string name="sessions_empty">Aucune session active</string>
     <string name="btn_delete_session">Supprimer la session</string>
     <string name="session_unknown_device">Appareil inconnu</string>
@@ -46,17 +80,33 @@
     <string name="success_session_deleted">Session supprimée</string>
     <string name="error_session_delete">Erreur lors de la suppression</string>
 
-    <string name="time_just_now">à l\'instant</string>
+    <string name="delete_comment_confirm_title">Supprimer le commentaire ?</string>
+    <string name="delete_comment_confirm_message">Voulez-vous vraiment supprimer ce commentaire ? Cette action est irréversible.</string>
+    <string name="delete_comment_btn">Supprimer</string>
+
+    <string name="post_date">Date et heure</string>
+    <string name="post_coordinates">Coordonées</string>
+
+    <string name="by">Par : </string>
+
+    <string name="time_just_now">Â l\'instant</string>
+    <string name="audio_selection">Audio sélectionné</string>
+    <string name="comment_modified_at">(modifié)</string>
+    <string name="comment_print_responses">-- Afficher les %1$d réponses --</string>
+    <string name="comment_hide_responses">-- Cacher les réponses --</string>
+    <string name="comments">Commentaires</string>
+    <string name="comment_response">Réponse à @%1$s</string>
+    <string name="comment_answer">Répondre</string>
     <plurals name="time_minutes_ago">
-        <item name="one" quantity="one">il y a %d minute</item>
-        <item name="other" quantity="many">il y a %d minutes</item>
+        <item quantity="one">Il y a %d minute</item>
+        <item quantity="other">Il y a %d minutes</item>
     </plurals>
     <plurals name="time_hours_ago">
-        <item name="one" quantity="one">il y a %d heure</item>
-        <item name="other" quantity="many">il y a %d heures</item>
+        <item quantity="one">Il y a %d heure</item>
+        <item quantity="other">Il y a %d heures</item>
     </plurals>
     <plurals name="time_days_ago">
-        <item name="one" quantity="one">il y a %d jour</item>
-        <item name="other" quantity="many">il y a %d jours</item>
+        <item quantity="one">Il y a %d jour</item>
+        <item quantity="other">Il y a %d jours</item>
     </plurals>
 </resources>

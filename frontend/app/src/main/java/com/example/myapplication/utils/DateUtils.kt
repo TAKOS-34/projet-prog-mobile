@@ -38,4 +38,9 @@ object DateUtils {
             else -> SimpleDateFormat(SHORT_DATE_FORMAT, Locale.getDefault()).format(date)
         }
     }
+
+    fun formatAbsoluteDate(isoString: String): String {
+        val date = isoString.parseIsoDate() ?: return isoString
+        return SimpleDateFormat("dd/MM/yy,\nHH:mm", Locale.getDefault()).format(date)
+    }
 }

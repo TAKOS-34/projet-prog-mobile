@@ -5,7 +5,7 @@ import { ResponseMessage } from 'src/utils/dto/responseMessage.dto';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { GetUser } from 'src/utils/decorator/get-user.decorator';
-import { PostInfos } from './dto/postInfos.dto';
+import { FeedInfos, PostInfos } from './dto/postInfos.dto';
 import { PostQueryService } from './post.query.service';
 import { GroupProtectGuard } from 'src/group/group.protect.guard';
 import { ReportDto } from './dto/report.dto';
@@ -26,7 +26,7 @@ export class PostController {
 
     @Get()
     @UseGuards(AuthOptionalGuard)
-    async getGlobalFeed(@Query('limit') limit: string = '20', @Query('cursor') cursor?: string, @GetUser() user?: UserSession, @GetAnonymous() anonymous?: string): Promise<PostInfos[]> {
+    async getGlobalFeed(@Query('limit') limit: string = '20', @Query('cursor') cursor?: string, @GetUser() user?: UserSession, @GetAnonymous() anonymous?: string): Promise<FeedInfos> {
         return this.postQueryService.getFeed(parseInt(limit), cursor, user?.id, anonymous);
     }
 

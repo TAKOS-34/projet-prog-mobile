@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { CdnService } from "src/cdn/cdn.service";
 import { PrismaService } from "src/prisma/prisma.service";
-import { PostInfos } from "./dto/postInfos.dto";
+import { FeedInfos, PostInfos } from "./dto/postInfos.dto";
 import { CommentInfos } from "./dto/comment.dto";
 
 @Injectable()
@@ -13,11 +13,11 @@ export class PostQueryService {
 
 
 
-    async getFeed(limit: number, cursor?: string, userId?: number, anonymousToken?: string): Promise<PostInfos[]> {
+    async getFeed(limit: number, cursor?: string, userId?: number, anonymousToken?: string): Promise<FeedInfos> {
         const realUser = userId ? { userId } : anonymousToken ? { anonymousUserId: anonymousToken } : null;
 
         const posts = await this.prisma.post.findMany({
-            take: limit,
+            take: limit + 1,
             skip: cursor ? 1 : 0,
             ...(cursor ? { cursor: { id: cursor } } : {}),
             where: {
@@ -31,7 +31,7 @@ export class PostQueryService {
                     } : {}
                 ]
             },
-            orderBy: { creationDate: 'desc', id: 'desc' },
+            orderBy: { creationDate: 'desc' },
             include: {
                 Group: { select: { id: true, name: true, avatar: true } },
                 User: { select: { id: true, username: true, avatar: true } },
@@ -40,29 +40,38 @@ export class PostQueryService {
             }
         });
 
-        return posts.map(post => ({
-            id: post.id,
-            image: this.cdn.getPostUrl(post.id, post.imageExt),
-            creationDate: post.creationDate,
-            isEdited: post.isEdited,
-            updatedAt: post.updatedAt ?? undefined,
-            title: post.title,
-            localisation: post.localisation,
-            long: post.long,
-            lat: post.lat,
-            description: post.description ?? undefined,
-            audio: post.audio ? this.cdn.getAudioUrl(post.audio) : undefined,
-            nbLikes: post.nbLikes,
-            nbComments: post.nbComments,
-            userId: post.User.id,
-            username: post.User.username,
-            avatar: this.cdn.getAvatarUrl(post.User.avatar),
-            groupId: post.Group?.id ?? undefined,
-            groupName: post.Group?.name ?? undefined,
-            groupAvatar: post.Group?.avatar ? this.cdn.getGroupAvatarUrl(post.Group.avatar) : undefined,
-            tags: post.postTags.map(pt => pt.tag.name),
-            isLiked: post.likes?.length > 0
-        }));
+        const hasNextPage = posts.length > limit;
+        const pagePosts = hasNextPage ? posts.slice(0, limit) : posts;
+        const nextCursor = hasNextPage ? pagePosts[pagePosts.length - 1]?.id : undefined;
+
+        return {
+            posts: pagePosts.map(post => ({
+                id: post.id,
+                image: this.cdn.getPostUrl(post.id, post.imageExt),
+                creationDate: post.creationDate,
+                isEdited: post.isEdited,
+                updatedAt: post.updatedAt ?? undefined,
+                title: post.title,
+                localisation: post.localisation,
+                long: post.long,
+                lat: post.lat,
+                description: post.description ?? undefined,
+                audio: post.audio ? this.cdn.getAudioUrl(post.audio) : undefined,
+                audioDuration: post.audioDuration ?? undefined,
+                nbLikes: post.nbLikes,
+                nbComments: post.nbComments,
+                userId: post.User.id,
+                username: post.User.username,
+                avatar: this.cdn.getAvatarUrl(post.User.avatar),
+                groupId: post.Group?.id ?? undefined,
+                groupName: post.Group?.name ?? undefined,
+                groupAvatar: post.Group?.avatar ? this.cdn.getGroupAvatarUrl(post.Group.avatar) : undefined,
+                tags: post.postTags.map(pt => pt.tag.name),
+                isLiked: post.likes?.length > 0,
+                isYours: userId ? userId === post.User.id : false
+            })),
+            nextCursor
+        };
     }
 
 
@@ -101,7 +110,8 @@ export class PostQueryService {
             groupName: post.Group?.name ?? undefined,
             groupAvatar: post.Group?.avatar ? this.cdn.getGroupAvatarUrl(post.Group.avatar) : undefined,
             tags: post.postTags.map(pt => pt.tag.name),
-            isLiked: post.likes?.length > 0
+            isLiked: post.likes?.length > 0,
+            isYours: userId ? userId === post.User.id : false
         };
     }
 
@@ -137,7 +147,8 @@ export class PostQueryService {
             userId: c.User.id,
             username: c.User.username,
             avatar: this.cdn.getAvatarUrl(c.User.avatar),
-            isLiked: c.commentLikes?.length > 0
+            isLiked: c.commentLikes?.length > 0,
+            isYours: userId ? userId === c.User.id : false
         }));
     }
 
@@ -173,7 +184,8 @@ export class PostQueryService {
             userId: c.User.id,
             username: c.User.username,
             avatar: this.cdn.getAvatarUrl(c.User.avatar),
-            isLiked: c.commentLikes?.length > 0
+            isLiked: c.commentLikes?.length > 0,
+            isYours: userId ? userId === c.User.id : false
         }));
     }
 }
