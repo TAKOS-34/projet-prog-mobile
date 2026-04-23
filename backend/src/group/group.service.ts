@@ -9,6 +9,7 @@ import sharp from 'sharp';
 import { UserList } from 'src/group/dto/userList.dto';
 import { GroupInfos } from './dto/groupInfos.dto';
 import { PostInfos } from 'src/post/dto/postInfos.dto';
+import { GroupCardsInfos } from './dto/groupCardsInfos.dto';
 
 @Injectable()
 export class GroupService {
@@ -16,6 +17,37 @@ export class GroupService {
         private readonly prisma: PrismaService,
         private readonly cdn: CdnService
     ) {}
+
+
+
+    async getMyGroups(user: UserSession): Promise<GroupCardsInfos[]> {
+        const groups = await this.prisma.group.findMany({
+            where: { members: { some: { userId: user.id } } },
+            select: {
+                id: true,
+                name: true,
+                avatar: true,
+                description: true,
+                creationDate: true,
+                isGroupPrivate: true,
+                adminId: true,
+                nbMembers: true,
+                nbPosts: true,
+            }
+        });
+
+        return groups.map(group => ({
+            id: group.id,
+            name: group.name,
+            avatar: this.cdn.getGroupAvatarUrl(group.avatar),
+            description: group.description ?? undefined,
+            creationDate: group.creationDate,
+            isGroupPrivate: group.isGroupPrivate,
+            nbMembers: group.nbMembers,
+            nbPosts: group.nbPosts,
+            isAdmin: group.adminId === user.id
+        }));
+    }
 
 
 

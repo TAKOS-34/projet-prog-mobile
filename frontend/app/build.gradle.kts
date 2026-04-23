@@ -57,6 +57,7 @@ android {
                 "src/main/res/layouts/home",
                 "src/main/res/layouts/post",
                 "src/main/res/layouts/common",
+                "src/main/res/layouts/group",
                 "src/main/res"
             )
         }

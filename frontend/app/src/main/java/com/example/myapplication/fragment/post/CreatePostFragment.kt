@@ -9,7 +9,9 @@ import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ArrayAdapter
 import android.widget.ImageView
+import android.widget.ListPopupWindow
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
@@ -17,14 +19,20 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.cardview.widget.CardView
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import coil.load
+import coil.transform.CircleCropTransformation
 import com.example.myapplication.R
+import com.example.myapplication.dto.group.GroupCardInfosDto
 import com.example.myapplication.utils.ApiClient
+import com.example.myapplication.utils.resolveBackendUrl
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
+import com.google.android.material.imageview.ShapeableImageView
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 
 class CreatePostFragment : Fragment() {
 
@@ -45,9 +53,13 @@ class CreatePostFragment : Fragment() {
     private lateinit var btnSelectAudio: MaterialButton
     private lateinit var tvAudioStatus: TextView
     private lateinit var btnPublish: MaterialButton
+    private lateinit var tilGroup: TextInputLayout
+    private lateinit var etGroup: TextInputEditText
 
     private var selectedImageUri: Uri? = null
     private var selectedAudioUri: Uri? = null
+    private var selectedGroupId: Int? = null
+    private var myGroups: List<GroupCardInfosDto> = emptyList()
 
     private val imagePickerLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
         uri?.let {
@@ -89,8 +101,75 @@ class CreatePostFragment : Fragment() {
 
         setupTagSuggestions()
         fetchPopularTags()
+        fetchMyGroups()
 
         return view
+    }
+
+    private fun fetchMyGroups() {
+        ApiClient.get("group/my-groups") { body, _, error ->
+            activity?.runOnUiThread {
+                if (error == null && body != null) {
+                    try {
+                        val type = object : TypeToken<List<GroupCardInfosDto>>() {}.type
+                        myGroups = Gson().fromJson(body, type)
+                        bindGroupDropdown()
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+                } else {
+                    Toast.makeText(context, R.string.error_load_groups, Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
+
+    private fun bindGroupDropdown() {
+        val ctx = context ?: return
+        val noneLabel = getString(R.string.group_selector_none)
+        val entries: List<GroupCardInfosDto?> = listOf(null) + myGroups
+
+        val adapter = object : ArrayAdapter<GroupCardInfosDto?>(ctx, 0, entries) {
+            override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+                val row = convertView ?: LayoutInflater.from(ctx)
+                    .inflate(R.layout.item_group_dropdown, parent, false)
+                val group = getItem(position)
+                val avatar = row.findViewById<ShapeableImageView>(R.id.ivGroupAvatar)
+                val name = row.findViewById<TextView>(R.id.tvGroupName)
+                if (group == null) {
+                    name.text = noneLabel
+                    avatar.setImageDrawable(null)
+                    avatar.visibility = View.GONE
+                } else {
+                    name.text = group.name
+                    avatar.visibility = View.VISIBLE
+                    avatar.load(group.avatar.resolveBackendUrl()) {
+                        crossfade(true)
+                        placeholder(R.drawable.ic_launcher_background)
+                        transformations(CircleCropTransformation())
+                    }
+                }
+                return row
+            }
+        }
+
+        val popup = ListPopupWindow(ctx).apply {
+            setAdapter(adapter)
+            anchorView = tilGroup
+            isModal = true
+        }
+
+        etGroup.setText(noneLabel)
+        selectedGroupId = null
+
+        etGroup.setOnClickListener { popup.show() }
+
+        popup.setOnItemClickListener { _, _, position, _ ->
+            val group = entries[position]
+            selectedGroupId = group?.id
+            etGroup.setText(group?.name ?: noneLabel)
+            popup.dismiss()
+        }
     }
 
     private fun setupTagSuggestions() {
@@ -198,6 +277,8 @@ class CreatePostFragment : Fragment() {
         btnSelectAudio = view.findViewById(R.id.btnSelectAudio)
         tvAudioStatus = view.findViewById(R.id.tvAudioStatus)
         btnPublish = view.findViewById(R.id.btnPublish)
+        tilGroup = view.findViewById(R.id.tilGroup)
+        etGroup = view.findViewById(R.id.etGroup)
     }
 
     private fun validateFields(): Boolean {
@@ -240,6 +321,7 @@ class CreatePostFragment : Fragment() {
         parts["localisation"] = location
         parts["description"] = description
         parts["tags"] = tags
+        parts["groupId"] = selectedGroupId
 
         val imageBytes = context.contentResolver.openInputStream(imageUri)?.readBytes() ?: return
         val imageMime = context.contentResolver.getType(imageUri) ?: "image/jpeg"

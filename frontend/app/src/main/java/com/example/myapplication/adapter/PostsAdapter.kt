@@ -58,6 +58,9 @@ class PostsAdapter(
         private val ivImage: ImageView = itemView.findViewById(R.id.ivPostImage)
         private val btnEdit: ImageView = itemView.findViewById(R.id.btnEdit)
         private val ivAvatar: ImageView = itemView.findViewById(R.id.ivAvatar)
+        private val llGroupBadge: LinearLayout = itemView.findViewById(R.id.llGroupBadge)
+        private val ivGroupBadgeAvatar: ImageView = itemView.findViewById(R.id.ivGroupBadgeAvatar)
+        private val tvGroupBadgeName: TextView = itemView.findViewById(R.id.tvGroupBadgeName)
         private val tvTitle: TextView = itemView.findViewById(R.id.tvPostTitle)
         private val tvAuthor: TextView = itemView.findViewById(R.id.tvPostAuthor)
         private val tvLocation: TextView = itemView.findViewById(R.id.tvPostLocation)
@@ -105,6 +108,19 @@ class PostsAdapter(
             tvAuthor.text = "${context.getString(R.string.by)} ${post.username} · ${DateUtils.formatRelativeDate(context, post.creationDate)}"
             tvLocation.text = post.localisation
             tvCommentCount.text = post.nbComments.toString()
+
+            if (post.groupId != null && !post.groupName.isNullOrBlank()) {
+                llGroupBadge.visibility = View.VISIBLE
+                tvGroupBadgeName.text = post.groupName
+                post.groupAvatar?.takeIf { it.isNotBlank() }?.let { url ->
+                    ivGroupBadgeAvatar.load(url.resolveBackendUrl()) {
+                        crossfade(true)
+                        transformations(CircleCropTransformation())
+                    }
+                } ?: ivGroupBadgeAvatar.setImageDrawable(null)
+            } else {
+                llGroupBadge.visibility = View.GONE
+            }
 
             if (!post.description.isNullOrBlank()) {
                 tvDescription.text = post.description

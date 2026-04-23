@@ -7,15 +7,15 @@
 
     <fragment
         android:id="@+id/nav_search"
-        android:name="com.example.myapplication.fragment.SearchGroupsFragment"
-        android:label="Recherche"
-        tools:layout="@layout/fragment_search_groups" />
+        android:name="com.example.myapplication.fragment.group.GroupsFragment"
+        android:label="@string/groups_title"
+        tools:layout="@layout/fragment_groups" />
 
     <fragment
         android:id="@+id/nav_groups"
-        android:name="com.example.myapplication.fragment.SearchGroupsFragment"
-        android:label="Groupes"
-        tools:layout="@layout/fragment_search_groups" />
+        android:name="com.example.myapplication.fragment.group.GroupsFragment"
+        android:label="@string/groups_title"
+        tools:layout="@layout/fragment_groups" />
 
     <fragment
         android:id="@+id/nav_menu"
@@ -71,7 +71,7 @@
 
     <fragment
         android:id="@+id/createPostFragment"
-        android:name="com.example.myapplication.fragment.CreatePostFragment"
+        android:name="com.example.myapplication.fragment.post.CreatePostFragment"
         android:label="Créer un post"
         tools:layout="@layout/fragment_create_post" />
 
@@ -83,6 +83,50 @@
         <argument
             android:name="postId"
             app:argType="string" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/groupDetailFragment"
+        android:name="com.example.myapplication.fragment.group.GroupDetailFragment"
+        android:label="@string/groups_tab_info"
+        tools:layout="@layout/fragment_group_detail">
+        <argument
+            android:name="group"
+            app:argType="string" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/groupMembersFragment"
+        android:name="com.example.myapplication.fragment.group.GroupMembersFragment"
+        android:label="@string/groups_members_title"
+        tools:layout="@layout/fragment_group_members">
+        <argument
+            android:name="groupId"
+            app:argType="integer" />
+        <argument
+            android:name="isAdmin"
+            app:argType="boolean"
+            android:defaultValue="false" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/groupBannedFragment"
+        android:name="com.example.myapplication.fragment.group.GroupBannedFragment"
+        android:label="@string/groups_banned_title"
+        tools:layout="@layout/fragment_group_members">
+        <argument
+            android:name="groupId"
+            app:argType="integer" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/groupRequestsFragment"
+        android:name="com.example.myapplication.fragment.group.GroupRequestsFragment"
+        android:label="@string/groups_requests_title"
+        tools:layout="@layout/fragment_group_members">
+        <argument
+            android:name="groupId"
+            app:argType="integer" />
     </fragment>
 
     </navigation>

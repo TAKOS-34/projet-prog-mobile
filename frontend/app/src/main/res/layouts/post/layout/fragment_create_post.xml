@@ -211,6 +211,37 @@
             style="@style/Widget.TravelApp.View.Divider"
             app:layout_constraintTop_toBottomOf="@id/cgSuggestedTags" />
 
+        <TextView
+            android:id="@+id/tvGroupLabel"
+            style="@style/Widget.TravelApp.TextView.InputLabel"
+            android:text="@string/label_post_group"
+            android:layout_marginTop="16dp"
+            app:layout_constraintTop_toBottomOf="@id/div4"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilGroup"
+            style="@style/Widget.TravelApp.TextInputLayout.Line"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@id/tvGroupLabel">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etGroup"
+                style="@style/Widget.TravelApp.TextInputEditText.Line"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:focusable="false"
+                android:longClickable="false"
+                android:cursorVisible="false"
+                android:inputType="none" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <View
+            android:id="@+id/div5"
+            style="@style/Widget.TravelApp.View.Divider"
+            app:layout_constraintTop_toBottomOf="@id/tilGroup" />
+
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnSelectAudio"
             style="@style/Widget.TravelApp.Button.Outlined"
@@ -218,7 +249,7 @@
             android:layout_height="wrap_content"
             android:text="@string/btn_select_audio"
             android:layout_marginTop="16dp"
-            app:layout_constraintTop_toBottomOf="@id/div4" />
+            app:layout_constraintTop_toBottomOf="@id/div5" />
 
         <TextView
             android:id="@+id/tvAudioStatus"
