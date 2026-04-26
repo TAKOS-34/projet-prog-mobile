@@ -45,17 +45,13 @@ class GroupDetailFragment : Fragment() {
     private var btnFollowGroup: ImageView? = null
     private var isFollowingGroup: Boolean = false
 
-    private val pickAvatarLauncher = registerForActivityResult(
-        ActivityResultContracts.GetContent()
-    ) { uri: Uri? ->
-        if (uri != null) {
-            pickedAvatarUri = uri
-            ivAvatar?.load(uri) {
-                crossfade(true)
-                transformations(CircleCropTransformation())
-            }
-            btnSaveAvatar?.visibility = View.VISIBLE
+    private val imagePicker = com.example.myapplication.utils.ImagePicker(this) { uri ->
+        pickedAvatarUri = uri
+        ivAvatar?.load(uri) {
+            crossfade(true)
+            transformations(CircleCropTransformation())
         }
+        btnSaveAvatar?.visibility = View.VISIBLE
     }
 
     override fun onCreateView(
@@ -151,7 +147,7 @@ class GroupDetailFragment : Fragment() {
             }
 
             fabEditAvatar.visibility = View.VISIBLE
-            fabEditAvatar.setOnClickListener { pickAvatarLauncher.launch("image/*") }
+            fabEditAvatar.setOnClickListener { imagePicker.pick() }
             btnSaveAvatar?.setOnClickListener {
                 pickedAvatarUri?.let { uploadAvatar(it) }
             }

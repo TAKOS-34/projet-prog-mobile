@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.myapplication.R
 import com.example.myapplication.adapter.PostsAdapter
 import com.example.myapplication.utils.PostFeedPaginator
+import com.example.myapplication.utils.SessionManager
 import com.example.myapplication.utils.buildPostsAdapter
 
 class HomeFragment : Fragment() {
@@ -35,8 +36,12 @@ class HomeFragment : Fragment() {
         )
         paginator.reset()
 
-        view.findViewById<View>(R.id.fabNewPost).setOnClickListener {
-            findNavController().navigate(R.id.createPostFragment)
+        val fab = view.findViewById<View>(R.id.fabNewPost)
+        if (SessionManager.getUserId() != null) {
+            fab.visibility = View.VISIBLE
+            fab.setOnClickListener { findNavController().navigate(R.id.createPostFragment) }
+        } else {
+            fab.visibility = View.GONE
         }
 
         return view

@@ -132,7 +132,7 @@
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="24dp"
             android:layout_marginTop="32dp"
-            android:text="Ouvrir dans Maps"
+            android:text="@string/dialog_gps_info_maps"
             app:icon="@android:drawable/ic_dialog_map"
             app:iconGravity="textStart"
             app:layout_constraintTop_toBottomOf="@id/layoutInfoBlocks" />
@@ -144,7 +144,7 @@
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="24dp"
             android:layout_marginTop="16dp"
-            android:text="Itinéraire dans\nTravelPath"
+            android:text="@string/dialog_gps_info_travel_path"
             app:icon="@android:drawable/ic_menu_mylocation"
             app:iconGravity="textStart"
             app:layout_constraintTop_toBottomOf="@id/btnOpenMaps" />

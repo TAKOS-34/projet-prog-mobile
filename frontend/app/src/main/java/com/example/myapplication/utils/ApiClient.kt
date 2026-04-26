@@ -124,12 +124,13 @@ object ApiClient {
     fun postMultipart(
         path: String,
         parts: Map<String, Any?>,
-        imageBytes: ByteArray,
-        imageName: String,
-        imageMediaType: String,
+        imageBytes: ByteArray?,
+        imageName: String?,
+        imageMediaType: String?,
         audioBytes: ByteArray? = null,
         audioName: String? = null,
         audioMediaType: String? = null,
+        imageFieldKey: String = "image",
         onResult: (String?, Int, String?) -> Unit
     ) {
         val url = "${BuildConfig.BACKEND_URL}$path"
@@ -143,11 +144,13 @@ object ApiClient {
             }
         }
 
-        builder.addFormDataPart(
-            "image",
-            imageName,
-            imageBytes.toRequestBody(imageMediaType.toMediaType())
-        )
+        if (imageBytes != null && imageName != null && imageMediaType != null) {
+            builder.addFormDataPart(
+                imageFieldKey,
+                imageName,
+                imageBytes.toRequestBody(imageMediaType.toMediaType())
+            )
+        }
 
         if (audioBytes != null && audioName != null && audioMediaType != null) {
             builder.addFormDataPart(

@@ -16,6 +16,7 @@ import com.example.myapplication.R
 import com.example.myapplication.adapter.PostsAdapter
 import com.example.myapplication.utils.ApiClient
 import com.example.myapplication.utils.PostFeedPaginator
+import com.example.myapplication.utils.SessionManager
 import com.example.myapplication.utils.buildPostsAdapter
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
@@ -63,12 +64,17 @@ class SearchFragment : Fragment() {
         etQ.setOnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_SEARCH) { submit(); true } else false
         }
-        etTag.setOnEditorActionListener { _, actionId, _ ->
-            if (actionId == EditorInfo.IME_ACTION_SEARCH) { submit(); true } else false
-        }
 
-        setupTagSuggestions()
-        fetchPopularTags()
+        if (SessionManager.getUserId() != null) {
+            etTag.setOnEditorActionListener { _, actionId, _ ->
+                if (actionId == EditorInfo.IME_ACTION_SEARCH) { submit(); true } else false
+            }
+            setupTagSuggestions()
+            fetchPopularTags()
+        } else {
+            view.findViewById<View>(R.id.tilSearchTag).visibility = View.GONE
+            cgTags.visibility = View.GONE
+        }
 
         return view
     }

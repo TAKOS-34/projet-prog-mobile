@@ -85,8 +85,8 @@ export class PostCommandService {
                 this.notification.notifyNewPostGroup(post.groupId, user.id, newPost.id, post.title);
             }
 
-            if (post.tags && post.tags.length > 0) {
-                this.notification.notifyNewPostTags(post.tags, user.id, newPost.id, post.title, post.groupId);
+            if (cleanTags.length > 0) {
+                this.notification.notifyNewPostTags(cleanTags, user.id, newPost.id, post.title, post.groupId);
             }
         } catch (error) {
             console.error(error)

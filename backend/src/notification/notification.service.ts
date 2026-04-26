@@ -124,6 +124,12 @@ export class NotificationService implements OnModuleInit {
 
 
 
+    async getNewNotificationNumber(user: UserSession): Promise<number> {
+        return (await this.prisma.notification.findMany({ where: { isRead: false, userId: user.id } })).length;
+    }
+
+
+
     async markAsRead(notificationsId: number[], user: UserSession): Promise<ResponseMessage> {
         await this.prisma.notification.updateMany({
             where: { userId: user.id, isRead: false, id: { in: notificationsId } },
@@ -179,8 +185,8 @@ export class NotificationService implements OnModuleInit {
         const response = await admin.messaging().sendEachForMulticast({
             tokens: fcmTokens,
             notification: {
-                title: 'notification_new_post_title',
-                body: 'notification_new_post_body',
+                title: 'Nouvelle publication ! ✨',
+                body: `Un utilisateur que vous suivez vient de publier : "${postTitle}"`,
             },
             data: {
                 type: NotificationType.NEW_POST_USER,
@@ -227,8 +233,8 @@ export class NotificationService implements OnModuleInit {
         const response = await admin.messaging().sendEachForMulticast({
             tokens: fcmTokens,
             notification: {
-                title: 'notification_new_post_group_title',
-                body: 'notification_new_post_group_body',
+                title: 'Nouveau post dans votre groupe ! 👥',
+                body: `Une nouvelle publication a été ajoutée : "${postTitle}"`,
             },
             data: {
                 type: NotificationType.NEW_POST_GROUP,
@@ -295,11 +301,13 @@ export class NotificationService implements OnModuleInit {
         const fcmTokens = [...new Set(tokenRows.map(r => r.fcmToken))];
         if (fcmTokens.length === 0) return;
 
+        const formattedTags = tags.map(t => `#${t}`).join(' ');
+
         const response = await admin.messaging().sendEachForMulticast({
             tokens: fcmTokens,
             notification: {
-                title: 'notification_new_post_tag_title',
-                body: 'notification_new_post_tag_body',
+                title: 'Nouveau post sur vos tags préférés ! 🤩',
+                body: `Découvrez "${postTitle}" contenant les tags: ${formattedTags}`,
             },
             data: {
                 type: NotificationType.NEW_POST_TAG,
@@ -329,8 +337,8 @@ export class NotificationService implements OnModuleInit {
         const response = await admin.messaging().sendEachForMulticast({
             tokens: fcmTokens,
             notification: {
-                title: 'notification_new_post_like',
-                body: 'notification_new_post_like',
+                title: 'Nouveau like ! ❤️',
+                body: `Quelqu'un a aimé votre publication : "${post.title}"`,
             },
             data: {
                 type: NotificationType.NEW_POST_LIKE,

@@ -64,6 +64,10 @@ class GroupsFragment : Fragment() {
         tvEmpty = view.findViewById(R.id.tvGroupsEmpty)
         etSearch = view.findViewById(R.id.etGroupsSearch)
 
+        view.findViewById<View>(R.id.fabNewGroup).setOnClickListener {
+            findNavController().navigate(R.id.createGroupFragment)
+        }
+
         showMyGroups()
 
         etSearch.setOnEditorActionListener { _, actionId, _ ->
@@ -125,9 +129,13 @@ class GroupsFragment : Fragment() {
     }
 
     private fun requestToJoin(groupId: Int) {
-        ApiClient.post("group/request-to-join/$groupId", emptyMap<String, String>()) { _, _, error ->
+        ApiClient.post("group/request-to-join/$groupId", emptyMap<String, String>()) { _, code, error ->
             activity?.runOnUiThread {
-                val msg = if (error == null) R.string.success_join_request else R.string.error_join
+                val msg = when {
+                    error == null -> R.string.success_join_request
+                    code == 401 -> R.string.error_join_group_banned
+                    else -> R.string.error_join_group
+                }
                 Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
             }
         }

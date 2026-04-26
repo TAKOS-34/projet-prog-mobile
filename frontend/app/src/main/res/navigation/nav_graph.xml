@@ -140,6 +140,12 @@
     </fragment>
 
     <fragment
+        android:id="@+id/createGroupFragment"
+        android:name="com.example.myapplication.fragment.group.CreateGroupFragment"
+        android:label="@string/create_group_title"
+        tools:layout="@layout/fragment_create_group" />
+
+    <fragment
         android:id="@+id/editPostFragment"
         android:name="com.example.myapplication.fragment.post.EditPostFragment"
         android:label="@string/edit_post_title"

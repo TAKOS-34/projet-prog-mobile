@@ -61,13 +61,11 @@ class CreatePostFragment : Fragment() {
     private var selectedGroupId: Int? = null
     private var myGroups: List<GroupCardInfosDto> = emptyList()
 
-    private val imagePickerLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-        uri?.let {
-            selectedImageUri = it
-            ivPreview.setImageURI(it)
-            cvPreview.visibility = View.VISIBLE
-            btnIaTags.visibility = View.VISIBLE
-        }
+    private val imagePicker = com.example.myapplication.utils.ImagePicker(this) { uri ->
+        selectedImageUri = uri
+        ivPreview.setImageURI(uri)
+        cvPreview.visibility = View.VISIBLE
+        btnIaTags.visibility = View.VISIBLE
     }
 
     private val audioPickerLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
@@ -89,7 +87,7 @@ class CreatePostFragment : Fragment() {
             findNavController().navigateUp()
         }
 
-        btnSelectImage.setOnClickListener { imagePickerLauncher.launch("image/*") }
+        btnSelectImage.setOnClickListener { imagePicker.pick() }
         btnSelectAudio.setOnClickListener { audioPickerLauncher.launch("audio/*") }
         btnIaTags.setOnClickListener { fetchIaSuggestions() }
 

@@ -37,17 +37,13 @@ class ProfileFragment : Fragment() {
     private var currentUsername: String = ""
     private var currentEmail: String = ""
 
-    private val pickAvatarLauncher = registerForActivityResult(
-        ActivityResultContracts.GetContent()
-    ) { uri: Uri? ->
-        if (uri != null) {
-            pickedAvatarUri = uri
-            ivProfileCover?.load(uri) {
-                crossfade(true)
-                transformations(CircleCropTransformation())
-            }
-            btnSaveAvatar?.visibility = View.VISIBLE
+    private val imagePicker = com.example.myapplication.utils.ImagePicker(this) { uri ->
+        pickedAvatarUri = uri
+        ivProfileCover?.load(uri) {
+            crossfade(true)
+            transformations(CircleCropTransformation())
         }
+        btnSaveAvatar?.visibility = View.VISIBLE
     }
 
     override fun onCreateView(
@@ -83,7 +79,7 @@ class ProfileFragment : Fragment() {
         btnSaveAvatar = view.findViewById(R.id.btnSaveAvatar)
 
         view.findViewById<FloatingActionButton>(R.id.fabEditAvatar).setOnClickListener {
-            pickAvatarLauncher.launch("image/*")
+            imagePicker.pick()
         }
 
         btnSaveAvatar?.setOnClickListener {

@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException, UnauthorizedException } from '@nestjs/common';
 import { UserSession } from 'src/utils/dto/userSession.dto';
 import { ResponseMessage } from 'src/utils/dto/responseMessage.dto';
 import { CreateGroupDto } from './dto/createGroup.dto';
@@ -182,7 +182,7 @@ export class GroupService {
                     .toFile(avatarPath);
             }
         } catch (error) {
-            throw new BadRequestException('Error during group creation');
+            throw new InternalServerErrorException('Error during group creation');
         }
 
         return { status: true, message: 'Group created' };

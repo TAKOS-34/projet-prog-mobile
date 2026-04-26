@@ -32,6 +32,14 @@ export class NotificationController {
 
 
     @UseGuards(AuthGuard)
+    @Get('new')
+    getNewNotificationNumber(@GetUser() user: UserSession): Promise<number> {
+        return this.notificationService.getNewNotificationNumber(user);
+    }
+
+
+
+    @UseGuards(AuthGuard)
     @Patch('mark-as-read')
     markAsRead(@Body() readNotificationListDto: ReadNotificationListDto, @GetUser() user: UserSession): Promise<ResponseMessage> {
         return this.notificationService.markAsRead(readNotificationListDto.notificationIds, user);

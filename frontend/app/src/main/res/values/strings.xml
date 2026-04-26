@@ -1,12 +1,15 @@
 <resources>
     <string name="app_name">7N</string>
     <string name="cancel">Annuler</string>
+    <string name="picker_source_title">Choisir une source</string>
+    <string name="picker_source_gallery">Galerie</string>
+    <string name="picker_source_camera">Appareil photo</string>
     <string name="error_network">Erreur réseau. Veuillez réessayer</string>
     <string name="error_global">Erreur réseau. Veuillez réessayer</string>
     <string name="error_unauthorized">Session expirée. Veuillez vous reconnecter</string>
     <string name="error_login_failed">Indentifiants incorrect</string>
     <string name="error_login_unauthorized">Vérifier votre email</string>
-    <string name="error_signup_failed">Email ou username déjà pris</string>
+    <string name="error_signup_failed">Email ou nom d\'utilisateur déjà pris</string>
     <string name="success_login">Connexion réussie !</string>
     <string name="btn_login">Se connecter</string>
     <string name="btn_register">S\'inscrire</string>
@@ -21,16 +24,16 @@
     <string name="error_invalid_email">Veuillez entrer une adresse e-mail valide</string>
     <string name="error_invalid_password">Le mot de passe doit contenir au moins 6 caractères et un chiffre</string>
     <string name="error_field_required">Ce champ est obligatoire</string>
-    <string name="error_invalid_username">Le pseudo doit faire entre 4 et 32 caractères</string>
+    <string name="error_invalid_username">Le nom d\'utilisateur doit faire entre 4 et 32 caractères</string>
     <string name="error_password_mismatch">Les mots de passe ne correspondent pas</string>
     <string name="success_register">Compte créé avec succès ! Veuillez vérifier votre email</string>
     <string name="edit_profile">Modifier votre profile</string>
     <string name="edit_profile_title">Modifier le profil</string>
-    <string name="edit_profile_subtitle">Personnalisez votre carnet de voyage.</string>
-    <string name="label_username">USERNAME</string>
-    <string name="label_email">EMAIL</string>
-    <string name="label_password">MOT DE PASSE</string>
-    <string name="label_confirm_password">CONFIRMER MOT DE PASSE</string>
+    <string name="edit_profile_subtitle">Personnalisez votre carnet de voyage</string>
+    <string name="label_username">NOM D\'UTILISATEUR <font color="#FF0000">*</font></string>
+    <string name="label_email">EMAIL <font color="#FF0000">*</font></string>
+    <string name="label_password">MOT DE PASSE <font color="#FF0000">*</font></string>
+    <string name="label_confirm_password">CONFIRMER MOT DE PASSE <font color="#FF0000">*</font></string>
     <string name="btn_update_profile">Modifier</string>
     <string name="btn_delete_account">Supprimer mon compte</string>
     <string name="delete_account_confirm_title">Supprimer votre compte ?</string>
@@ -40,20 +43,18 @@
     <string name="profile_member_since">Membre depuis le</string>
     <string name="logout">Se déconnecter</string>
     <string name="profile_logout">Déconnexion</string>
-    <string name="profile_update_already_taken">Email ou username déjà pris</string>
+    <string name="profile_update_already_taken">Email ou nom d\'utilisateur déjà pris</string>
     <string name="profile_stat_posts">POSTS</string>
     <string name="profile_stat_groups">GROUPES</string>
-
     <string name="create_post_title">Créer un post</string>
     <string name="create_post_subtitle">Partagez votre aventure</string>
-    <string name="label_post_title">TITRE</string>
-    <string name="label_post_location">LOCALISATION</string>
+    <string name="label_post_title">TITRE <font color="#FF0000">*</font></string>
+    <string name="label_post_location">LOCALISATION <font color="#FF0000">*</font></string>
     <string name="label_post_description">DESCRIPTION</string>
     <string name="label_post_tags">TAGS (séparés par des virgules, pas d\'espaces, uniquement -,_)</string>
-    <string name="label_post_group">GROUPE (OPTIONNEL)</string>
+    <string name="label_post_group">GROUPE</string>
     <string name="group_selector_none">Aucun</string>
     <string name="error_load_groups">Impossible de charger vos groupes</string>
-
     <string name="groups_title">VOS GROUPES</string>
     <string name="groups_search_hint">Rechercher un groupe...</string>
     <string name="groups_empty">Vous n\'avez rejoint aucun groupe</string>
@@ -62,7 +63,6 @@
     <string name="search_q_hint">Titre, description, localisation...</string>
     <string name="search_tag_hint">Tag</string>
     <string name="search_empty">Aucun résultat</string>
-
     <string name="notification_title">NOTIFICATIONS</string>
     <string name="notification_empty">Aucune notification</string>
     <string name="notif_user_post">%1$s a publié un nouveau post</string>
@@ -80,7 +80,8 @@
     <string name="notif_tag_post">Nouveau post avec #%1$s</string>
     <string name="groups_join">Rejoindre</string>
     <string name="success_join_request">Demande envoyée</string>
-    <string name="error_join">Impossible de rejoindre</string>
+    <string name="error_join_group_banned">Vous êtes bannis de ce groupe</string>
+    <string name="error_join_group">Impossible de rejoindre le groupe</string>
     <string name="groups_members_count">%1$d membres</string>
     <string name="groups_posts_count">%1$d posts</string>
     <string name="groups_created_on">Créé le %1$s</string>
@@ -108,7 +109,6 @@
     <string name="success_request_accepted">Demande acceptée</string>
     <string name="success_request_refused">Demande refusée</string>
     <string name="error_generic_action">L\'action a échoué</string>
-
     <string name="groups_admin_edit_btn">Modifier le groupe</string>
     <string name="groups_admin_delete_btn">Supprimer le groupe</string>
     <string name="groups_delete_confirm_title">Supprimer le groupe ?</string>
@@ -117,7 +117,7 @@
     <string name="groups_admin_fail_update_name">Ce nom de group existe déjà</string>
     <string name="groups_edit_title">Modifier le groupe</string>
     <string name="groups_edit_subtitle">Mettez à jour les infos du groupe.</string>
-    <string name="label_group_name">NOM</string>
+    <string name="label_group_name">NOM <font color="#FF0000">*</font></string>
     <string name="label_group_description">DESCRIPTION</string>
     <string name="label_group_private">Groupe privé</string>
     <string name="success_group_updated">Groupe mis à jour !</string>
@@ -129,8 +129,16 @@
     <string name="success_group_quit">Vous avez quitté le groupe</string>
     <string name="success_group_avatar">Photo du groupe mise à jour !</string>
     <string name="error_group_avatar">Erreur lors de l\'envoi de la photo</string>
-    <string name="btn_select_image">Choisir une image</string>
-    <string name="btn_select_audio">Ajouter un audio (optionnel)</string>
+    <string name="create_group_title">Créer un groupe</string>
+    <string name="create_group_subtitle">Lancez votre tribu.</string>
+    <string name="btn_select_group_avatar">Choisir un avatar</string>
+    <string name="btn_create_group">Créer le groupe</string>
+    <string name="success_group_created">Groupe créé !</string>
+    <string name="error_group_create">Échec de la création</string>
+    <string name="error_group_name_already_set">Ce nom de groupe est déjà pris</string>
+    <string name="error_group_name_required">Le nom est requis</string>
+    <string name="btn_select_image">Choisir une image *</string>
+    <string name="btn_select_audio">Ajouter un audio</string>
     <string name="btn_create_post">Publier</string>
     <string name="success_post_created">Post publié avec succès !</string>
     <string name="error_post_failed">Erreur lors de la publication</string>
@@ -160,11 +168,9 @@
     <string name="error_report_failed">Échec de l\'envoi du signalement</string>
     <string name="error_report_reason_required">Veuillez choisir une raison</string>
     <string name="write_comment">Écrire un commentaire...</string>
-
     <string name="btn_save_avatar">Enregistrer la photo</string>
     <string name="success_avatar_upload">Photo mise à jour !</string>
     <string name="error_avatar_upload">Erreur lors de l\'envoi de la photo</string>
-
     <string name="btn_active_sessions">Sessions actives</string>
     <string name="sessions_title">Sessions actives</string>
     <string name="sessions_subtitle">Appareils actuellement connectés à votre compte</string>
@@ -174,16 +180,12 @@
     <string name="session_current_badge">Session actuelle</string>
     <string name="success_session_deleted">Session supprimée</string>
     <string name="error_session_delete">Erreur lors de la suppression</string>
-
     <string name="delete_comment_confirm_title">Supprimer le commentaire ?</string>
     <string name="delete_comment_confirm_message">Voulez-vous vraiment supprimer ce commentaire ? Cette action est irréversible.</string>
     <string name="delete_comment_btn">Supprimer</string>
-
     <string name="post_date">Date et heure</string>
     <string name="post_coordinates">Coordonées</string>
-
     <string name="by">Par : </string>
-
     <string name="time_just_now">Â l\'instant</string>
     <string name="audio_selection">Audio sélectionné</string>
     <string name="comment_modified_at">(modifié)</string>
@@ -195,6 +197,25 @@
     <string name="tag_prefix">#%1$s</string>
     <string name="format_audio_timer">0:00 / %1$s</string>
     <string name="format_post_username_date">%1$s %2$s · %3$s</string>
+    <string name="register">Inscription</string>
+    <string name="register_sub_title">Rejoignez notre communauté</string>
+    <string name="signin">Connexion</string>
+    <string name="signin_sub_title">Bon retour parmi nous</string>
+    <string name="register_btn">S\'inscrire</string>
+    <string name="register_redirect_signin_title">Déjà un compte ?</string>
+    <string name="register_redirect_register_title">Pas encore de compte ?</string>
+    <string name="signin_btn">Se connecter</string>
+    <string name="dialog_gps_info_maps">Ouvrir dans Maps</string>
+    <string name="dialog_gps_info_travel_path">Itinéraire dans\nTravelPath</string>
+    <string name="label_edit_group_name">NOM</string>
+    <string name="label_edit_post_title">TITRE</string>
+    <string name="label_edit_post_location">LOCALISATION</string>
+    <string name="label_edit_username">NOM D\'UTILISATEUR</string>
+    <string name="label_edit_email">EMAIL</string>
+    <string name="label_edit_password">MOT DE PASSE</string>
+    <string name="label_edit_confirm_password">CONFIRMER MOT DE PASSE</string>
+    <string name="profile_posts">POSTS</string>
+    <string name="profile_groups">GROUPES</string>
     <plurals name="time_minutes_ago">
         <item quantity="one">Il y a %d minute</item>
         <item quantity="other">Il y a %d minutes</item>

@@ -88,7 +88,10 @@ class NotificationsFragment : Fragment() {
             if (error == null) {
                 val remaining = (1000 - (System.currentTimeMillis() - startedAt)).coerceAtLeast(0)
                 Handler(Looper.getMainLooper()).postDelayed({
-                    if (isAdded) adapter.submitList(current.map { it.copy(isRead = true) })
+                    if (isAdded) {
+                        adapter.submitList(current.map { it.copy(isRead = true) })
+                        (activity as? com.example.myapplication.fragment.MainActivity)?.refreshNotificationBadge()
+                    }
                 }, remaining)
             }
         }
