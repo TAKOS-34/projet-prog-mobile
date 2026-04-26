@@ -4,6 +4,7 @@ export type GroupSearch = {
     avatar: string;
     creationDate: Date;
     isGroupPrivate: boolean;
+    isMember: boolean;
     nbMembers: number;
     nbPosts: number;
 }

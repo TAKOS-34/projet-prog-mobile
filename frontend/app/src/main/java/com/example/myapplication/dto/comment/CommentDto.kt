@@ -12,7 +12,6 @@ data class CommentDto(
     val username: String,
     val avatar: String,
     val parentId: Int?,
-    val isYours: Boolean,
     val isLiked: Boolean
 )
 

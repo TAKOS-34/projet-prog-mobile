@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background"
+    android:fillViewport="true">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingBottom="32dp">
+
+        <View
+            android:id="@+id/viewBanner"
+            android:layout_width="match_parent"
+            android:layout_height="140dp"
+            android:background="@color/primary"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/btnBack"
+            style="@style/Widget.TravelApp.Icon.Back"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            app:tint="@android:color/white"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/ivProfileCover"
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:layout_marginTop="80dp"
+            android:padding="4dp"
+            android:background="@color/background"
+            android:scaleType="centerCrop"
+            app:shapeAppearanceOverlay="@style/Widget.TravelApp.Avatar"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            tools:src="@tools:sample/avatars" />
+
+        <LinearLayout
+            android:id="@+id/llNameRow"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginTop="16dp"
+            app:layout_constraintTop_toBottomOf="@id/ivProfileCover"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <TextView
+                android:id="@+id/tvProfileName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="@style/TextAppearance.TravelApp.HeadlineMedium"
+                android:textStyle="bold"
+                tools:text="takos34" />
+
+            <TextView
+                android:id="@+id/tvSelfBadge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="6dp"
+                android:text="@string/profile_self_badge"
+                android:textAppearance="@style/TextAppearance.TravelApp.LabelMedium"
+                android:textColor="@color/text_hint"
+                android:visibility="gone" />
+
+            <ImageView
+                android:id="@+id/btnFollow"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_marginStart="8dp"
+                android:padding="4dp"
+                android:src="@drawable/ic_bell"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:clickable="true"
+                android:focusable="true"
+                android:visibility="gone"
+                app:tint="@color/text_secondary"
+                android:contentDescription="@null" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/tvMemberSince"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:textAppearance="@style/TextAppearance.TravelApp.LabelMedium"
+            android:textColor="@color/text_hint"
+            app:layout_constraintTop_toBottomOf="@id/llNameRow"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            tools:text="Membre depuis le 21/04/2026" />
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardStats"
+            style="@style/Widget.TravelApp.Card"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="24dp"
+            android:layout_marginTop="24dp"
+            app:layout_constraintTop_toBottomOf="@id/tvMemberSince">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingVertical="12dp">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:orientation="vertical">
+                    <TextView
+                        android:id="@+id/tvNbPosts"
+                        style="@style/Widget.TravelApp.TextView.StatNumber"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        tools:text="1" />
+                    <TextView
+                        style="@style/Widget.TravelApp.TextView.StatLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/profile_stat_posts" />
+                </LinearLayout>
+
+                <View
+                    android:layout_width="1dp"
+                    android:layout_height="match_parent"
+                    android:background="@color/divider"
+                    android:layout_marginVertical="8dp" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:orientation="vertical">
+                    <TextView
+                        android:id="@+id/tvNbGroups"
+                        style="@style/Widget.TravelApp.TextView.StatNumber"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        tools:text="0" />
+                    <TextView
+                        style="@style/Widget.TravelApp.TextView.StatLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/profile_stat_groups" />
+                </LinearLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>

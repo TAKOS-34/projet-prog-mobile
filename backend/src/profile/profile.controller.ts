@@ -10,6 +10,7 @@ import { Token } from './dto/token.dto';
 import type { UserProfile } from './dto/userProfile.dto';
 import { UserPublicProfile } from './dto/userPublicProfile.dto';
 import { UserGroup } from './dto/userGroup.dto';
+import { AuthOptionalGuard } from 'src/auth/auth.optionnal.guard';
 
 @Controller('profile')
 export class ProfileController {
@@ -35,9 +36,10 @@ export class ProfileController {
         return this.profileService.getTokens(user, req.headers.authorization);
     }
 
+    @UseGuards(AuthOptionalGuard)
     @Get('/:userId')
-    getPublicProfile(@Param('userId', ParseIntPipe) userId: number): Promise<UserPublicProfile> {
-        return this.profileService.getPublicProfile(userId);
+    getPublicProfile(@Param('userId', ParseIntPipe) userId: number, @GetUser() user?: UserSession): Promise<UserPublicProfile> {
+        return this.profileService.getPublicProfile(userId, user);
     }
 
 

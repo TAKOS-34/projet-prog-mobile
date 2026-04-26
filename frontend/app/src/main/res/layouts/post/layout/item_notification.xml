@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/cardNotification"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="8dp"
+    android:clickable="true"
+    android:focusable="true"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="0dp"
+    app:strokeWidth="0dp">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="12dp">
+
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/ivNotifAvatar"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:scaleType="centerCrop"
+            android:background="@color/surface_variant"
+            app:shapeAppearanceOverlay="@style/Widget.TravelApp.Avatar"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            tools:src="@tools:sample/avatars" />
+
+        <TextView
+            android:id="@+id/tvNotifMessage"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:textAppearance="@style/TextAppearance.TravelApp.BodyMedium"
+            app:layout_constraintTop_toTopOf="@id/ivNotifAvatar"
+            app:layout_constraintStart_toEndOf="@id/ivNotifAvatar"
+            app:layout_constraintEnd_toStartOf="@id/ivNotifPostImage"
+            tools:text="takos34 a publié un nouveau post" />
+
+        <TextView
+            android:id="@+id/tvNotifDate"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:layout_marginTop="2dp"
+            android:textAppearance="@style/TextAppearance.TravelApp.LabelMedium"
+            android:textColor="@color/text_hint"
+            app:layout_constraintTop_toBottomOf="@id/tvNotifMessage"
+            app:layout_constraintStart_toEndOf="@id/ivNotifAvatar"
+            app:layout_constraintEnd_toStartOf="@id/ivNotifPostImage"
+            tools:text="il y a 2h" />
+
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/ivNotifPostImage"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:scaleType="centerCrop"
+            android:background="@color/surface_variant"
+            android:visibility="gone"
+            app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Medium"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/dotUnread"
+            tools:src="@tools:sample/backgrounds/scenic" />
+
+        <View
+            android:id="@+id/dotUnread"
+            android:layout_width="8dp"
+            android:layout_height="8dp"
+            android:layout_marginStart="8dp"
+            android:background="@drawable/bg_unread_dot"
+            android:visibility="gone"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</com.google.android.material.card.MaterialCardView>

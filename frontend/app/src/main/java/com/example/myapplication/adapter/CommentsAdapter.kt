@@ -16,6 +16,7 @@ import coil.transform.CircleCropTransformation
 import com.example.myapplication.R
 import com.example.myapplication.dto.comment.CommentDto
 import com.example.myapplication.utils.DateUtils
+import com.example.myapplication.utils.SessionManager
 import com.example.myapplication.utils.resolveBackendUrl
 import com.google.android.material.imageview.ShapeableImageView
 
@@ -114,7 +115,7 @@ class CommentsAdapter(
 
             btnReply.setOnClickListener { onReply(comment) }
 
-            if (comment.isYours) {
+            if (comment.userId == SessionManager.getUserId()) {
                 btnEdit.visibility = View.VISIBLE
                 btnDelete.visibility = View.VISIBLE
                 btnEdit.setOnClickListener {

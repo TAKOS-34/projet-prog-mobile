@@ -1,7 +1,5 @@
 package com.example.myapplication.adapter
 
-import android.graphics.Color
-import android.media.MediaMetadataRetriever
 import android.media.MediaPlayer
 import android.os.Handler
 import android.os.Looper
@@ -19,7 +17,9 @@ import coil.load
 import coil.transform.CircleCropTransformation
 import com.example.myapplication.R
 import com.example.myapplication.dto.post.PostDto
+import com.example.myapplication.utils.AdminGroupsCache
 import com.example.myapplication.utils.DateUtils
+import com.example.myapplication.utils.SessionManager
 import com.example.myapplication.utils.resolveBackendUrl
 import com.google.android.material.chip.Chip
 import androidx.core.graphics.toColorInt
@@ -29,12 +29,15 @@ class PostsAdapter(
     private val onComment: (PostDto) -> Unit,
     private val onReport: (PostDto) -> Unit,
     private val onLocation: (PostDto) -> Unit,
-    private val onEdit: (PostDto) -> Unit = {}
+    private val onEdit: (PostDto) -> Unit = {},
+    private val onDelete: (PostDto) -> Unit = {},
+    private val onUserClick: (PostDto) -> Unit = {},
+    private val onImageClick: (PostDto) -> Unit = {}
 ) : ListAdapter<PostDto, PostsAdapter.PostViewHolder>(DIFF) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PostViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.item_post, parent, false)
-        return PostViewHolder(view, onLike, onComment, onReport, onLocation, onEdit)
+        return PostViewHolder(view, onLike, onComment, onReport, onLocation, onEdit, onDelete, onUserClick, onImageClick)
     }
 
     override fun onBindViewHolder(holder: PostViewHolder, position: Int) {
@@ -52,11 +55,15 @@ class PostsAdapter(
         private val onComment: (PostDto) -> Unit,
         private val onReport: (PostDto) -> Unit,
         private val onLocation: (PostDto) -> Unit,
-        private val onEdit: (PostDto) -> Unit
+        private val onEdit: (PostDto) -> Unit,
+        private val onDelete: (PostDto) -> Unit,
+        private val onUserClick: (PostDto) -> Unit,
+        private val onImageClick: (PostDto) -> Unit
     ) : RecyclerView.ViewHolder(itemView) {
 
         private val ivImage: ImageView = itemView.findViewById(R.id.ivPostImage)
         private val btnEdit: ImageView = itemView.findViewById(R.id.btnEdit)
+        private val btnDelete: ImageView = itemView.findViewById(R.id.btnDelete)
         private val ivAvatar: ImageView = itemView.findViewById(R.id.ivAvatar)
         private val llGroupBadge: LinearLayout = itemView.findViewById(R.id.llGroupBadge)
         private val ivGroupBadgeAvatar: ImageView = itemView.findViewById(R.id.ivGroupBadgeAvatar)
@@ -154,11 +161,25 @@ class PostsAdapter(
             btnReport.setOnClickListener { onReport(post) }
             btnLocation.setOnClickListener { onLocation(post) }
 
-            if (post.isYours) {
+            ivAvatar.setOnClickListener { onUserClick(post) }
+            tvAuthor.setOnClickListener { onUserClick(post) }
+            ivImage.setOnClickListener { onImageClick(post) }
+
+            val isOwner = post.userId == SessionManager.getUserId()
+            val canModerate = isOwner || AdminGroupsCache.isAdminOf(post.groupId)
+
+            if (isOwner) {
                 btnEdit.visibility = View.VISIBLE
                 btnEdit.setOnClickListener { onEdit(post) }
             } else {
                 btnEdit.visibility = View.GONE
+            }
+
+            if (canModerate) {
+                btnDelete.visibility = View.VISIBLE
+                btnDelete.setOnClickListener { onDelete(post) }
+            } else {
+                btnDelete.visibility = View.GONE
             }
 
             llTags.removeAllViews()

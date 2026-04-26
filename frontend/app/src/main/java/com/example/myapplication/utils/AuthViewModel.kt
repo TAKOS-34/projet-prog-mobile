@@ -17,13 +17,14 @@ class AuthViewModel : ViewModel() {
     }
 
     fun checkLoginStatus() {
-        val token = TokenManager.getToken()
+        val token = SessionManager.getToken()
         _isLoggedIn.value = !token.isNullOrBlank()
     }
 
     fun logout(fcmToken: String, onComplete: () -> Unit) {
-        if (TokenManager.getToken().isNullOrBlank()) {
-            TokenManager.clearToken()
+        if (SessionManager.getToken().isNullOrBlank()) {
+            SessionManager.clearToken()
+            AdminGroupsCache.clear()
             _isLoggedIn.postValue(false)
             onComplete()
             return
@@ -31,7 +32,8 @@ class AuthViewModel : ViewModel() {
 
         val body = """{"fcmToken":"$fcmToken"}"""
         ApiClient.delete("auth/logout", body, "application/json; charset=utf-8") { _, _, _ ->
-            TokenManager.clearToken()
+            SessionManager.clearToken()
+            AdminGroupsCache.clear()
             _isLoggedIn.postValue(false)
             onComplete()
         }

@@ -5,5 +5,6 @@ export type ResponseMessage = {
 
 export type TokenResponseMessage = {
     status: boolean,
-    token: string
+    token: string,
+    userId: number
 }

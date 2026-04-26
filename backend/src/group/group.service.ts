@@ -108,7 +108,8 @@ export class GroupService {
                 User: { select: { id: true, username: true, avatar: true } },
                 postTags: { select: { tag: { select: { name: true } } } },
                 likes: realUser ? { where: realUser, select: { id: true } } : false
-            }
+            },
+            orderBy: [{ creationDate: 'desc' }, { id: 'desc' }]
         });
 
         return posts.map(post => ({

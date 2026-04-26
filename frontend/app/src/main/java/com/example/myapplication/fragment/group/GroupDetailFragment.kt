@@ -1,7 +1,5 @@
 package com.example.myapplication.fragment.group
 
-import android.app.Dialog
-import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -9,6 +7,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.widget.NestedScrollView
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
@@ -20,15 +20,16 @@ import com.example.myapplication.adapter.PostsAdapter
 import com.example.myapplication.dto.group.GroupCardInfosDto
 import com.example.myapplication.dto.post.PostDto
 import com.example.myapplication.utils.ApiClient
-import com.google.gson.reflect.TypeToken
-import com.example.myapplication.utils.DateUtils
+import com.example.myapplication.utils.buildPostsAdapter
 import com.example.myapplication.utils.resolveBackendUrl
 import com.example.myapplication.utils.toShortDate
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.button.MaterialButtonToggleGroup
-import com.google.android.material.card.MaterialCardView
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.imageview.ShapeableImageView
 import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 
 class GroupDetailFragment : Fragment() {
 
@@ -37,6 +38,23 @@ class GroupDetailFragment : Fragment() {
     private lateinit var rvPosts: RecyclerView
     private lateinit var scrollInfo: NestedScrollView
     private var postsLoaded = false
+
+    private var ivAvatar: ShapeableImageView? = null
+    private var btnSaveAvatar: MaterialButton? = null
+    private var pickedAvatarUri: Uri? = null
+
+    private val pickAvatarLauncher = registerForActivityResult(
+        ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        if (uri != null) {
+            pickedAvatarUri = uri
+            ivAvatar?.load(uri) {
+                crossfade(true)
+                transformations(CircleCropTransformation())
+            }
+            btnSaveAvatar?.visibility = View.VISIBLE
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -62,7 +80,9 @@ class GroupDetailFragment : Fragment() {
 
     private fun setupInfoTab(view: View) {
         val ctx = requireContext()
-        view.findViewById<ShapeableImageView>(R.id.ivDetailAvatar).load(group.avatar.resolveBackendUrl()) {
+        ivAvatar = view.findViewById(R.id.ivDetailAvatar)
+        btnSaveAvatar = view.findViewById(R.id.btnSaveGroupAvatar)
+        ivAvatar?.load(group.avatar.resolveBackendUrl()) {
             crossfade(true)
             placeholder(R.drawable.ic_launcher_background)
             transformations(CircleCropTransformation())
@@ -96,6 +116,15 @@ class GroupDetailFragment : Fragment() {
 
         val btnBanned = view.findViewById<MaterialButton>(R.id.btnViewBanned)
         val btnRequests = view.findViewById<MaterialButton>(R.id.btnViewRequests)
+        val btnEdit = view.findViewById<MaterialButton>(R.id.btnEditGroup)
+        val btnDelete = view.findViewById<MaterialButton>(R.id.btnDeleteGroup)
+        val btnQuit = view.findViewById<MaterialButton>(R.id.btnQuitGroup)
+        val fabEditAvatar = view.findViewById<FloatingActionButton>(R.id.fabEditGroupAvatar)
+
+        if (!group.isAdmin) {
+            btnQuit.visibility = View.VISIBLE
+            btnQuit.setOnClickListener { confirmQuitGroup() }
+        }
 
         if (group.isAdmin) {
             btnBanned.visibility = View.VISIBLE
@@ -110,22 +139,106 @@ class GroupDetailFragment : Fragment() {
                     findNavController().navigate(R.id.groupRequestsFragment, bundle)
                 }
             }
+
+            fabEditAvatar.visibility = View.VISIBLE
+            fabEditAvatar.setOnClickListener { pickAvatarLauncher.launch("image/*") }
+            btnSaveAvatar?.setOnClickListener {
+                pickedAvatarUri?.let { uploadAvatar(it) }
+            }
+
+            btnEdit.visibility = View.VISIBLE
+            btnEdit.setOnClickListener {
+                val bundle = Bundle().apply {
+                    putString(EditGroupFragment.ARG_GROUP, Gson().toJson(group))
+                }
+                findNavController().navigate(R.id.editGroupFragment, bundle)
+            }
+
+            btnDelete.visibility = View.VISIBLE
+            btnDelete.setOnClickListener { confirmDeleteGroup() }
+        }
+    }
+
+    private fun uploadAvatar(uri: Uri) {
+        val ctx = context ?: return
+        val bytes = runCatching {
+            ctx.contentResolver.openInputStream(uri)?.use { it.readBytes() }
+        }.getOrNull() ?: run {
+            Toast.makeText(ctx, R.string.error_group_avatar, Toast.LENGTH_LONG).show()
+            return
+        }
+
+        val mimeType = ctx.contentResolver.getType(uri) ?: "image/jpeg"
+        val fileName = "group_avatar_${System.currentTimeMillis()}.jpg"
+
+        btnSaveAvatar?.isEnabled = false
+        ApiClient.patchMultipart("group/admin/avatar/${group.id}", "avatar", fileName, bytes, mimeType) { _, _, error ->
+            activity?.runOnUiThread {
+                btnSaveAvatar?.isEnabled = true
+                if (error == null) {
+                    Toast.makeText(ctx, R.string.success_group_avatar, Toast.LENGTH_SHORT).show()
+                    btnSaveAvatar?.visibility = View.GONE
+                    pickedAvatarUri = null
+                } else {
+                    Toast.makeText(ctx, R.string.error_group_avatar, Toast.LENGTH_LONG).show()
+                }
+            }
+        }
+    }
+
+    private fun confirmQuitGroup() {
+        val ctx = context ?: return
+        MaterialAlertDialogBuilder(ctx)
+            .setTitle(R.string.groups_quit_confirm_title)
+            .setMessage(R.string.groups_quit_confirm_message)
+            .setNegativeButton(R.string.cancel, null)
+            .setPositiveButton(R.string.groups_quit_btn) { _, _ -> performQuitGroup() }
+            .show()
+    }
+
+    private fun performQuitGroup() {
+        ApiClient.delete("group/quit/${group.id}") { _, _, error ->
+            activity?.runOnUiThread {
+                if (error == null) {
+                    Toast.makeText(context, R.string.success_group_quit, Toast.LENGTH_SHORT).show()
+                    findNavController().navigateUp()
+                } else {
+                    Toast.makeText(context, R.string.error_generic_action, Toast.LENGTH_LONG).show()
+                }
+            }
+        }
+    }
+
+    private fun confirmDeleteGroup() {
+        val ctx = context ?: return
+        MaterialAlertDialogBuilder(ctx)
+            .setTitle(R.string.groups_delete_confirm_title)
+            .setMessage(R.string.groups_delete_confirm_message)
+            .setNegativeButton(R.string.cancel, null)
+            .setPositiveButton(R.string.groups_admin_delete_btn) { _, _ -> performDeleteGroup() }
+            .show()
+    }
+
+    private fun performDeleteGroup() {
+        ApiClient.delete("group/admin/${group.id}") { _, code, error ->
+            activity?.runOnUiThread {
+                if (error == null) {
+                    Toast.makeText(context, R.string.success_group_deleted, Toast.LENGTH_SHORT).show()
+                    findNavController().navigateUp()
+                } else if (code == 409){
+                    Toast.makeText(context, R.string.groups_admin_fail_delete_group, Toast.LENGTH_LONG).show()
+                } else {
+                    Toast.makeText(context, R.string.error_generic_action, Toast.LENGTH_LONG).show()
+                }
+            }
         }
     }
 
     private fun setupPostsTab() {
-        postsAdapter = PostsAdapter(
-            onLike = { post, isNowLiked -> toggleLike(post, isNowLiked) },
-            onComment = { post ->
-                val bundle = Bundle().apply { putString("postId", post.id) }
-                findNavController().navigate(R.id.commentsFragment, bundle)
-            },
-            onReport = { post ->
-                val bundle = Bundle().apply { putString("postId", post.id) }
-                findNavController().navigate(R.id.reportFragment, bundle)
-            },
-            onLocation = { post -> showGpsDialog(post) }
-        )
+        postsAdapter = buildPostsAdapter(onChanged = {
+            postsLoaded = false
+            fetchPosts()
+        })
         rvPosts.adapter = postsAdapter
     }
 
@@ -163,36 +276,6 @@ class GroupDetailFragment : Fragment() {
                 }
             }
         }
-    }
-
-    private fun toggleLike(post: PostDto, isNowLiked: Boolean) {
-        if (isNowLiked) {
-            ApiClient.post("like/post/${post.id}", emptyMap<String, String>()) { _, _, _ -> }
-        } else {
-            ApiClient.delete("like/post/${post.id}") { _, _, _ -> }
-        }
-    }
-
-    private fun showGpsDialog(post: PostDto) {
-        val ctx = context ?: return
-        val dialogView = LayoutInflater.from(ctx).inflate(R.layout.dialog_gps_info, null)
-
-        dialogView.findViewById<TextView>(R.id.tvLocationTitle).text = post.localisation
-        dialogView.findViewById<TextView>(R.id.tvDate).text = DateUtils.formatAbsoluteDate(post.creationDate)
-        dialogView.findViewById<TextView>(R.id.tvCoordinates).text = "%.4f N\n%.4f E".format(post.lat, post.long)
-
-        val dialog = Dialog(ctx, android.R.style.Theme_Translucent_NoTitleBar)
-        dialog.setContentView(dialogView)
-        dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
-
-        dialogView.findViewById<MaterialCardView>(R.id.btnClosePopup).setOnClickListener { dialog.dismiss() }
-        dialogView.findViewById<MaterialButton>(R.id.btnOpenMaps).setOnClickListener {
-            val uri = Uri.parse("geo:${post.lat},${post.long}?q=${post.lat},${post.long}(${post.localisation})")
-            startActivity(Intent(Intent.ACTION_VIEW, uri))
-        }
-        dialogView.findViewById<MaterialButton>(R.id.btnTravelPathRoute).setOnClickListener { dialog.dismiss() }
-
-        dialog.show()
     }
 
     companion object {

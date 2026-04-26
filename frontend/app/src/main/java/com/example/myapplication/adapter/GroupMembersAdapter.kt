@@ -13,6 +13,7 @@ import coil.load
 import coil.transform.CircleCropTransformation
 import com.example.myapplication.R
 import com.example.myapplication.dto.group.GroupMemberDto
+import com.example.myapplication.utils.SessionManager
 import com.example.myapplication.utils.resolveBackendUrl
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.imageview.ShapeableImageView
@@ -66,8 +67,10 @@ class GroupMembersAdapter(
             when (val m = mode) {
                 is Mode.Plain -> Unit
                 is Mode.Admin -> {
-                    btnMenu.visibility = View.VISIBLE
-                    btnMenu.setOnClickListener { showAdminMenu(it, member, m) }
+                    if (member.id != SessionManager.getUserId()) {
+                        btnMenu.visibility = View.VISIBLE
+                        btnMenu.setOnClickListener { showAdminMenu(it, member, m) }
+                    }
                 }
                 is Mode.Banned -> {
                     btnDeban.visibility = View.VISIBLE

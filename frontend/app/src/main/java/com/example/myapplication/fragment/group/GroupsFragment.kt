@@ -4,56 +4,95 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import com.example.myapplication.R
+import com.example.myapplication.adapter.GroupSearchAdapter
 import com.example.myapplication.adapter.GroupsAdapter
 import com.example.myapplication.dto.group.GroupCardInfosDto
+import com.example.myapplication.dto.group.GroupSearchDto
+import com.example.myapplication.utils.AdminGroupsCache
 import com.example.myapplication.utils.ApiClient
+import com.example.myapplication.utils.AuthViewModel
+import com.google.android.material.button.MaterialButton
+import com.google.android.material.textfield.TextInputEditText
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import java.net.URLEncoder
 
 class GroupsFragment : Fragment() {
 
+    private val authViewModel: AuthViewModel by activityViewModels()
+
     private lateinit var recyclerView: RecyclerView
     private lateinit var tvEmpty: TextView
-    private lateinit var adapter: GroupsAdapter
+    private lateinit var etSearch: TextInputEditText
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        val view = inflater.inflate(R.layout.fragment_groups, container, false)
-
-        recyclerView = view.findViewById(R.id.rvGroups)
-        tvEmpty = view.findViewById(R.id.tvGroupsEmpty)
-
-        adapter = GroupsAdapter { group ->
+    private val groupsAdapter: GroupsAdapter by lazy {
+        GroupsAdapter { group ->
             val bundle = Bundle().apply {
                 putString(GroupDetailFragment.ARG_GROUP, Gson().toJson(group))
             }
             findNavController().navigate(R.id.groupDetailFragment, bundle)
         }
-        recyclerView.adapter = adapter
+    }
 
-        fetchGroups()
+    private val searchAdapter: GroupSearchAdapter by lazy {
+        GroupSearchAdapter { group -> requestToJoin(group.id) }
+    }
+
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        if (!authViewModel.isAuthenticated()) {
+            val guestView = inflater.inflate(R.layout.fragment_guest_prompt, container, false)
+            guestView.findViewById<MaterialButton>(R.id.btnGuestLogin).setOnClickListener {
+                findNavController().navigate(R.id.loginFragment)
+            }
+            return guestView
+        }
+
+        val view = inflater.inflate(R.layout.fragment_groups, container, false)
+
+        recyclerView = view.findViewById(R.id.rvGroups)
+        tvEmpty = view.findViewById(R.id.tvGroupsEmpty)
+        etSearch = view.findViewById(R.id.etGroupsSearch)
+
+        showMyGroups()
+
+        etSearch.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                val query = etSearch.text.toString().trim()
+                if (query.isEmpty()) showMyGroups() else performSearch(query)
+                true
+            } else false
+        }
 
         return view
     }
 
-    private fun fetchGroups() {
+    private fun showMyGroups() {
+        recyclerView.adapter = groupsAdapter
+        tvEmpty.setText(R.string.groups_empty)
+        fetchMyGroups()
+    }
+
+    private fun fetchMyGroups() {
         ApiClient.get("group/my-groups") { body, _, error ->
             activity?.runOnUiThread {
                 if (error == null && body != null) {
                     try {
                         val type = object : TypeToken<List<GroupCardInfosDto>>() {}.type
                         val groups: List<GroupCardInfosDto> = Gson().fromJson(body, type)
-                        tvEmpty.visibility = if (groups.isEmpty()) View.VISIBLE else View.GONE
-                        recyclerView.visibility = if (groups.isEmpty()) View.GONE else View.VISIBLE
-                        adapter.submitList(groups)
+                        AdminGroupsCache.set(groups.filter { it.isAdmin }.map { it.id })
+                        renderState(groups.isEmpty())
+                        groupsAdapter.submitList(groups)
                     } catch (e: Exception) {
                         e.printStackTrace()
                     }
@@ -62,5 +101,40 @@ class GroupsFragment : Fragment() {
                 }
             }
         }
+    }
+
+    private fun performSearch(query: String) {
+        recyclerView.adapter = searchAdapter
+        tvEmpty.setText(R.string.groups_search_empty)
+
+        val encoded = URLEncoder.encode(query, Charsets.UTF_8.name())
+        ApiClient.get("search/groups?name=$encoded") { body, _, error ->
+            activity?.runOnUiThread {
+                if (error == null && body != null) {
+                    try {
+                        val type = object : TypeToken<List<GroupSearchDto>>() {}.type
+                        val results: List<GroupSearchDto> = Gson().fromJson(body, type)
+                        renderState(results.isEmpty())
+                        searchAdapter.submitList(results)
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+                }
+            }
+        }
+    }
+
+    private fun requestToJoin(groupId: Int) {
+        ApiClient.post("group/request-to-join/$groupId", emptyMap<String, String>()) { _, _, error ->
+            activity?.runOnUiThread {
+                val msg = if (error == null) R.string.success_join_request else R.string.error_join
+                Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    private fun renderState(isEmpty: Boolean) {
+        tvEmpty.visibility = if (isEmpty) View.VISIBLE else View.GONE
+        recyclerView.visibility = if (isEmpty) View.GONE else View.VISIBLE
     }
 }

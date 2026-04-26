@@ -37,15 +37,13 @@ export class NotificationService implements OnModuleInit {
 
 
 
-    async getNotifications(limit: number, user: UserSession, cursor?: string): Promise<NotificationList[]> {
+    async getNotifications(limit: number, user: UserSession, cursor?: number): Promise<NotificationList[]> {
         const take = Math.min(Math.max(limit, 1), 50);
-        const skip = cursor ? 1 : 0;
-        const cursorObj = cursor ? { id: parseInt(cursor) } : undefined;
 
         const notifications = await this.prisma.notification.findMany({
             take,
-            skip,
-            cursor: cursorObj,
+            skip: cursor ? 1 : 0,
+            ...(cursor ? { cursor: { id: cursor } } : {}),
             where: { userId: user.id },
             orderBy: [{ creationDate: 'desc' }, { id: 'desc' }],
             include: {
@@ -270,5 +268,27 @@ export class NotificationService implements OnModuleInit {
                 where: { fcmToken: { in: invalidTokens } }
             });
         }
+    }
+
+
+
+    async addFollowUser(follower: UserSession, followingId: number): Promise<ResponseMessage> {
+        await this.prisma.userFollow.create({ data: {
+            followerId: follower.id,
+            followingId
+        }});
+
+        return { status: true, message: 'Add new user post notifications' };
+    }
+
+    async deleteFollowUser(follower: UserSession, followingId: number): Promise<ResponseMessage> {
+        await this.prisma.userFollow.delete({ where: {
+            followerId_followingId: {
+                followerId: follower.id,
+                followingId
+            }
+        }});
+
+        return { status: true, message: 'Delete user post notifications' };
     }
 }

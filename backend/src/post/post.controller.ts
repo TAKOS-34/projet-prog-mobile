@@ -26,8 +26,15 @@ export class PostController {
 
     @Get()
     @UseGuards(AuthOptionalGuard)
-    async getGlobalFeed(@Query('limit') limit: string = '20', @Query('cursor') cursor?: string, @GetUser() user?: UserSession, @GetAnonymous() anonymous?: string): Promise<FeedInfos> {
-        return this.postQueryService.getFeed(parseInt(limit), cursor, user?.id, anonymous);
+    async getGlobalFeed(
+        @Query('limit') limit: string = '20',
+        @Query('cursor') cursor?: string,
+        @Query('q') q?: string,
+        @Query('tag') tag?: string,
+        @GetUser() user?: UserSession,
+        @GetAnonymous() anonymous?: string
+    ): Promise<FeedInfos> {
+        return this.postQueryService.getFeed(parseInt(limit), cursor, user?.id, anonymous, q, tag);
     }
 
     @UseGuards(GroupProtectGuard, AuthOptionalGuard)

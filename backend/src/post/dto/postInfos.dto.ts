@@ -21,7 +21,6 @@ export type PostInfos = {
     groupAvatar?: string;
     tags: string[];
     isLiked: boolean;
-    isYours: boolean;
 }
 
 export type FeedInfos = {

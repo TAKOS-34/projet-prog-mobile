@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Patch, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { NotificationService } from './notification.service';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { ResponseMessage } from 'src/utils/dto/responseMessage.dto';
@@ -15,7 +15,7 @@ export class NotificationController {
 
     @UseGuards(AuthGuard)
     @Get()
-    getNotifications(@Query('limit') limit: string = '20', @GetUser() user: UserSession, @Query('cursor') cursor?: string): Promise<NotificationList[]> {
+    getNotifications(@Query('limit') limit: string = '20', @GetUser() user: UserSession, @Query('cursor') cursor?: number): Promise<NotificationList[]> {
         return this.notificationService.getNotifications(parseInt(limit, 10), user, cursor);
     };
 
@@ -25,5 +25,19 @@ export class NotificationController {
     @Patch('fcm-token')
     updateFcmToken(@Body() fcmTokenDto: UpdateFcmTokenDto, @GetUser() user: UserSession): Promise<ResponseMessage> {
         return this.notificationService.updateFcmToken(fcmTokenDto.fcmToken, user?.id);
+    }
+
+
+
+    @UseGuards(AuthGuard)
+    @Post('/user/:userId')
+    addFollowUser(@GetUser() user: UserSession, @Param('userId') userId: number): Promise<ResponseMessage> {
+        return this.notificationService.addFollowUser(user, userId);
+    }
+
+    @UseGuards(AuthGuard)
+    @Delete('/user/:userId')
+    deleteFollowUser(@GetUser() user: UserSession, @Param('userId') userId: number): Promise<ResponseMessage> {
+        return this.notificationService.deleteFollowUser(user, userId);
     }
 }

@@ -7,9 +7,9 @@
 
     <fragment
         android:id="@+id/nav_search"
-        android:name="com.example.myapplication.fragment.group.GroupsFragment"
-        android:label="@string/groups_title"
-        tools:layout="@layout/fragment_groups" />
+        android:name="com.example.myapplication.fragment.post.SearchFragment"
+        android:label="@string/search_title"
+        tools:layout="@layout/fragment_search" />
 
     <fragment
         android:id="@+id/nav_groups"
@@ -35,9 +35,9 @@
 
     <fragment
         android:id="@+id/nav_notifications"
-        android:name="com.example.myapplication.fragment.post.ReportFragment"
-        android:label="Notifications"
-        tools:layout="@layout/fragment_report" />
+        android:name="com.example.myapplication.fragment.post.NotificationsFragment"
+        android:label="@string/notification_title"
+        tools:layout="@layout/fragment_notifications" />
 
     <fragment
         android:id="@+id/nav_profile"
@@ -127,6 +127,46 @@
         <argument
             android:name="groupId"
             app:argType="integer" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/editGroupFragment"
+        android:name="com.example.myapplication.fragment.group.EditGroupFragment"
+        android:label="@string/groups_edit_title"
+        tools:layout="@layout/fragment_edit_group">
+        <argument
+            android:name="group"
+            app:argType="string" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/editPostFragment"
+        android:name="com.example.myapplication.fragment.post.EditPostFragment"
+        android:label="@string/edit_post_title"
+        tools:layout="@layout/fragment_edit_post">
+        <argument
+            android:name="post"
+            app:argType="string" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/profileViewerFragment"
+        android:name="com.example.myapplication.fragment.profile.ProfileViewerFragment"
+        android:label="Profil"
+        tools:layout="@layout/fragment_profile_viewer">
+        <argument
+            android:name="userId"
+            app:argType="integer" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/postViewerFragment"
+        android:name="com.example.myapplication.fragment.post.PostViewerFragment"
+        android:label="Post"
+        tools:layout="@layout/fragment_post_viewer">
+        <argument
+            android:name="postId"
+            app:argType="string" />
     </fragment>
 
     </navigation>

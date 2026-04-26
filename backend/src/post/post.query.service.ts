@@ -13,7 +13,7 @@ export class PostQueryService {
 
 
 
-    async getFeed(limit: number, cursor?: string, userId?: number, anonymousToken?: string): Promise<FeedInfos> {
+    async getFeed(limit: number, cursor?: string, userId?: number, anonymousToken?: string, q?: string, tag?: string): Promise<FeedInfos> {
         const realUser = userId ? { userId } : anonymousToken ? { anonymousUserId: anonymousToken } : null;
 
         const posts = await this.prisma.post.findMany({
@@ -21,17 +21,31 @@ export class PostQueryService {
             skip: cursor ? 1 : 0,
             ...(cursor ? { cursor: { id: cursor } } : {}),
             where: {
-                OR: [
-                    { Group: null },
-                    { Group: { isGroupPrivate: false } },
-                    userId ? {
-                        Group: {
-                            members: { some: { userId } }
-                        }
-                    } : {}
+                AND: [
+                    q ? {
+                        OR: [
+                            { title: { contains: q, mode: 'insensitive' } },
+                            { description: { contains: q, mode: 'insensitive' } },
+                            { localisation: { contains: q, mode: 'insensitive' } }
+                        ]
+                    } : {},
+                    tag ? {
+                        postTags: { some: { tag: { name: tag } } }
+                    } : {},
+                    {
+                        OR: [
+                            { Group: null },
+                            { Group: { isGroupPrivate: false } },
+                            userId ? {
+                                Group: {
+                                    members: { some: { userId } }
+                                }
+                            } : {}
+                        ]
+                    }
                 ]
             },
-            orderBy: { creationDate: 'desc' },
+            orderBy: [{ creationDate: 'desc' }, { id: 'desc' }],
             include: {
                 Group: { select: { id: true, name: true, avatar: true } },
                 User: { select: { id: true, username: true, avatar: true } },
@@ -110,8 +124,7 @@ export class PostQueryService {
             groupName: post.Group?.name ?? undefined,
             groupAvatar: post.Group?.avatar ? this.cdn.getGroupAvatarUrl(post.Group.avatar) : undefined,
             tags: post.postTags.map(pt => pt.tag.name),
-            isLiked: post.likes?.length > 0,
-            isYours: userId ? userId === post.User.id : false
+            isLiked: post.likes?.length > 0
         };
     }
 
@@ -133,7 +146,7 @@ export class PostQueryService {
                 User: { select: { id: true, username: true, avatar: true } },
                 commentLikes: realUser ? { where: realUser, select: { id: true } } : false,
             },
-            orderBy: { creationDate: "asc" }
+            orderBy: [{ creationDate: 'desc'}, { id: 'desc' }]
         });
 
         return comments.map(c => ({
@@ -147,8 +160,7 @@ export class PostQueryService {
             userId: c.User.id,
             username: c.User.username,
             avatar: this.cdn.getAvatarUrl(c.User.avatar),
-            isLiked: c.commentLikes?.length > 0,
-            isYours: userId ? userId === c.User.id : false
+            isLiked: c.commentLikes?.length > 0
         }));
     }
 
@@ -170,7 +182,7 @@ export class PostQueryService {
                 User: { select: { id: true, username: true, avatar: true } },
                 commentLikes: realUser ? { where: realUser, select: { id: true } } : false,
             },
-            orderBy: { creationDate: "asc" }
+            orderBy: [{ creationDate: 'desc' }, { id: 'desc' }]
         });
 
         return comments.map(c => ({

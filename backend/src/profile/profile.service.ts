@@ -39,19 +39,28 @@ export class ProfileService {
         };
     }
 
-    async getPublicProfile(userId: number): Promise<UserPublicProfile> {
-        const user = await this.prisma.user.findUniqueOrThrow({
+    async getPublicProfile(userId: number, user?: UserSession): Promise<UserPublicProfile> {
+        const targetUser = await this.prisma.user.findUniqueOrThrow({
             where: { id: userId },
-            select: { id: true, username: true, creationDate: true, avatar: true, nbGroups: true, nbPosts: true }
+            select: {
+                id: true,
+                username: true,
+                creationDate: true,
+                avatar: true,
+                nbGroups: true,
+                nbPosts: true,
+                ...(user ? { userFollowers: { where: { followerId: user.id }, select: { followerId: true }, take: 1 } } : {})
+            }
         });
 
         return {
-            id: user.id,
-            username: user.username,
-            creationDate: user.creationDate,
-            avatar: this.cdn.getAvatarUrl(user.avatar),
-            nbGroups: user.nbGroups,
-            nbPosts: user.nbPosts
+            id: targetUser.id,
+            username: targetUser.username,
+            creationDate: targetUser.creationDate,
+            avatar: this.cdn.getAvatarUrl(targetUser.avatar),
+            nbGroups: targetUser.nbGroups,
+            nbPosts: targetUser.nbPosts,
+            isFollowing: user ? targetUser.userFollowers.length > 0 : false
         };
     }
 

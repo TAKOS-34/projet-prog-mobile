@@ -6,9 +6,9 @@ import okhttp3.Response
 
 class AuthInterceptor : Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
-        val token = TokenManager.getToken()
+        val token = SessionManager.getToken()
 
-        val authHeader = if (!token.isNullOrBlank()) token else "Anonymous ${TokenManager.getOrCreateAnonymousId()}"
+        val authHeader = if (!token.isNullOrBlank()) token else "Anonymous ${SessionManager.getOrCreateAnonymousId()}"
 
         Log.d("AUTH_DEBUG", "Sending Header -> Authorization: $authHeader")
 

@@ -27,7 +27,7 @@ export class PostCommandService {
     async createPost(image: Express.Multer.File, post: CreatePostDto, user: UserSession, audio?: Express.Multer.File): Promise<ResponseMessage> {
         const { long, lat } = await this.getCoordinates(post.localisation);
         const imageExt: string = image.mimetype.replace('image/', '');
-        const cleanTags: string[] = (post.tags ?? []).map(t => t.toLowerCase().trim());
+        const cleanTags: string[] = (post.tags ?? []).map(t => t.toLowerCase().trim()).filter(t => t !== '');
         const audioName = audio ? (randomUUID() + '.' + audio.mimetype.replace('audio/', '')) : null;
         const audioDurationMs = audio ? await this.extractAudioDuration(audio.buffer, audio.mimetype) : null;
 

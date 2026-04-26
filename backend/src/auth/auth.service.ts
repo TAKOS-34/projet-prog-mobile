@@ -91,7 +91,7 @@ export class AuthService {
             })
         ]);
 
-        return { status: true,  token: `Bearer ${token}` };
+        return { status: true,  token: `Bearer ${token}`, userId: existingUser.id };
     }
 
 

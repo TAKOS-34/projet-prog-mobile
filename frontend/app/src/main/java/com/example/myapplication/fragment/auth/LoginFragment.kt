@@ -17,7 +17,7 @@ import com.example.myapplication.dto.auth.LoginRequestDto
 import com.example.myapplication.utils.ApiClient
 import com.example.myapplication.utils.AuthViewModel
 import com.example.myapplication.utils.FcmToken
-import com.example.myapplication.utils.TokenManager
+import com.example.myapplication.utils.SessionManager
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import org.json.JSONObject
@@ -108,8 +108,9 @@ class LoginFragment : Fragment() {
 
     private fun handleLoginResponse(body: String?, code: Int, error: String?) {
         if (error == null && body != null) {
-            val token = JSONObject(body).optString("token")
-            TokenManager.saveToken(token)
+            val json = JSONObject(body)
+            SessionManager.saveToken(json.optString("token"))
+            json.optInt("userId", -1).takeIf { it != -1 }?.let { SessionManager.saveUserId(it) }
             authViewModel.checkLoginStatus()
 
             Toast.makeText(context, R.string.success_login, Toast.LENGTH_SHORT).show()

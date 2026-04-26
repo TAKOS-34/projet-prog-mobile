@@ -181,7 +181,7 @@ export class GroupAdminService {
     async updateGroup(updateGroup: UpdateGroupDto, group: Group): Promise<ResponseMessage> {
         const { name, description, isGroupPrivate } = updateGroup;
 
-        if (await this.prisma.group.findUnique({ where: { name }, select: { id: true } })) {
+        if (name && await this.prisma.group.findUnique({ where: { name }, select: { id: true } })) {
             throw new BadRequestException('A group with this name already exists');
         }
 
@@ -190,7 +190,7 @@ export class GroupAdminService {
             data: {
                 ...(name && { name }),
                 ...(description && { description }),
-                ...(isGroupPrivate && { isGroupPrivate })
+                ...(isGroupPrivate !== undefined && { isGroupPrivate })
             },
             select: { id: true }
         });

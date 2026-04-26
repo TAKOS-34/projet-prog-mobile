@@ -5,7 +5,7 @@ import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import com.example.myapplication.R
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.example.myapplication.utils.TokenManager
+import com.example.myapplication.utils.SessionManager
 
 class MainActivity : AppCompatActivity() {
 
@@ -13,7 +13,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        TokenManager.init(this)
+        SessionManager.init(this)
 
         val navHostFragment = supportFragmentManager
             .findFragmentById(R.id.nav_host_fragment) as NavHostFragment

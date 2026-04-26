@@ -22,8 +22,7 @@ data class PostDto(
     val groupName: String?,
     val groupAvatar: String?,
     val tags: List<String>,
-    val isLiked: Boolean,
-    val isYours: Boolean
+    val isLiked: Boolean
 )
 
 data class PostsResponseDto(
