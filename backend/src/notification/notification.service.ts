@@ -7,6 +7,7 @@ import { NotificationList } from './dto/notificationList.dto';
 import { CdnService } from 'src/cdn/cdn.service';
 import { UserSession } from 'src/utils/dto/userSession.dto';
 import { NotificationType } from '@prisma/client';
+import { UserFollowingList } from './dto/userFollowingList.dto';
 
 @Injectable()
 export class NotificationService implements OnModuleInit {
@@ -62,9 +63,10 @@ export class NotificationService implements OnModuleInit {
 
             postId: n.targetPostId ?? undefined,
             postImage: (n.targetPostId && n.post?.imageExt) ? this.cdn.getPostUrl(n.targetPostId, n.post.imageExt) : undefined,
-            postUserId: n.targetUser.id,
-            postUsername: n.targetUser.username,
-            postUserAvatar: n.targetUser.avatar ? this.cdn.getAvatarUrl(n.targetUser.avatar) : undefined,
+
+            targetUserId: n.targetUser?.id,
+            targetUsername: n.targetUser?.username,
+            targetUserAvatar: n.targetUser?.avatar ? this.cdn.getAvatarUrl(n.targetUser.avatar) : this.cdn.getAvatarUrl(null),
 
             groupId: n.targetGroupId ?? undefined,
             groupName: n.group?.name,
@@ -73,6 +75,62 @@ export class NotificationService implements OnModuleInit {
             tagId: n.tag?.id,
             tagName: n.tag?.name
         }));
+    }
+
+
+
+    async getUserFollowing(user: UserSession): Promise<UserFollowingList[]> {
+        const [users, groups, tags] = await Promise.all([
+            this.prisma.userFollow.findMany({
+                where: { followerId: user.id },
+                select: {
+                    followingId: true,
+                    following: { select: { username: true, avatar: true } }
+                }
+            }),
+            this.prisma.groupFollow.findMany({
+                where: { followerId: user.id },
+                select: {
+                    groupId: true,
+                    following: { select: { name: true, avatar: true } }
+                }
+            }),
+            this.prisma.tagFollow.findMany({
+                where: { followerId: user.id },
+                select: { tagId: true, following: { select: { name: true } } }
+            })
+        ]);
+
+        return [
+            ...users.map(u => ({
+                type: 'user',
+                targetUserId: u.followingId,
+                targetUsername: u.following.username,
+                targetUserAvatar: this.cdn.getAvatarUrl(u.following.avatar)
+            })),
+            ...groups.map(g => ({
+                type: 'group',
+                targetGroupId: g.groupId,
+                targetGroupName: g.following.name,
+                targetGroupAvatar: this.cdn.getGroupAvatarUrl(g.following.avatar)
+            })),
+            ...tags.map(t => ({
+                type: 'tag',
+                targetTagId: t.tagId,
+                targetTagName: t.following.name
+            }))
+        ];
+    }
+
+
+
+    async markAsRead(notificationsId: number[], user: UserSession): Promise<ResponseMessage> {
+        await this.prisma.notification.updateMany({
+            where: { userId: user.id, isRead: false, id: { in: notificationsId } },
+            data: { isRead: true }
+        });
+
+        return { status: true, message: 'Notifications marked as read' };
     }
 
 
@@ -255,7 +313,38 @@ export class NotificationService implements OnModuleInit {
 
 
 
-    private async cleanupTokens(tokens: string[], response: admin.messaging.BatchResponse) {
+    async notifyNewPostLike(postId: string, userId?: number): Promise<void> {
+        const post = await this.prisma.post.findUniqueOrThrow({ where: { id: postId } });
+
+        await this.prisma.notification.create({ data: {
+            targetUserId: userId ? userId : null,
+            userId: post.userId,
+            type: NotificationType.NEW_POST_LIKE,
+            targetPostId: postId
+        }});
+
+        const fcmTokens = (await this.prisma.fcmToken.findMany({ where: { userId: post.userId } })).map(t => t.fcmToken);
+        if (fcmTokens.length === 0) return;
+
+        const response = await admin.messaging().sendEachForMulticast({
+            tokens: fcmTokens,
+            notification: {
+                title: 'notification_new_post_like',
+                body: 'notification_new_post_like',
+            },
+            data: {
+                type: NotificationType.NEW_POST_LIKE,
+                postId: postId,
+                postTitle: post.title
+            },
+        });
+
+        await this.cleanupTokens(fcmTokens, response);
+    }
+
+
+
+    private async cleanupTokens(tokens: string[], response: admin.messaging.BatchResponse): Promise<void> {
         const invalidTokens: string[] = [];
         response.responses.forEach((res, idx) => {
             if (!res.success && res.error?.code === 'messaging/registration-token-not-registered') {
@@ -272,16 +361,16 @@ export class NotificationService implements OnModuleInit {
 
 
 
-    async addFollowUser(follower: UserSession, followingId: number): Promise<ResponseMessage> {
+    async addUserFollow(follower: UserSession, followingId: number): Promise<ResponseMessage> {
         await this.prisma.userFollow.create({ data: {
             followerId: follower.id,
             followingId
         }});
 
-        return { status: true, message: 'Add new user post notifications' };
+        return { status: true, message: 'Added new user post notifications' };
     }
 
-    async deleteFollowUser(follower: UserSession, followingId: number): Promise<ResponseMessage> {
+    async deleteUserFollow(follower: UserSession, followingId: number): Promise<ResponseMessage> {
         await this.prisma.userFollow.delete({ where: {
             followerId_followingId: {
                 followerId: follower.id,
@@ -289,6 +378,50 @@ export class NotificationService implements OnModuleInit {
             }
         }});
 
-        return { status: true, message: 'Delete user post notifications' };
+        return { status: true, message: 'Deleted user post notifications' };
+    }
+
+
+
+    async addGroupFollow(follower: UserSession, groupId: number): Promise<ResponseMessage> {
+        await this.prisma.groupFollow.create({ data: {
+            followerId: follower.id,
+            groupId
+        }});
+
+        return { status: true, message: 'Added new group post notifications' };
+    }
+
+    async deleteGroupFollow(follower: UserSession, groupId: number): Promise<ResponseMessage> {
+        await this.prisma.groupFollow.delete({ where: {
+            followerId_groupId: {
+                followerId: follower.id,
+                groupId
+            }
+        }});
+
+        return { status: true, message: 'Deleted new group post notifications' };
+    }
+
+
+
+    async addTagFollow(follower: UserSession, tagId: number): Promise<ResponseMessage> {
+        await this.prisma.tagFollow.create({ data: {
+            followerId: follower.id,
+            tagId
+        }});
+
+        return { status: true, message: 'Added new tag post notifications' };
+    }
+
+    async deleteTagFollow(follower: UserSession, tagId: number): Promise<ResponseMessage> {
+        await this.prisma.tagFollow.delete({ where: {
+            followerId_tagId: {
+                followerId: follower.id,
+                tagId
+            }
+        }});
+
+        return { status: true, message: 'Deleted new tag post notifications' };
     }
 }

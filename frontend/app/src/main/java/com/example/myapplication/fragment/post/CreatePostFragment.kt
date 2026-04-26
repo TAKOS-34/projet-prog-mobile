@@ -176,6 +176,17 @@ class CreatePostFragment : Fragment() {
         var runnable: Runnable? = null
         val handler = Handler(Looper.getMainLooper())
 
+        etTags.filters = arrayOf(android.text.InputFilter { source, start, end, _, _, _ ->
+            val filtered = StringBuilder()
+            var changed = false
+            for (i in start until end) {
+                val c = source[i]
+                if (c.isLetterOrDigit() || c == '-' || c == '_' || c == ',') filtered.append(c)
+                else changed = true
+            }
+            if (changed) filtered.toString() else null
+        })
+
         etTags.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
@@ -254,7 +265,7 @@ class CreatePostFragment : Fragment() {
         } else {
             tags.add(tag)
         }
-        val newText = tags.filter { it.isNotEmpty() }.joinToString(", ") + ", "
+        val newText = tags.filter { it.isNotEmpty() }.joinToString(",") + ","
         etTags.setText(newText)
         etTags.setSelection(etTags.text?.length ?: 0)
     }

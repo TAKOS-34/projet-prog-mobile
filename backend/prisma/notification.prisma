@@ -4,8 +4,8 @@ model Notification {
     creationDate DateTime         @default(now())
     isRead       Boolean          @default(false)
 
-    targetUserId Int
-    targetUser   User @relation("NotificationTargetUser", fields: [targetUserId], references: [id], onDelete: Cascade)
+    targetUserId Int?
+    targetUser   User? @relation("NotificationTargetUser", fields: [targetUserId], references: [id], onDelete: Cascade)
 
     targetPostId String @db.Uuid()
     post         Post   @relation(fields: [targetPostId], references: [id])
@@ -28,4 +28,5 @@ enum NotificationType {
     NEW_POST_USER
     NEW_POST_GROUP
     NEW_POST_TAG
+    NEW_POST_LIKE
 }

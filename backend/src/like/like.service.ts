@@ -2,11 +2,13 @@ import { Injectable } from '@nestjs/common';
 import type { UserSession } from 'src/utils/dto/userSession.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { ResponseMessage } from 'src/utils/dto/responseMessage.dto';
+import { NotificationService } from 'src/notification/notification.service';
 
 @Injectable()
 export class LikeService {
     constructor(
-        private readonly prisma: PrismaService
+        private readonly prisma: PrismaService,
+        private readonly notification: NotificationService
     ) {}
 
 
@@ -25,6 +27,8 @@ export class LikeService {
                 anonymousUserId: anonymousToken
             }});
         }
+
+        this.notification.notifyNewPostLike(postId, user?.id);
 
         return { status: true, message: 'Post liked' };
     }

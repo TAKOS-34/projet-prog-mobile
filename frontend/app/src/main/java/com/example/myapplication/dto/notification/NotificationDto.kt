@@ -8,9 +8,10 @@ data class NotificationDto(
 
     val postId: String? = null,
     val postImage: String? = null,
-    val postUserId: Int? = null,
-    val postUsername: String? = null,
-    val postUserAvatar: String? = null,
+
+    val targetUserId: Int? = null,
+    val targetUsername: String? = null,
+    val targetUserAvatar: String? = null,
 
     val groupId: Int? = null,
     val groupName: String? = null,

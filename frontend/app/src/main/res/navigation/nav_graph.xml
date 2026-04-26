@@ -169,4 +169,20 @@
             app:argType="string" />
     </fragment>
 
+    <fragment
+        android:id="@+id/notificationFollowingFragment"
+        android:name="com.example.myapplication.fragment.post.NotificationFollowingFragment"
+        android:label="@string/notif_following_title"
+        tools:layout="@layout/fragment_notification_following" />
+
+    <fragment
+        android:id="@+id/tagViewerFragment"
+        android:name="com.example.myapplication.fragment.post.TagViewerFragment"
+        android:label="Tag"
+        tools:layout="@layout/fragment_tag_viewer">
+        <argument
+            android:name="tag"
+            app:argType="string" />
+    </fragment>
+
     </navigation>

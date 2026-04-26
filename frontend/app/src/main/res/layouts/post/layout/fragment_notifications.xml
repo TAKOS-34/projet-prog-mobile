@@ -17,6 +17,21 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
+    <ImageView
+        android:id="@+id/btnNotifSettings"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:padding="4dp"
+        android:src="@drawable/ic_settings"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:clickable="true"
+        android:focusable="true"
+        app:tint="@color/text_secondary"
+        android:contentDescription="@string/notif_following_title"
+        app:layout_constraintTop_toTopOf="@id/tvNotifTitle"
+        app:layout_constraintBottom_toBottomOf="@id/tvNotifTitle"
+        app:layout_constraintEnd_toEndOf="parent" />
+
     <TextView
         android:id="@+id/tvNotifEmpty"
         android:layout_width="wrap_content"

@@ -46,7 +46,7 @@ class NotificationsAdapter(
         fun bind(notif: NotificationDto) {
             val context = itemView.context
 
-            val avatarUrl = notif.postUserAvatar ?: notif.groupAvatar
+            val avatarUrl = notif.targetUserAvatar ?: notif.groupAvatar
             if (!avatarUrl.isNullOrBlank()) {
                 ivAvatar.visibility = View.VISIBLE
                 ivAvatar.load(avatarUrl.resolveBackendUrl()) {
@@ -77,14 +77,20 @@ class NotificationsAdapter(
 
         private fun formatMessage(notif: NotificationDto): String {
             val context = itemView.context
-            return when {
-                !notif.postUsername.isNullOrBlank() && notif.groupName.isNullOrBlank() && notif.tagName.isNullOrBlank() ->
-                    context.getString(R.string.notif_user_post, notif.postUsername)
-                !notif.groupName.isNullOrBlank() ->
-                    context.getString(R.string.notif_group_post, notif.groupName)
-                !notif.tagName.isNullOrBlank() ->
-                    context.getString(R.string.notif_tag_post, notif.tagName)
-                else -> ""
+            return when (notif.type) {
+                "NEW_POST_LIKE" -> if (notif.targetUsername.isNullOrBlank())
+                    context.getString(R.string.notif_post_liked_anon)
+                else
+                    context.getString(R.string.notif_post_liked, notif.targetUsername)
+                else -> when {
+                    !notif.targetUsername.isNullOrBlank() && notif.groupName.isNullOrBlank() && notif.tagName.isNullOrBlank() ->
+                        context.getString(R.string.notif_user_post, notif.targetUsername)
+                    !notif.groupName.isNullOrBlank() ->
+                        context.getString(R.string.notif_group_post, notif.groupName)
+                    !notif.tagName.isNullOrBlank() ->
+                        context.getString(R.string.notif_tag_post, notif.tagName)
+                    else -> ""
+                }
             }
         }
     }

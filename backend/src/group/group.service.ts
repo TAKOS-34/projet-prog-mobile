@@ -33,6 +33,7 @@ export class GroupService {
                 adminId: true,
                 nbMembers: true,
                 nbPosts: true,
+                followers: { where: { followerId: user.id }, select: { followerId: true }, take: 1 }
             }
         });
 
@@ -45,7 +46,8 @@ export class GroupService {
             isGroupPrivate: group.isGroupPrivate,
             nbMembers: group.nbMembers,
             nbPosts: group.nbPosts,
-            isAdmin: group.adminId === user.id
+            isAdmin: group.adminId === user.id,
+            isFollowing: group.followers.length > 0
         }));
     }
 
@@ -64,7 +66,9 @@ export class GroupService {
                 adminId: true,
                 nbMembers: true,
                 nbPosts: true,
-                members: user ? { where: { userId: user.id }, select: { userId: true } } : false
+                members: user ? { where: { userId: user.id }, select: { userId: true } } : false,
+                followers: user ? { where: { followerId: user.id }, select: { followerId: true }, take: 1 } : false,
+
             }});
 
         return {
@@ -77,7 +81,8 @@ export class GroupService {
             nbMembers: group.nbMembers,
             nbPosts: group.nbPosts,
             isMember: user ? group.members.length > 0 : false,
-            isAdmin: user ? group.adminId === user.id : false
+            isAdmin: user ? group.adminId === user.id : false,
+            isFollowing: user ? group.followers.length > 0 : false
         }
     }
 

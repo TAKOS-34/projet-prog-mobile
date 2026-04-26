@@ -4,9 +4,10 @@ import { LikeService } from './like.service';
 import { PrismaModule } from 'src/prisma/prisma.module';
 import { AuthModule } from 'src/auth/auth.module';
 import { GroupModule } from 'src/group/group.module';
+import { NotificationModule } from 'src/notification/notification.module';
 
 @Module({
-    imports: [PrismaModule, AuthModule, GroupModule],
+    imports: [PrismaModule, AuthModule, GroupModule, NotificationModule],
     controllers: [LikeController],
     providers: [LikeService]
 })

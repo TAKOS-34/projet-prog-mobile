@@ -51,13 +51,15 @@ class SessionsAdapter(
                 card.strokeWidth = (2 * context.resources.displayMetrics.density).toInt()
                 card.strokeColor = ContextCompat.getColor(context, R.color.primary)
                 card.setCardBackgroundColor(ContextCompat.getColor(context, R.color.surface_variant))
+                btnDelete.visibility = View.GONE
+                btnDelete.setOnClickListener(null)
             } else {
                 badge.visibility = View.GONE
                 card.strokeWidth = 0
                 card.setCardBackgroundColor(ContextCompat.getColor(context, R.color.surface))
+                btnDelete.visibility = View.VISIBLE
+                btnDelete.setOnClickListener { onDelete(token) }
             }
-
-            btnDelete.setOnClickListener { onDelete(token) }
         }
     }
 

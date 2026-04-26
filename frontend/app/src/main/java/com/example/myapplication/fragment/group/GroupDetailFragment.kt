@@ -42,6 +42,8 @@ class GroupDetailFragment : Fragment() {
     private var ivAvatar: ShapeableImageView? = null
     private var btnSaveAvatar: MaterialButton? = null
     private var pickedAvatarUri: Uri? = null
+    private var btnFollowGroup: ImageView? = null
+    private var isFollowingGroup: Boolean = false
 
     private val pickAvatarLauncher = registerForActivityResult(
         ActivityResultContracts.GetContent()
@@ -90,6 +92,14 @@ class GroupDetailFragment : Fragment() {
         view.findViewById<TextView>(R.id.tvDetailName).text = group.name
         view.findViewById<ImageView>(R.id.ivDetailLock).visibility =
             if (group.isGroupPrivate) View.VISIBLE else View.GONE
+
+        btnFollowGroup = view.findViewById(R.id.btnFollowGroup)
+        group.isFollowing?.let { initial ->
+            btnFollowGroup?.visibility = View.VISIBLE
+            isFollowingGroup = initial
+            applyFollowState()
+            btnFollowGroup?.setOnClickListener { toggleFollowGroup() }
+        }
 
         val tvDescription = view.findViewById<TextView>(R.id.tvDetailDescription)
         if (!group.description.isNullOrBlank()) {
@@ -183,6 +193,42 @@ class GroupDetailFragment : Fragment() {
                     Toast.makeText(ctx, R.string.error_group_avatar, Toast.LENGTH_LONG).show()
                 }
             }
+        }
+    }
+
+    private fun applyFollowState() {
+        val btn = btnFollowGroup ?: return
+        btn.setImageResource(if (isFollowingGroup) R.drawable.ic_bell_filled else R.drawable.ic_bell)
+        btn.setColorFilter(
+            androidx.core.content.ContextCompat.getColor(
+                requireContext(),
+                if (isFollowingGroup) R.color.primary else R.color.text_secondary
+            )
+        )
+    }
+
+    private fun toggleFollowGroup() {
+        val target = !isFollowingGroup
+        btnFollowGroup?.isEnabled = false
+
+        val callback: (String?, Int, String?) -> Unit = { _, _, error ->
+            activity?.runOnUiThread {
+                btnFollowGroup?.isEnabled = true
+                if (error == null) {
+                    isFollowingGroup = target
+                    applyFollowState()
+                    val msg = if (target) R.string.success_followed else R.string.success_unfollowed
+                    Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(context, R.string.error_follow_action, Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+
+        if (target) {
+            ApiClient.post("notification/group/${group.id}", emptyMap<String, String>(), callback)
+        } else {
+            ApiClient.delete("notification/group/${group.id}", callback)
         }
     }
 

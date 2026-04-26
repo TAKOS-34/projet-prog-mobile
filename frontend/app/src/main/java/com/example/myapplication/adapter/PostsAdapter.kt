@@ -32,12 +32,13 @@ class PostsAdapter(
     private val onEdit: (PostDto) -> Unit = {},
     private val onDelete: (PostDto) -> Unit = {},
     private val onUserClick: (PostDto) -> Unit = {},
-    private val onImageClick: (PostDto) -> Unit = {}
+    private val onImageClick: (PostDto) -> Unit = {},
+    private val onTagClick: ((String) -> Unit)? = null
 ) : ListAdapter<PostDto, PostsAdapter.PostViewHolder>(DIFF) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PostViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.item_post, parent, false)
-        return PostViewHolder(view, onLike, onComment, onReport, onLocation, onEdit, onDelete, onUserClick, onImageClick)
+        return PostViewHolder(view, onLike, onComment, onReport, onLocation, onEdit, onDelete, onUserClick, onImageClick, onTagClick)
     }
 
     override fun onBindViewHolder(holder: PostViewHolder, position: Int) {
@@ -58,7 +59,8 @@ class PostsAdapter(
         private val onEdit: (PostDto) -> Unit,
         private val onDelete: (PostDto) -> Unit,
         private val onUserClick: (PostDto) -> Unit,
-        private val onImageClick: (PostDto) -> Unit
+        private val onImageClick: (PostDto) -> Unit,
+        private val onTagClick: ((String) -> Unit)?
     ) : RecyclerView.ViewHolder(itemView) {
 
         private val ivImage: ImageView = itemView.findViewById(R.id.ivPostImage)
@@ -112,7 +114,12 @@ class PostsAdapter(
             }
 
             tvTitle.text = post.title
-            tvAuthor.text = "${context.getString(R.string.by)} ${post.username} · ${DateUtils.formatRelativeDate(context, post.creationDate)}"
+            tvAuthor.text = context.getString(
+                R.string.format_post_username_date,
+                context.getString(R.string.by),
+                post.username,
+                DateUtils.formatRelativeDate(context, post.creationDate)
+            )
             tvLocation.text = post.localisation
             tvCommentCount.text = post.nbComments.toString()
 
@@ -140,7 +147,8 @@ class PostsAdapter(
                 llAudio.visibility = View.VISIBLE
                 audioDurationMs = post.audioDuration
                 updateAudioButton()
-                tvAudioTimer.text = "0:00 / ${formatTime(audioDurationMs)}"
+                tvAudioTimer.text =
+                    context.getString(R.string.format_audio_timer, formatTime(audioDurationMs))
                 btnPlayAudio.setOnClickListener { toggleAudio(post.audio.resolveBackendUrl()) }
             } else {
                 llAudio.visibility = View.GONE
@@ -185,11 +193,12 @@ class PostsAdapter(
             llTags.removeAllViews()
             post.tags.forEach { tag ->
                 val chip = Chip(context).apply {
-                    text = "#$tag"
+                    text = context.getString(R.string.tag_prefix, tag)
                     chipBackgroundColor = android.content.res.ColorStateList.valueOf("#D1FAE5".toColorInt())
                     setTextColor("#065F46".toColorInt())
-                    isClickable = false
+                    isClickable = onTagClick != null
                     isCheckable = false
+                    if (onTagClick != null) setOnClickListener { onTagClick.invoke(tag) }
                     chipStrokeWidth = 0f
                     chipMinHeight = 0f
                     textSize = 11f

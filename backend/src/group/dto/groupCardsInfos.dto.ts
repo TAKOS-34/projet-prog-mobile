@@ -7,5 +7,6 @@ export type GroupCardsInfos = {
     isGroupPrivate: boolean,
     nbMembers: number,
     nbPosts: number,
-    isAdmin: boolean
+    isAdmin: boolean,
+    isFollowing: boolean
 }

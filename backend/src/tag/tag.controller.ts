@@ -1,7 +1,10 @@
-import { Controller, FileTypeValidator, Get, MaxFileSizeValidator, ParseFilePipe, Post, Query, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Controller, FileTypeValidator, Get, MaxFileSizeValidator, Param, ParseFilePipe, Post, Query, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { TagService } from './tag.service';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { tag } from './dto/tag.dto';
+import { GetUser } from 'src/utils/decorator/get-user.decorator';
+import type { UserSession } from 'src/utils/dto/userSession.dto';
 
 @Controller('tag')
 export class TagController {
@@ -9,6 +12,7 @@ export class TagController {
 
 
 
+    @UseGuards(AuthGuard)
     @Get('popular')
     getPopularTag(): Promise<string[]> {
         return this.tagService.getPopularTag();
@@ -20,6 +24,14 @@ export class TagController {
     @Get('suggest')
     suggestTag(@Query('tag') tag: string): Promise<string[]> {
         return this.tagService.suggestTag(tag);
+    }
+
+
+
+    @UseGuards(AuthGuard)
+    @Get('/:tag')
+    getTag(@Param('tag') tagId: string, @GetUser() user: UserSession): Promise<tag> {
+        return this.tagService.getTag(tagId, user);
     }
 
 

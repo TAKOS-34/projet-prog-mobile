@@ -1,6 +1,8 @@
 package com.example.myapplication.fragment.post
 
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -43,6 +45,10 @@ class NotificationsFragment : Fragment() {
         recyclerView = view.findViewById(R.id.rvNotifications)
         tvEmpty = view.findViewById(R.id.tvNotifEmpty)
 
+        view.findViewById<android.widget.ImageView>(R.id.btnNotifSettings).setOnClickListener {
+            findNavController().navigate(R.id.notificationFollowingFragment)
+        }
+
         adapter = NotificationsAdapter { notif ->
             notif.postId?.let {
                 val bundle = Bundle().apply { putString(PostViewerFragment.ARG_POST_ID, it) }
@@ -65,10 +71,25 @@ class NotificationsFragment : Fragment() {
                         val notifications: List<NotificationDto> = Gson().fromJson(body, type)
                         renderState(notifications.isEmpty())
                         adapter.submitList(notifications)
+
+                        val unreadIds = notifications.filter { !it.isRead }.map { it.id }
+                        if (unreadIds.isNotEmpty()) markAsRead(unreadIds, notifications)
                     } catch (e: Exception) {
                         e.printStackTrace()
                     }
                 }
+            }
+        }
+    }
+
+    private fun markAsRead(ids: List<Int>, current: List<NotificationDto>) {
+        val startedAt = System.currentTimeMillis()
+        ApiClient.patch("notification/mark-as-read", mapOf("notificationIds" to ids)) { _, _, error ->
+            if (error == null) {
+                val remaining = (1000 - (System.currentTimeMillis() - startedAt)).coerceAtLeast(0)
+                Handler(Looper.getMainLooper()).postDelayed({
+                    if (isAdded) adapter.submitList(current.map { it.copy(isRead = true) })
+                }, remaining)
             }
         }
     }

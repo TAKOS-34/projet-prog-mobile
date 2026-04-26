@@ -15,6 +15,7 @@ import com.example.myapplication.adapter.PostsAdapter
 import com.example.myapplication.dto.post.PostDto
 import com.example.myapplication.fragment.post.EditPostFragment
 import com.example.myapplication.fragment.post.PostViewerFragment
+import com.example.myapplication.fragment.post.TagViewerFragment
 import com.example.myapplication.fragment.profile.ProfileViewerFragment
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.card.MaterialCardView
@@ -42,7 +43,11 @@ fun Fragment.buildPostsAdapter(onChanged: () -> Unit): PostsAdapter = PostsAdapt
     onImageClick = { post ->
         val bundle = Bundle().apply { putString(PostViewerFragment.ARG_POST_ID, post.id) }
         findNavController().navigate(R.id.postViewerFragment, bundle)
-    }
+    },
+    onTagClick = if (SessionManager.getUserId() != null) { tag ->
+        val bundle = Bundle().apply { putString(TagViewerFragment.ARG_TAG, tag) }
+        findNavController().navigate(R.id.tagViewerFragment, bundle)
+    } else null
 )
 
 private fun togglePostLike(post: PostDto, isNowLiked: Boolean) {

@@ -6,9 +6,10 @@ export type NotificationList = {
 
     postId?: string;
     postImage?: string;
-    postUserId?: number;
-    postUsername?: string;
-    postUserAvatar?: string;
+
+    targetUserId?: number;
+    targetUsername?: string;
+    targetUserAvatar?: string;
 
     groupId?: number;
     groupName?: string;

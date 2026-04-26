@@ -9,5 +9,6 @@ data class GroupCardInfosDto(
     val isGroupPrivate: Boolean,
     val nbMembers: Int,
     val nbPosts: Int,
-    val isAdmin: Boolean
+    val isAdmin: Boolean,
+    val isFollowing: Boolean? = null
 )

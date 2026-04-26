@@ -8,5 +8,6 @@ export type GroupInfos = {
     nbMembers: number,
     nbPosts: number,
     isMember: boolean,
-    isAdmin: boolean
+    isAdmin: boolean,
+    isFollowing: boolean
 }
