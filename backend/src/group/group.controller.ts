@@ -12,7 +12,6 @@ import { GroupInfos } from './dto/groupInfos.dto';
 import { AuthOptionalGuard } from 'src/auth/auth.optionnal.guard';
 import { GetAnonymous } from 'src/utils/decorator/get-anonymous.decorator';
 import { PostInfos } from 'src/post/dto/postInfos.dto';
-import { GroupCardsInfos } from './dto/groupCardsInfos.dto';
 
 @Controller('group')
 export class GroupController {
@@ -21,7 +20,7 @@ export class GroupController {
 
     @UseGuards(AuthGuard)
     @Get('/my-groups')
-    getMyGroups(@GetUser() user: UserSession): Promise<GroupCardsInfos[]> {
+    getMyGroups(@GetUser() user: UserSession): Promise<GroupInfos[]> {
         return this.groupService.getMyGroups(user);
     }
 

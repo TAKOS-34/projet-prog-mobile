@@ -9,6 +9,7 @@ export type PostInfos = {
     lat: number;
     title: string;
     description?: string;
+    type: string;
     audio?: string;
     audioDuration?: number;
     nbLikes: number;

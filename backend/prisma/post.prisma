@@ -4,6 +4,7 @@ model Post {
     creationDate DateTime  @default(now())
     updatedAt    DateTime?
     isEdited     Boolean   @default(false)
+    type         PostType  @default(OTHER)
     title        String    @db.VarChar(64)
     localisation String   
     long         Float
@@ -28,6 +29,21 @@ model Post {
     User   User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
     @@index([creationDate(sort: Desc), id(sort: Desc)])
+}
+
+
+enum PostType {
+    PANORAMA           // Points de vue, belvédères, spots photo
+    HISTORIC_SITE      // Monuments, châteaux, ruines
+    NATURAL_AREA       // Parcs, forêts, montagnes, sentiers
+    COASTAL_WATER      // Plages, cascades, lacs, rivières
+    URBAN_ARCHITECTURE // Places célèbres, quartiers iconiques, design
+    GASTRONOMY         // Restaurants typiques, marchés, street-food
+    UNIQUE_STAY        // Hôtels insolites, glamping, cabanes
+    ART_CULTURE        // Musées, street-art, galeries
+    NIGHTLIFE          // Rooftops, bars conceptuels, clubs
+    HIDDEN_GEM         // Lieux secrets, hors des sentiers battus
+    OTHER              // Autres
 }
 
 

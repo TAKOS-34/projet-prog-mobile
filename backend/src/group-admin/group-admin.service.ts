@@ -111,7 +111,16 @@ export class GroupAdminService {
             this.prisma.ban.create({ data: {
                 groupId: group.id,
                 userId
-            }})
+            }}),
+
+            this.prisma.groupFollow.delete({
+                where: {
+                    followerId_groupId: {
+                        followerId: userId,
+                        groupId: group.id
+                    }
+                }
+            })
         ]);
 
         const user = await this.prisma.user.findUnique({

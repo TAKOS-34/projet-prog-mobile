@@ -9,7 +9,6 @@ import sharp from 'sharp';
 import { UserList } from 'src/group/dto/userList.dto';
 import { GroupInfos } from './dto/groupInfos.dto';
 import { PostInfos } from 'src/post/dto/postInfos.dto';
-import { GroupCardsInfos } from './dto/groupCardsInfos.dto';
 
 @Injectable()
 export class GroupService {
@@ -20,7 +19,7 @@ export class GroupService {
 
 
 
-    async getMyGroups(user: UserSession): Promise<GroupCardsInfos[]> {
+    async getMyGroups(user: UserSession): Promise<GroupInfos[]> {
         const groups = await this.prisma.group.findMany({
             where: { members: { some: { userId: user.id } } },
             select: {
@@ -33,7 +32,8 @@ export class GroupService {
                 adminId: true,
                 nbMembers: true,
                 nbPosts: true,
-                followers: { where: { followerId: user.id }, select: { followerId: true }, take: 1 }
+                members: { where: { userId: user.id }, select: { userId: true } },
+                followers: { where: { followerId: user.id }, select: { followerId: true }, take: 1 },
             }
         });
 
@@ -46,6 +46,7 @@ export class GroupService {
             isGroupPrivate: group.isGroupPrivate,
             nbMembers: group.nbMembers,
             nbPosts: group.nbPosts,
+            isMember: user ? group.members.length > 0 : false,
             isAdmin: group.adminId === user.id,
             isFollowing: group.followers.length > 0
         }));
@@ -124,6 +125,7 @@ export class GroupService {
             isEdited: post.isEdited,
             updatedAt: post.updatedAt ?? undefined,
             title: post.title,
+            type: post.type,
             localisation: post.localisation,
             long: post.long,
             lat: post.lat,
@@ -256,6 +258,15 @@ export class GroupService {
             where: {
                 groupId_userId: {
                     userId: user.id,
+                    groupId
+                }
+            }
+        });
+
+        await this.prisma.groupFollow.delete({
+            where: {
+                followerId_groupId: {
+                    followerId: user.id,
                     groupId
                 }
             }

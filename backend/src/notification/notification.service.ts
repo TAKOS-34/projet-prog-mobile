@@ -392,6 +392,8 @@ export class NotificationService implements OnModuleInit {
 
 
     async addGroupFollow(follower: UserSession, groupId: number): Promise<ResponseMessage> {
+        await this.prisma.member.findUniqueOrThrow({ where: { groupId_userId: { groupId, userId: follower.id } } });
+
         await this.prisma.groupFollow.create({ data: {
             followerId: follower.id,
             groupId

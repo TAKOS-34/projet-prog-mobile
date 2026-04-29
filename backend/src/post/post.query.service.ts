@@ -3,6 +3,7 @@ import { CdnService } from "src/cdn/cdn.service";
 import { PrismaService } from "src/prisma/prisma.service";
 import { FeedInfos, PostInfos } from "./dto/postInfos.dto";
 import { CommentInfos } from "./dto/comment.dto";
+import { PostType } from "@prisma/client";
 
 @Injectable()
 export class PostQueryService {
@@ -13,7 +14,7 @@ export class PostQueryService {
 
 
 
-    async getFeed(limit: number, cursor?: string, userId?: number, anonymousToken?: string, q?: string, tag?: string): Promise<FeedInfos> {
+    async getFeed(limit: number, cursor?: string, userId?: number, anonymousToken?: string, q?: string, tag?: string, type?: PostType): Promise<FeedInfos> {
         const realUser = userId ? { userId } : anonymousToken ? { anonymousUserId: anonymousToken } : null;
 
         const posts = await this.prisma.post.findMany({
@@ -31,6 +32,9 @@ export class PostQueryService {
                     } : {},
                     tag ? {
                         postTags: { some: { tag: { name: tag } } }
+                    } : {},
+                    type ? {
+                        type
                     } : {},
                     {
                         OR: [
@@ -66,6 +70,7 @@ export class PostQueryService {
                 isEdited: post.isEdited,
                 updatedAt: post.updatedAt ?? undefined,
                 title: post.title,
+                type: post.type,
                 localisation: post.localisation,
                 long: post.long,
                 lat: post.lat,
@@ -110,6 +115,7 @@ export class PostQueryService {
             isEdited: post.isEdited,
             updatedAt: post.updatedAt ?? undefined,
             title: post.title,
+            type: post.type,
             localisation: post.localisation,
             long: post.long,
             lat: post.lat,

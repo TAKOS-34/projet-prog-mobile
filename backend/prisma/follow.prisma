@@ -1,8 +1,8 @@
 model UserFollow {
     followerId  Int
     followingId Int
-    follower    User @relation("UserFollowsGiven", fields: [followerId], references: [id])
-    following   User @relation("UserFollowsReceived", fields: [followingId], references: [id])
+    follower    User @relation("UserFollowsGiven", fields: [followerId], references: [id], onDelete: Cascade)
+    following   User @relation("UserFollowsReceived", fields: [followingId], references: [id], onDelete: Cascade)
 
     @@id([followerId, followingId])
 }
@@ -12,8 +12,8 @@ model UserFollow {
 model GroupFollow {
     followerId  Int
     groupId     Int
-    follower    User @relation(fields: [followerId], references: [id])
-    following   Group @relation(fields: [groupId], references: [id])
+    follower    User @relation(fields: [followerId], references: [id], onDelete: Cascade)
+    following   Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
 
     @@id([followerId, groupId])
 }
@@ -23,8 +23,8 @@ model GroupFollow {
 model TagFollow {
     followerId  Int
     tagId       Int
-    follower    User @relation(fields: [followerId], references: [id])
-    following   Tag  @relation(fields: [tagId], references: [id])
+    follower    User @relation(fields: [followerId], references: [id], onDelete: Cascade)
+    following   Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
 
     @@id([followerId, tagId])
 }

@@ -1,9 +1,13 @@
+import { PostType } from "@prisma/client";
 import { IsOptional, MaxLength, IsArray, IsString } from "class-validator";
 
 export class UpdatePostDto {
     @IsOptional()
     @MaxLength(64, { message: "Title must not be longer than 64 characters" })
     title?: string
+
+    @IsOptional()
+    type?: PostType;
 
     @IsOptional()
     localisation?: string;

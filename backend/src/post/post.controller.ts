@@ -15,6 +15,7 @@ import { AuthOptionalGuard } from 'src/auth/auth.optionnal.guard';
 import { GetAnonymous } from 'src/utils/decorator/get-anonymous.decorator';
 import { CommentInfos } from './dto/comment.dto';
 import type { UserSession } from 'src/utils/dto/userSession.dto';
+import { PostType } from '@prisma/client';
 
 @Controller('post')
 export class PostController {
@@ -31,10 +32,11 @@ export class PostController {
         @Query('cursor') cursor?: string,
         @Query('q') q?: string,
         @Query('tag') tag?: string,
+        @Query('type') type?: PostType,
         @GetUser() user?: UserSession,
         @GetAnonymous() anonymous?: string
     ): Promise<FeedInfos> {
-        return this.postQueryService.getFeed(parseInt(limit), cursor, user?.id, anonymous, q, tag);
+        return this.postQueryService.getFeed(parseInt(limit), cursor, user?.id, anonymous, q, tag, type);
     }
 
     @UseGuards(GroupProtectGuard, AuthOptionalGuard)

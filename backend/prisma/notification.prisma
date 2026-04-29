@@ -8,13 +8,13 @@ model Notification {
     targetUser   User? @relation("NotificationTargetUser", fields: [targetUserId], references: [id], onDelete: Cascade)
 
     targetPostId String @db.Uuid()
-    post         Post   @relation(fields: [targetPostId], references: [id])
+    post         Post   @relation(fields: [targetPostId], references: [id], onDelete: Cascade)
 
     targetGroupId Int?
-    group        Group? @relation(fields: [targetGroupId], references: [id])
+    group        Group? @relation(fields: [targetGroupId], references: [id], onDelete: Cascade)
 
     targetTagId Int?
-    tag         Tag? @relation(fields: [targetTagId], references: [id])
+    tag         Tag? @relation(fields: [targetTagId], references: [id], onDelete: Cascade)
 
     userId Int
     User   User @relation("NotificationUser", fields: [userId], references: [id], onDelete: Cascade)

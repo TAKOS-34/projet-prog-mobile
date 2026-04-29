@@ -1,5 +1,6 @@
 import { IsNotEmpty, IsOptional, MaxLength, IsArray, IsString } from "class-validator";
 import { Transform } from 'class-transformer';
+import { PostType } from "@prisma/client";
 
 export class CreatePostDto {
     @IsNotEmpty()
@@ -8,6 +9,9 @@ export class CreatePostDto {
 
     @IsNotEmpty()
     localisation!: string;
+
+    @IsNotEmpty()
+    type!: PostType;
 
     @IsOptional()
     @MaxLength(280, { message: "Description must not be longer than 280 characters" })

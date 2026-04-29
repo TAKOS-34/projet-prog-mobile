@@ -50,6 +50,7 @@ export class PostCommandService {
                 long,
                 userId: user.id,
                 title: post.title,
+                type: post.type,
                 localisation: post.localisation.toLowerCase().trim(),
                 description: post.description ?? null,
                 groupId: post.groupId ?? null,
@@ -99,7 +100,7 @@ export class PostCommandService {
 
 
     async updatePost(postId: string, post: UpdatePostDto, user: UserSession): Promise<ResponseMessage> {
-        const { title, description, localisation } = post;
+        const { title, type, description, localisation } = post;
         const coords = localisation ? await this.getCoordinates(localisation) : undefined;
 
         await this.prisma.post.updateMany({
@@ -108,6 +109,7 @@ export class PostCommandService {
                 updatedAt: new Date(),
                 ...(title && { title }),
                 ...(description && { description }),
+                ...(type && { type }),
                 ...(localisation && { localisation: localisation.toLowerCase().trim() }),
                 ...(coords && { long: coords.long, lat: coords.lat })
             },
