@@ -1,6 +1,6 @@
 package com.example.myapplication.dto.group
 
-data class GroupCardInfosDto(
+data class GroupInfosDto(
     val id: Int,
     val name: String,
     val avatar: String,
@@ -9,6 +9,7 @@ data class GroupCardInfosDto(
     val isGroupPrivate: Boolean,
     val nbMembers: Int,
     val nbPosts: Int,
+    val isMember: Boolean,
     val isAdmin: Boolean,
     val isFollowing: Boolean? = null
 )

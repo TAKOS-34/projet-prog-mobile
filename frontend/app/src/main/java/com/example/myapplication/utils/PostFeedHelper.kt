@@ -44,6 +44,12 @@ fun Fragment.buildPostsAdapter(onChanged: () -> Unit): PostsAdapter = PostsAdapt
         val bundle = Bundle().apply { putString(PostViewerFragment.ARG_POST_ID, post.id) }
         findNavController().navigate(R.id.postViewerFragment, bundle)
     },
+    onGroupClick = { post ->
+        post.groupId?.let { id ->
+            val bundle = Bundle().apply { putInt("groupId", id) }
+            findNavController().navigate(R.id.groupDetailFragment, bundle)
+        }
+    },
     onTagClick = if (SessionManager.getUserId() != null) { tag ->
         val bundle = Bundle().apply { putString(TagViewerFragment.ARG_TAG, tag) }
         findNavController().navigate(R.id.tagViewerFragment, bundle)

@@ -209,6 +209,16 @@
                 app:layout_constraintTop_toBottomOf="@id/tvDetailCreated" />
 
             <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnJoinGroupDetail"
+                style="@style/Widget.TravelApp.Button.Primary"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:text="@string/btn_join_group"
+                android:visibility="gone"
+                app:layout_constraintTop_toBottomOf="@id/btnViewMembers" />
+
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnViewBanned"
                 style="@style/Widget.TravelApp.Button.Outlined"
                 android:layout_width="match_parent"

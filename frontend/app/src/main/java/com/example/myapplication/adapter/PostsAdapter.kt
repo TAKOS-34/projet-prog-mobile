@@ -33,12 +33,13 @@ class PostsAdapter(
     private val onDelete: (PostDto) -> Unit = {},
     private val onUserClick: (PostDto) -> Unit = {},
     private val onImageClick: (PostDto) -> Unit = {},
+    private val onGroupClick: (PostDto) -> Unit = {},
     private val onTagClick: ((String) -> Unit)? = null
 ) : ListAdapter<PostDto, PostsAdapter.PostViewHolder>(DIFF) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PostViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.item_post, parent, false)
-        return PostViewHolder(view, onLike, onComment, onReport, onLocation, onEdit, onDelete, onUserClick, onImageClick, onTagClick)
+        return PostViewHolder(view, onLike, onComment, onReport, onLocation, onEdit, onDelete, onUserClick, onImageClick, onGroupClick, onTagClick)
     }
 
     override fun onBindViewHolder(holder: PostViewHolder, position: Int) {
@@ -60,6 +61,7 @@ class PostsAdapter(
         private val onDelete: (PostDto) -> Unit,
         private val onUserClick: (PostDto) -> Unit,
         private val onImageClick: (PostDto) -> Unit,
+        private val onGroupClick: (PostDto) -> Unit,
         private val onTagClick: ((String) -> Unit)?
     ) : RecyclerView.ViewHolder(itemView) {
 
@@ -73,6 +75,8 @@ class PostsAdapter(
         private val tvTitle: TextView = itemView.findViewById(R.id.tvPostTitle)
         private val tvAuthor: TextView = itemView.findViewById(R.id.tvPostAuthor)
         private val tvLocation: TextView = itemView.findViewById(R.id.tvPostLocation)
+        private val tvType: TextView = itemView.findViewById(R.id.tvPostType)
+        private val ivTypeIcon: ImageView = itemView.findViewById(R.id.ivTypeIcon)
         private val tvDescription: TextView = itemView.findViewById(R.id.tvDescription)
         private val llAudio: LinearLayout = itemView.findViewById(R.id.llAudio)
         private val btnPlayAudio: ImageView = itemView.findViewById(R.id.btnPlayAudio)
@@ -114,6 +118,7 @@ class PostsAdapter(
             }
 
             tvTitle.text = post.title
+            tvType.text = context.getString(postTypeLabel(post.type))
             tvAuthor.text = context.getString(
                 R.string.format_post_username_date,
                 context.getString(R.string.by),
@@ -121,6 +126,7 @@ class PostsAdapter(
                 DateUtils.formatRelativeDate(context, post.creationDate)
             )
             tvLocation.text = post.localisation
+
             tvCommentCount.text = post.nbComments.toString()
 
             if (post.groupId != null && !post.groupName.isNullOrBlank()) {
@@ -132,6 +138,7 @@ class PostsAdapter(
                         transformations(CircleCropTransformation())
                     }
                 } ?: ivGroupBadgeAvatar.setImageDrawable(null)
+                llGroupBadge.setOnClickListener { onGroupClick(post) }
             } else {
                 llGroupBadge.visibility = View.GONE
             }
@@ -275,6 +282,20 @@ class PostsAdapter(
         private val DIFF = object : DiffUtil.ItemCallback<PostDto>() {
             override fun areItemsTheSame(oldItem: PostDto, newItem: PostDto) = oldItem.id == newItem.id
             override fun areContentsTheSame(oldItem: PostDto, newItem: PostDto) = oldItem == newItem
+        }
+
+        fun postTypeLabel(type: String): Int = when (type.uppercase()) {
+            "PANORAMA" -> R.string.post_type_panorama
+            "HISTORIC_SITE" -> R.string.post_type_historic_site
+            "NATURAL_AREA" -> R.string.post_type_natural_area
+            "COASTAL_WATER" -> R.string.post_type_coastal_water
+            "URBAN_ARCHITECTURE" -> R.string.post_type_urban_architecture
+            "GASTRONOMY" -> R.string.post_type_gastronomy
+            "UNIQUE_STAY" -> R.string.post_type_unique_stay
+            "ART_CULTURE" -> R.string.post_type_art_culture
+            "NIGHTLIFE" -> R.string.post_type_nightlife
+            "HIDDEN_GEM" -> R.string.post_type_hidden_gem
+            else -> R.string.post_type_other
         }
     }
 }

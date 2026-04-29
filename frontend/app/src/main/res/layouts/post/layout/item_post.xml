@@ -133,6 +133,30 @@
                     android:layout_marginTop="4dp">
 
                     <ImageView
+                        android:id="@+id/ivTypeIcon"
+                        android:layout_width="12dp"
+                        android:layout_height="12dp"
+                        android:src="@drawable/ic_fire"
+                        app:tint="@color/primary" />
+
+                    <TextView
+                        android:id="@+id/tvPostType"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="4dp"
+                        android:textAppearance="@style/TextAppearance.TravelApp.LabelMedium"
+                        android:textColor="@color/primary"
+                        tools:text="Panorama" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginHorizontal="6dp"
+                        android:text="·"
+                        android:textAppearance="@style/TextAppearance.TravelApp.LabelMedium"
+                        android:textColor="@color/text_hint" />
+
+                    <ImageView
                         android:layout_width="12dp"
                         android:layout_height="12dp"
                         android:src="@drawable/ic_location"

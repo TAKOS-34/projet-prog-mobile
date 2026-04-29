@@ -9,7 +9,7 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.example.myapplication.R
-import com.example.myapplication.dto.group.GroupCardInfosDto
+import com.example.myapplication.dto.group.GroupInfosDto
 import com.example.myapplication.dto.group.UpdateGroupRequestDto
 import com.example.myapplication.utils.ApiClient
 import com.google.android.material.button.MaterialButton
@@ -20,7 +20,7 @@ import com.google.gson.Gson
 
 class EditGroupFragment : Fragment() {
 
-    private lateinit var group: GroupCardInfosDto
+    private lateinit var group: GroupInfosDto
 
     private lateinit var tilName: TextInputLayout
     private lateinit var etName: TextInputEditText
@@ -36,7 +36,7 @@ class EditGroupFragment : Fragment() {
         val view = inflater.inflate(R.layout.fragment_edit_group, container, false)
 
         val json = arguments?.getString(ARG_GROUP) ?: return view
-        group = Gson().fromJson(json, GroupCardInfosDto::class.java)
+        group = Gson().fromJson(json, GroupInfosDto::class.java)
 
         tilName = view.findViewById(R.id.tilGroupName)
         etName = view.findViewById(R.id.etGroupName)

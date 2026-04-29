@@ -38,13 +38,34 @@
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/tilSearchTag"
+        android:id="@+id/tilSearchType"
         style="@style/Widget.TravelApp.SearchBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
         app:hintEnabled="false"
         app:layout_constraintTop_toBottomOf="@id/tilSearchQ">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/etSearchType"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/search_type_hint"
+            android:paddingVertical="12dp"
+            android:inputType="none"
+            android:focusable="false"
+            android:clickable="true"
+            android:cursorVisible="false" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/tilSearchTag"
+        style="@style/Widget.TravelApp.SearchBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        app:hintEnabled="false"
+        app:layout_constraintTop_toBottomOf="@id/tilSearchType">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/etSearchTag"

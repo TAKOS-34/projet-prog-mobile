@@ -1,6 +1,7 @@
 package com.example.myapplication.fragment.group
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -14,11 +15,12 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.myapplication.R
 import com.example.myapplication.adapter.GroupSearchAdapter
 import com.example.myapplication.adapter.GroupsAdapter
-import com.example.myapplication.dto.group.GroupCardInfosDto
+import com.example.myapplication.dto.group.GroupInfosDto
 import com.example.myapplication.dto.group.GroupSearchDto
 import com.example.myapplication.utils.AdminGroupsCache
 import com.example.myapplication.utils.ApiClient
 import com.example.myapplication.utils.AuthViewModel
+import com.example.myapplication.utils.requestToJoinGroup
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
 import com.google.gson.Gson
@@ -36,14 +38,20 @@ class GroupsFragment : Fragment() {
     private val groupsAdapter: GroupsAdapter by lazy {
         GroupsAdapter { group ->
             val bundle = Bundle().apply {
-                putString(GroupDetailFragment.ARG_GROUP, Gson().toJson(group))
+                putInt(GroupDetailFragment.ARG_GROUP_ID, group.id)
             }
             findNavController().navigate(R.id.groupDetailFragment, bundle)
         }
     }
 
     private val searchAdapter: GroupSearchAdapter by lazy {
-        GroupSearchAdapter { group -> requestToJoin(group.id) }
+        GroupSearchAdapter(
+            onJoin = { group -> requestToJoinGroup(group.id) },
+            onGroupClick = { group ->
+                val bundle = Bundle().apply { putInt("groupId", group.id) }
+                findNavController().navigate(R.id.groupDetailFragment, bundle)
+            }
+        )
     }
 
     override fun onCreateView(
@@ -92,8 +100,8 @@ class GroupsFragment : Fragment() {
             activity?.runOnUiThread {
                 if (error == null && body != null) {
                     try {
-                        val type = object : TypeToken<List<GroupCardInfosDto>>() {}.type
-                        val groups: List<GroupCardInfosDto> = Gson().fromJson(body, type)
+                        val type = object : TypeToken<List<GroupInfosDto>>() {}.type
+                        val groups: List<GroupInfosDto> = Gson().fromJson(body, type)
                         AdminGroupsCache.set(groups.filter { it.isAdmin }.map { it.id })
                         renderState(groups.isEmpty())
                         groupsAdapter.submitList(groups)
@@ -124,19 +132,6 @@ class GroupsFragment : Fragment() {
                         e.printStackTrace()
                     }
                 }
-            }
-        }
-    }
-
-    private fun requestToJoin(groupId: Int) {
-        ApiClient.post("group/request-to-join/$groupId", emptyMap<String, String>()) { _, code, error ->
-            activity?.runOnUiThread {
-                val msg = when {
-                    error == null -> R.string.success_join_request
-                    code == 401 -> R.string.error_join_group_banned
-                    else -> R.string.error_join_group
-                }
-                Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
             }
         }
     }

@@ -8,6 +8,7 @@ data class PostDto(
     val updatedAt: String?,
     val title: String,
     val description: String?,
+    val type: String,
     val audio: String?,
     val audioDuration: Int?,
     val localisation: String,

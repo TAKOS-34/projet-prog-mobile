@@ -18,13 +18,14 @@ import com.google.android.material.button.MaterialButton
 import com.google.android.material.imageview.ShapeableImageView
 
 class GroupSearchAdapter(
-    private val onJoin: (GroupSearchDto) -> Unit
+    private val onJoin: (GroupSearchDto) -> Unit,
+    private val onGroupClick: (GroupSearchDto) -> Unit
 ) : ListAdapter<GroupSearchDto, GroupSearchAdapter.SearchViewHolder>(DIFF) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SearchViewHolder {
         val view = LayoutInflater.from(parent.context)
             .inflate(R.layout.item_group_search, parent, false)
-        return SearchViewHolder(view, onJoin)
+        return SearchViewHolder(view, onJoin, onGroupClick)
     }
 
     override fun onBindViewHolder(holder: SearchViewHolder, position: Int) {
@@ -33,7 +34,8 @@ class GroupSearchAdapter(
 
     class SearchViewHolder(
         itemView: View,
-        private val onJoin: (GroupSearchDto) -> Unit
+        private val onJoin: (GroupSearchDto) -> Unit,
+        private val onGroupClick: (GroupSearchDto) -> Unit
     ) : RecyclerView.ViewHolder(itemView) {
 
         private val ivAvatar: ShapeableImageView = itemView.findViewById(R.id.ivGroupAvatar)
@@ -64,6 +66,8 @@ class GroupSearchAdapter(
                 btnJoin.visibility = View.VISIBLE
                 btnJoin.setOnClickListener { onJoin(group) }
             }
+
+            itemView.setOnClickListener { onGroupClick(group) }
         }
     }
 

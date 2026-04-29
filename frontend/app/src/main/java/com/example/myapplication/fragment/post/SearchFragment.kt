@@ -11,9 +11,11 @@ import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.widget.TextView
 import androidx.fragment.app.Fragment
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import androidx.recyclerview.widget.RecyclerView
 import com.example.myapplication.R
 import com.example.myapplication.adapter.PostsAdapter
+import com.example.myapplication.dto.post.PostType
 import com.example.myapplication.utils.ApiClient
 import com.example.myapplication.utils.PostFeedPaginator
 import com.example.myapplication.utils.SessionManager
@@ -32,7 +34,10 @@ class SearchFragment : Fragment() {
     private lateinit var tvEmpty: TextView
     private lateinit var etQ: TextInputEditText
     private lateinit var etTag: TextInputEditText
+    private lateinit var etType: TextInputEditText
     private lateinit var cgTags: ChipGroup
+
+    private var selectedType: PostType? = null
 
     private val handler = Handler(Looper.getMainLooper())
     private var suggestRunnable: Runnable? = null
@@ -47,7 +52,9 @@ class SearchFragment : Fragment() {
         tvEmpty = view.findViewById(R.id.tvSearchEmpty)
         etQ = view.findViewById(R.id.etSearchQ)
         etTag = view.findViewById(R.id.etSearchTag)
+        etType = view.findViewById(R.id.etSearchType)
         cgTags = view.findViewById(R.id.cgSearchTags)
+        setupTypeDropdown()
 
         adapter = buildPostsAdapter(onChanged = { paginator.reset() })
         recyclerView.adapter = adapter
@@ -129,12 +136,34 @@ class SearchFragment : Fragment() {
         }
     }
 
+    private fun setupTypeDropdown() {
+        val labels = listOf(getString(R.string.search_type_all)) +
+                PostType.entries.map { getString(it.labelRes) }
+
+        selectedType?.let {
+            etType.setText(getString(it.labelRes))
+        } ?: etType.setText("")
+
+        etType.setOnClickListener {
+            MaterialAlertDialogBuilder(requireContext())
+                .setTitle(R.string.search_type_hint)
+                .setItems(labels.toTypedArray()) { _, position ->
+                    selectedType = if (position == 0) null else PostType.entries[position - 1]
+                    etType.setText(if (position == 0) "" else labels[position])
+                    performSearch()
+                }
+                .show()
+        }
+    }
+
     private fun buildSearchUrl(): String {
         val q = etQ.text.toString().trim()
         val tag = etTag.text.toString().trim()
+        val type = selectedType?.name
         val params = mutableListOf<String>()
         if (q.isNotEmpty()) params += "q=${URLEncoder.encode(q, Charsets.UTF_8.name())}"
         if (tag.isNotEmpty()) params += "tag=${URLEncoder.encode(tag, Charsets.UTF_8.name())}"
+        if (type != null) params += "type=$type"
         return if (params.isEmpty()) "post" else "post?" + params.joinToString("&")
     }
 

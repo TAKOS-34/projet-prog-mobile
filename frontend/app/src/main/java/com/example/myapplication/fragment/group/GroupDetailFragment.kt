@@ -8,7 +8,6 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.widget.NestedScrollView
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
@@ -17,10 +16,13 @@ import coil.load
 import coil.transform.CircleCropTransformation
 import com.example.myapplication.R
 import com.example.myapplication.adapter.PostsAdapter
-import com.example.myapplication.dto.group.GroupCardInfosDto
+import com.example.myapplication.dto.group.GroupInfosDto
 import com.example.myapplication.dto.post.PostDto
 import com.example.myapplication.utils.ApiClient
 import com.example.myapplication.utils.buildPostsAdapter
+import com.example.myapplication.utils.resolveBackendUrl
+import com.example.myapplication.utils.toShortDate
+import com.example.myapplication.utils.requestToJoinGroup
 import com.example.myapplication.utils.resolveBackendUrl
 import com.example.myapplication.utils.toShortDate
 import com.google.android.material.button.MaterialButton
@@ -33,7 +35,7 @@ import com.google.gson.reflect.TypeToken
 
 class GroupDetailFragment : Fragment() {
 
-    private lateinit var group: GroupCardInfosDto
+    private lateinit var group: GroupInfosDto
     private lateinit var postsAdapter: PostsAdapter
     private lateinit var rvPosts: RecyclerView
     private lateinit var scrollInfo: NestedScrollView
@@ -59,8 +61,7 @@ class GroupDetailFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_group_detail, container, false)
-        val json = arguments?.getString(ARG_GROUP) ?: return view
-        group = Gson().fromJson(json, GroupCardInfosDto::class.java)
+        val groupId = arguments?.getInt("groupId", -1) ?: -1
 
         view.findViewById<ImageView>(R.id.btnBack).setOnClickListener {
             findNavController().navigateUp()
@@ -69,11 +70,38 @@ class GroupDetailFragment : Fragment() {
         scrollInfo = view.findViewById(R.id.scrollInfo)
         rvPosts = view.findViewById(R.id.rvGroupPosts)
 
+        if (groupId != -1) {
+            fetchGroupDetail(groupId, view)
+        } else {
+            findNavController().navigateUp()
+        }
+
+        return view
+    }
+
+    private fun fetchGroupDetail(id: Int, view: View) {
+        ApiClient.get("group/$id") { body, _, error ->
+            activity?.runOnUiThread {
+                if (error == null && body != null) {
+                    try {
+                        group = Gson().fromJson(body, GroupInfosDto::class.java)
+                        initUi(view)
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                        findNavController().navigateUp()
+                    }
+                } else {
+                    Toast.makeText(context, R.string.error_load_groups, Toast.LENGTH_SHORT).show()
+                    findNavController().navigateUp()
+                }
+            }
+        }
+    }
+
+    private fun initUi(view: View) {
         setupInfoTab(view)
         setupPostsTab()
         setupTabs(view)
-
-        return view
     }
 
     private fun setupInfoTab(view: View) {
@@ -127,9 +155,11 @@ class GroupDetailFragment : Fragment() {
         val btnQuit = view.findViewById<MaterialButton>(R.id.btnQuitGroup)
         val fabEditAvatar = view.findViewById<FloatingActionButton>(R.id.fabEditGroupAvatar)
 
-        if (!group.isAdmin) {
+        if (group.isMember && !group.isAdmin) {
             btnQuit.visibility = View.VISIBLE
             btnQuit.setOnClickListener { confirmQuitGroup() }
+        } else {
+            btnQuit.visibility = View.GONE
         }
 
         if (group.isAdmin) {
@@ -162,6 +192,33 @@ class GroupDetailFragment : Fragment() {
 
             btnDelete.visibility = View.VISIBLE
             btnDelete.setOnClickListener { confirmDeleteGroup() }
+        }
+
+        val btnJoin = view.findViewById<MaterialButton>(R.id.btnJoinGroupDetail)
+        val btnSeeMember = view.findViewById<MaterialButton>(R.id.btnViewMembers)
+        val btnSeePostsAction = view.findViewById<MaterialButton>(R.id.btnTabPosts)
+        val toggle = view.findViewById<MaterialButtonToggleGroup>(R.id.tgGroupTabs)
+
+        if (!group.isMember) {
+            btnFollowGroup?.visibility = View.GONE
+            btnJoin.visibility = View.VISIBLE
+            btnJoin.text = ctx.getString(if (group.isGroupPrivate) R.string.btn_request_join_group else R.string.btn_join_group)
+            btnJoin.setOnClickListener {
+                requestToJoinGroup(group.id) {
+                    if (!group.isGroupPrivate) {
+                        fetchGroupDetail(group.id, requireView())
+                    }
+                }
+            }
+
+            if (!group.isGroupPrivate) {
+                btnSeePostsAction.visibility = View.VISIBLE
+                btnSeePostsAction.setOnClickListener {
+                    toggle.check(R.id.btnTabPosts)
+                }
+            } else {
+                btnSeeMember.visibility = View.GONE
+            }
         }
     }
 
@@ -286,6 +343,11 @@ class GroupDetailFragment : Fragment() {
 
     private fun setupTabs(view: View) {
         val toggle = view.findViewById<MaterialButtonToggleGroup>(R.id.tgGroupTabs)
+
+        if (!group.isMember && group.isGroupPrivate) {
+            toggle.visibility = View.GONE
+        }
+
         toggle.check(R.id.btnTabInfo)
         toggle.addOnButtonCheckedListener { _, checkedId, isChecked ->
             if (!isChecked) return@addOnButtonCheckedListener
@@ -321,6 +383,6 @@ class GroupDetailFragment : Fragment() {
     }
 
     companion object {
-        const val ARG_GROUP = "group"
+        const val ARG_GROUP_ID = "groupId"
     }
 }

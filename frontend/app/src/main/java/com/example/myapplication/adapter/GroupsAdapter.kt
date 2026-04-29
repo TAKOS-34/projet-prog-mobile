@@ -11,14 +11,14 @@ import androidx.recyclerview.widget.RecyclerView
 import coil.load
 import coil.transform.CircleCropTransformation
 import com.example.myapplication.R
-import com.example.myapplication.dto.group.GroupCardInfosDto
+import com.example.myapplication.dto.group.GroupInfosDto
 import com.example.myapplication.utils.resolveBackendUrl
 import com.example.myapplication.utils.toShortDate
 import com.google.android.material.imageview.ShapeableImageView
 
 class GroupsAdapter(
-    private val onClick: (GroupCardInfosDto) -> Unit
-) : ListAdapter<GroupCardInfosDto, GroupsAdapter.GroupViewHolder>(DIFF) {
+    private val onClick: (GroupInfosDto) -> Unit
+) : ListAdapter<GroupInfosDto, GroupsAdapter.GroupViewHolder>(DIFF) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): GroupViewHolder {
         val view = LayoutInflater.from(parent.context)
@@ -32,7 +32,7 @@ class GroupsAdapter(
 
     class GroupViewHolder(
         itemView: View,
-        private val onClick: (GroupCardInfosDto) -> Unit
+        private val onClick: (GroupInfosDto) -> Unit
     ) : RecyclerView.ViewHolder(itemView) {
 
         private val ivAvatar: ShapeableImageView = itemView.findViewById(R.id.ivGroupAvatar)
@@ -44,7 +44,7 @@ class GroupsAdapter(
         private val tvCreated: TextView = itemView.findViewById(R.id.tvGroupCreated)
         private val tvAdmin: TextView = itemView.findViewById(R.id.tvGroupAdmin)
 
-        fun bind(group: GroupCardInfosDto) {
+        fun bind(group: GroupInfosDto) {
             val context = itemView.context
             tvName.text = group.name
 
@@ -72,9 +72,9 @@ class GroupsAdapter(
     }
 
     companion object {
-        private val DIFF = object : DiffUtil.ItemCallback<GroupCardInfosDto>() {
-            override fun areItemsTheSame(oldItem: GroupCardInfosDto, newItem: GroupCardInfosDto) = oldItem.id == newItem.id
-            override fun areContentsTheSame(oldItem: GroupCardInfosDto, newItem: GroupCardInfosDto) = oldItem == newItem
+        private val DIFF = object : DiffUtil.ItemCallback<GroupInfosDto>() {
+            override fun areItemsTheSame(oldItem: GroupInfosDto, newItem: GroupInfosDto) = oldItem.id == newItem.id
+            override fun areContentsTheSame(oldItem: GroupInfosDto, newItem: GroupInfosDto) = oldItem == newItem
         }
     }
 }

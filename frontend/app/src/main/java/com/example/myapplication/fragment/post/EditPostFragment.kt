@@ -16,14 +16,23 @@ import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
 import com.google.gson.Gson
 
+import android.widget.ArrayAdapter
+import android.widget.AutoCompleteTextView
+import com.example.myapplication.dto.post.PostType
+import com.google.android.material.textfield.TextInputLayout
+
 class EditPostFragment : Fragment() {
 
     private lateinit var post: PostDto
 
     private lateinit var etTitle: TextInputEditText
+    private lateinit var tilType: TextInputLayout
+    private lateinit var atvType: AutoCompleteTextView
     private lateinit var etLocation: TextInputEditText
     private lateinit var etDescription: TextInputEditText
     private lateinit var btnUpdate: MaterialButton
+
+    private var selectedPostType: PostType? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -35,6 +44,8 @@ class EditPostFragment : Fragment() {
         post = Gson().fromJson(json, PostDto::class.java)
 
         etTitle = view.findViewById(R.id.etTitle)
+        tilType = view.findViewById(R.id.tilType)
+        atvType = view.findViewById(R.id.atvType)
         etLocation = view.findViewById(R.id.etLocation)
         etDescription = view.findViewById(R.id.etDescription)
         btnUpdate = view.findViewById(R.id.btnUpdatePost)
@@ -42,6 +53,8 @@ class EditPostFragment : Fragment() {
         etTitle.hint = post.title
         etLocation.hint = post.localisation
         etDescription.hint = post.description.orEmpty()
+
+        setupTypeDropdown()
 
         view.findViewById<ImageView>(R.id.btnBack).setOnClickListener {
             findNavController().navigateUp()
@@ -52,8 +65,25 @@ class EditPostFragment : Fragment() {
         return view
     }
 
+    private fun setupTypeDropdown() {
+        val types = PostType.values()
+        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_list_item_1, types.map { getString(it.labelRes) })
+        atvType.setAdapter(adapter)
+
+        val initialType = types.find { it.name == post.type }
+        initialType?.let {
+            atvType.setText(getString(it.labelRes), false)
+            selectedPostType = it
+        }
+
+        atvType.setOnItemClickListener { _, _, position, _ ->
+            selectedPostType = types[position]
+        }
+    }
+
     private fun performUpdate() {
         val newTitle = etTitle.text.toString().trim().takeIf { it.isNotEmpty() && it != post.title }
+        val newType = selectedPostType?.name?.takeIf { it != post.type }
         val newLocation = etLocation.text.toString().trim()
             .takeIf { it.isNotEmpty() && it != post.localisation }
         val newDescription = etDescription.text.toString().trim()
@@ -61,6 +91,7 @@ class EditPostFragment : Fragment() {
 
         val dto = UpdatePostRequestDto(
             title = newTitle,
+            type = newType,
             localisation = newLocation,
             description = newDescription
         )

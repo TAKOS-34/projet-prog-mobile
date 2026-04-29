@@ -91,8 +91,8 @@
         android:label="@string/groups_tab_info"
         tools:layout="@layout/fragment_group_detail">
         <argument
-            android:name="group"
-            app:argType="string" />
+            android:name="groupId"
+            app:argType="integer" />
     </fragment>
 
     <fragment

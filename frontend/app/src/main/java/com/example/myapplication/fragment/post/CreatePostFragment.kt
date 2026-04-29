@@ -22,7 +22,8 @@ import androidx.navigation.fragment.findNavController
 import coil.load
 import coil.transform.CircleCropTransformation
 import com.example.myapplication.R
-import com.example.myapplication.dto.group.GroupCardInfosDto
+import com.example.myapplication.dto.group.GroupInfosDto
+import com.example.myapplication.dto.post.PostType
 import com.example.myapplication.utils.ApiClient
 import com.example.myapplication.utils.resolveBackendUrl
 import com.google.android.material.button.MaterialButton
@@ -33,6 +34,7 @@ import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import android.widget.AutoCompleteTextView
 
 class CreatePostFragment : Fragment() {
 
@@ -41,6 +43,8 @@ class CreatePostFragment : Fragment() {
     private lateinit var btnSelectImage: MaterialButton
     private lateinit var tilTitle: TextInputLayout
     private lateinit var etTitle: TextInputEditText
+    private lateinit var tilType: TextInputLayout
+    private lateinit var atvType: AutoCompleteTextView
     private lateinit var tilLocation: TextInputLayout
     private lateinit var etLocation: TextInputEditText
     private lateinit var tilDescription: TextInputLayout
@@ -59,7 +63,8 @@ class CreatePostFragment : Fragment() {
     private var selectedImageUri: Uri? = null
     private var selectedAudioUri: Uri? = null
     private var selectedGroupId: Int? = null
-    private var myGroups: List<GroupCardInfosDto> = emptyList()
+    private var selectedPostType: PostType? = null
+    private var myGroups: List<GroupInfosDto> = emptyList()
 
     private val imagePicker = com.example.myapplication.utils.ImagePicker(this) { uri ->
         selectedImageUri = uri
@@ -82,6 +87,7 @@ class CreatePostFragment : Fragment() {
     ): View? {
         val view = inflater.inflate(R.layout.fragment_create_post, container, false)
         initViews(view)
+        setupTypeDropdown()
 
         view.findViewById<ImageView>(R.id.btnBack).setOnClickListener {
             findNavController().navigateUp()
@@ -109,7 +115,7 @@ class CreatePostFragment : Fragment() {
             activity?.runOnUiThread {
                 if (error == null && body != null) {
                     try {
-                        val type = object : TypeToken<List<GroupCardInfosDto>>() {}.type
+                        val type = object : TypeToken<List<GroupInfosDto>>() {}.type
                         myGroups = Gson().fromJson(body, type)
                         bindGroupDropdown()
                     } catch (e: Exception) {
@@ -125,9 +131,9 @@ class CreatePostFragment : Fragment() {
     private fun bindGroupDropdown() {
         val ctx = context ?: return
         val noneLabel = getString(R.string.group_selector_none)
-        val entries: List<GroupCardInfosDto?> = listOf(null) + myGroups
+        val entries: List<GroupInfosDto?> = listOf(null) + myGroups
 
-        val adapter = object : ArrayAdapter<GroupCardInfosDto?>(ctx, 0, entries) {
+        val adapter = object : ArrayAdapter<GroupInfosDto?>(ctx, 0, entries) {
             override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
                 val row = convertView ?: LayoutInflater.from(ctx)
                     .inflate(R.layout.item_group_dropdown, parent, false)
@@ -276,6 +282,8 @@ class CreatePostFragment : Fragment() {
         btnSelectImage = view.findViewById(R.id.btnSelectImage)
         tilTitle = view.findViewById(R.id.tilTitle)
         etTitle = view.findViewById(R.id.etTitle)
+        tilType = view.findViewById(R.id.tilType)
+        atvType = view.findViewById(R.id.atvType)
         tilLocation = view.findViewById(R.id.tilLocation)
         etLocation = view.findViewById(R.id.etLocation)
         tilDescription = view.findViewById(R.id.tilDescription)
@@ -288,6 +296,16 @@ class CreatePostFragment : Fragment() {
         btnPublish = view.findViewById(R.id.btnPublish)
         tilGroup = view.findViewById(R.id.tilGroup)
         etGroup = view.findViewById(R.id.etGroup)
+    }
+
+    private fun setupTypeDropdown() {
+        val types = PostType.values()
+        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_list_item_1, types.map { getString(it.labelRes) })
+        atvType.setAdapter(adapter)
+        atvType.setOnItemClickListener { _, _, position, _ ->
+            selectedPostType = types[position]
+            tilType.error = null
+        }
     }
 
     private fun validateFields(): Boolean {
@@ -305,6 +323,13 @@ class CreatePostFragment : Fragment() {
             tilTitle.error = null
         }
 
+        if (selectedPostType == null) {
+            tilType.error = getString(R.string.error_field_required)
+            isValid = false
+        } else {
+            tilType.error = null
+        }
+
         if (etLocation.text.isNullOrBlank()) {
             tilLocation.error = getString(R.string.error_location_required)
             isValid = false
@@ -320,6 +345,7 @@ class CreatePostFragment : Fragment() {
         val imageUri = selectedImageUri ?: return
 
         val title = etTitle.text.toString().trim()
+        val type = selectedPostType?.name ?: return
         val location = etLocation.text.toString().trim()
         val description = etDescription.text.toString().trim().takeIf { it.isNotEmpty() }
         val tagsString = etTags.text.toString().trim()
@@ -327,6 +353,7 @@ class CreatePostFragment : Fragment() {
 
         val parts = mutableMapOf<String, Any?>()
         parts["title"] = title
+        parts["type"] = type
         parts["localisation"] = location
         parts["description"] = description
         parts["tags"] = tags
