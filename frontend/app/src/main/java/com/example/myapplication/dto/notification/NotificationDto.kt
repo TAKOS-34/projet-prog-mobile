@@ -18,5 +18,8 @@ data class NotificationDto(
     val groupAvatar: String? = null,
 
     val tagId: Int? = null,
-    val tagName: String? = null
+    val tagName: String? = null,
+
+    val localisationId: Int? = null,
+    val localisationName: String? = null
 )

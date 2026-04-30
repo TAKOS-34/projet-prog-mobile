@@ -33,10 +33,12 @@ export class PostController {
         @Query('q') q?: string,
         @Query('tag') tag?: string,
         @Query('type') type?: PostType,
+        @Query('loc') loc?: string,
+        @Query('dist') dist?: number,
         @GetUser() user?: UserSession,
         @GetAnonymous() anonymous?: string
     ): Promise<FeedInfos> {
-        return this.postQueryService.getFeed(parseInt(limit), cursor, user?.id, anonymous, q, tag, type);
+        return this.postQueryService.getFeed(parseInt(limit), cursor, user?.id, anonymous, q, tag, type, loc, dist);
     }
 
     @UseGuards(GroupProtectGuard, AuthOptionalGuard)

@@ -17,4 +17,7 @@ export type NotificationList = {
 
     tagId?: number;
     tagName?: string;
+
+    localisationId?: number,
+    localisationName?: string
 }

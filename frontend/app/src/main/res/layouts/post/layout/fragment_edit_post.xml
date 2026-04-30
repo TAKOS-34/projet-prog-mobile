@@ -104,37 +104,9 @@
         </com.google.android.material.textfield.TextInputLayout>
 
         <View
-            android:id="@+id/divLocationLabel"
-            style="@style/Widget.TravelApp.View.Divider"
-            app:layout_constraintTop_toBottomOf="@id/tilType" />
-
-        <TextView
-            android:id="@+id/tvLocationLabel"
-            style="@style/Widget.TravelApp.TextView.InputLabel"
-            android:text="@string/label_edit_post_location"
-            android:layout_marginTop="16dp"
-            app:layout_constraintTop_toBottomOf="@id/divLocationLabel"
-            app:layout_constraintStart_toStartOf="parent" />
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/tilLocation"
-            style="@style/Widget.TravelApp.TextInputLayout.Line"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:layout_constraintTop_toBottomOf="@id/tvLocationLabel">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etLocation"
-                style="@style/Widget.TravelApp.TextInputEditText.Line"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="text" />
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <View
             android:id="@+id/divLocation"
             style="@style/Widget.TravelApp.View.Divider"
-            app:layout_constraintTop_toBottomOf="@id/tilLocation" />
+            app:layout_constraintTop_toBottomOf="@id/tilType" />
 
         <TextView
             android:id="@+id/tvDescriptionLabel"

@@ -191,4 +191,14 @@
             app:argType="string" />
     </fragment>
 
+    <fragment
+        android:id="@+id/localisationViewerFragment"
+        android:name="com.example.myapplication.fragment.post.LocalisationViewerFragment"
+        android:label="Localisation"
+        tools:layout="@layout/fragment_localisation_viewer">
+        <argument
+            android:name="localisation"
+            app:argType="string" />
+    </fragment>
+
     </navigation>

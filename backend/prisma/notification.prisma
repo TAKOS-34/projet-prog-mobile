@@ -16,6 +16,9 @@ model Notification {
     targetTagId Int?
     tag         Tag? @relation(fields: [targetTagId], references: [id], onDelete: Cascade)
 
+    targetLocalisationId Int?
+    localisation         Localisation? @relation(fields: [targetLocalisationId], references: [id], onDelete: Cascade)
+
     userId Int
     User   User @relation("NotificationUser", fields: [userId], references: [id], onDelete: Cascade)
 
@@ -28,5 +31,6 @@ enum NotificationType {
     NEW_POST_USER
     NEW_POST_GROUP
     NEW_POST_TAG
+    NEW_POST_LOCALISATION
     NEW_POST_LIKE
 }

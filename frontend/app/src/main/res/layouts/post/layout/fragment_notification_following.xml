@@ -129,5 +129,38 @@
             app:layout_constraintTop_toBottomOf="@id/tvTagsHeader"
             tools:listitem="@layout/item_following" />
 
+        <TextView
+            android:id="@+id/tvLocalisationsHeader"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="@string/notif_following_localisations"
+            android:textAppearance="@style/TextAppearance.TravelApp.LabelMedium"
+            android:textColor="@color/text_hint"
+            app:layout_constraintTop_toBottomOf="@id/rvTagsFollowing"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <TextView
+            android:id="@+id/tvLocalisationsEmpty"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="@string/notif_following_empty_localisations"
+            android:textAppearance="@style/TextAppearance.TravelApp.BodyMedium"
+            android:textColor="@color/text_secondary"
+            android:visibility="gone"
+            app:layout_constraintTop_toBottomOf="@id/tvLocalisationsHeader"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvLocalisationsFollowing"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:nestedScrollingEnabled="false"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            app:layout_constraintTop_toBottomOf="@id/tvLocalisationsHeader"
+            tools:listitem="@layout/item_following" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.core.widget.NestedScrollView>

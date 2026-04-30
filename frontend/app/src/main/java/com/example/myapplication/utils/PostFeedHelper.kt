@@ -14,6 +14,7 @@ import com.example.myapplication.R
 import com.example.myapplication.adapter.PostsAdapter
 import com.example.myapplication.dto.post.PostDto
 import com.example.myapplication.fragment.post.EditPostFragment
+import com.example.myapplication.fragment.post.LocalisationViewerFragment
 import com.example.myapplication.fragment.post.PostViewerFragment
 import com.example.myapplication.fragment.post.TagViewerFragment
 import com.example.myapplication.fragment.profile.ProfileViewerFragment
@@ -53,6 +54,10 @@ fun Fragment.buildPostsAdapter(onChanged: () -> Unit): PostsAdapter = PostsAdapt
     onTagClick = if (SessionManager.getUserId() != null) { tag ->
         val bundle = Bundle().apply { putString(TagViewerFragment.ARG_TAG, tag) }
         findNavController().navigate(R.id.tagViewerFragment, bundle)
+    } else null,
+    onLocationNameClick = if (SessionManager.getUserId() != null) { name ->
+        val bundle = Bundle().apply { putString(LocalisationViewerFragment.ARG_LOCALISATION, name) }
+        findNavController().navigate(R.id.localisationViewerFragment, bundle)
     } else null
 )
 

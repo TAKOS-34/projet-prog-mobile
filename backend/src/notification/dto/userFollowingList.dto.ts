@@ -10,5 +10,8 @@ export type UserFollowingList = {
     targetGroupAvatar?: string,
 
     targetTagId?: number,
-    targetTagName?: string
+    targetTagName?: string,
+
+    targetLocalisationId?: number,
+    targetLocalisationName?: string
 }

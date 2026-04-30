@@ -38,6 +38,10 @@ class PostFeedPaginator(
         loadNext()
     }
 
+    fun tryLoadMore() {
+        if (!isLoading && hasMore) loadNext()
+    }
+
     private fun loadNext() {
         if (isLoading || !hasMore) return
         isLoading = true

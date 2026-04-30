@@ -51,7 +51,8 @@ export class NotificationService implements OnModuleInit {
                 targetUser: { select: { id: true, username: true, avatar: true } },
                 post: { select: { imageExt: true  } },
                 group: { select: { id: true, name: true, avatar: true } },
-                tag: { select: { id: true, name: true } }
+                tag: { select: { id: true, name: true } },
+                localisation: { select: { id: true, name: true } }
             }
         });
 
@@ -73,14 +74,17 @@ export class NotificationService implements OnModuleInit {
             groupAvatar: n.group?.avatar ? this.cdn.getGroupAvatarUrl(n.group.avatar) : undefined,
 
             tagId: n.tag?.id,
-            tagName: n.tag?.name
+            tagName: n.tag?.name,
+
+            localisationId: n.localisation?.id,
+            localisationName: n.localisation?.name
         }));
     }
 
 
 
     async getUserFollowing(user: UserSession): Promise<UserFollowingList[]> {
-        const [users, groups, tags] = await Promise.all([
+        const [users, groups, tags, localisations] = await Promise.all([
             this.prisma.userFollow.findMany({
                 where: { followerId: user.id },
                 select: {
@@ -98,6 +102,10 @@ export class NotificationService implements OnModuleInit {
             this.prisma.tagFollow.findMany({
                 where: { followerId: user.id },
                 select: { tagId: true, following: { select: { name: true } } }
+            }),
+            this.prisma.localisationFollow.findMany({
+                where: { followerId: user.id },
+                select: { localisationId: true, following: { select: { name: true } } }
             })
         ]);
 
@@ -118,6 +126,11 @@ export class NotificationService implements OnModuleInit {
                 type: 'tag',
                 targetTagId: t.tagId,
                 targetTagName: t.following.name
+            })),
+            ...localisations.map(l => ({
+                type: 'localisation',
+                targetLocalisationId: l.localisationId,
+                targetLocalisationName: l.following.name
             }))
         ];
     }
@@ -307,7 +320,7 @@ export class NotificationService implements OnModuleInit {
             tokens: fcmTokens,
             notification: {
                 title: 'Nouveau post sur vos tags préférés ! 🤩',
-                body: `Découvrez "${postTitle}" contenant les tags: ${formattedTags}`,
+                body: `Découvrez "${postTitle}" contenant les tags : ${formattedTags}`,
             },
             data: {
                 type: NotificationType.NEW_POST_TAG,
@@ -319,7 +332,71 @@ export class NotificationService implements OnModuleInit {
         await this.cleanupTokens(fcmTokens, response);
     }
 
+    async notifyNewPostLocalisation(userId: number, postId: string, postTitle: string, localisation: string, groupId?: number): Promise<void> {
+        const localisationRecord = await this.prisma.localisation.findUnique({
+            where: { name: localisation },
+            select: { id: true, name: true }
+        });
+        if (!localisationRecord) return;
 
+        let group = null;
+        if (groupId) {
+            group = await this.prisma.group.findUnique({
+                where: { id: groupId },
+                select: { isGroupPrivate: true }
+            });
+        }
+
+        const followers = await this.prisma.localisationFollow.findMany({
+            where: {
+                localisationId: localisationRecord.id,
+                followerId: { not: userId },
+                ...(group?.isGroupPrivate ? {
+                    follower: {
+                        memberOf: { some: { groupId } }
+                    }
+                } : {})
+            },
+            select: { followerId: true }
+        });
+
+        const recipientIds = followers.map(f => f.followerId);
+        if (recipientIds.length === 0) return;
+
+        await this.prisma.notification.createMany({
+            data: recipientIds.map(id => ({
+                targetUserId: userId,
+                userId: id,
+                type: NotificationType.NEW_POST_LOCALISATION,
+                targetPostId: postId,
+                targetLocalisationId: localisationRecord.id
+            }))
+        });
+
+        const tokenRows = await this.prisma.fcmToken.findMany({
+            where: { userId: { in: recipientIds } },
+            select: { fcmToken: true }
+        });
+
+        const fcmTokens = [...new Set(tokenRows.map(r => r.fcmToken))];
+        if (fcmTokens.length === 0) return;
+
+        const response = await admin.messaging().sendEachForMulticast({
+            tokens: fcmTokens,
+            notification: {
+                title: 'Nouveau post sur une localisation que vous suivez ! 📍',
+                body: `Découvrez "${postTitle}" à ${localisationRecord.name}`,
+            },
+            data: {
+                type: NotificationType.NEW_POST_LOCALISATION,
+                postId: postId,
+                postTitle: postTitle,
+                localisationId: localisationRecord.id.toString()
+            },
+        });
+
+        await this.cleanupTokens(fcmTokens, response);
+    }
 
     async notifyNewPostLike(postId: string, userId?: number): Promise<void> {
         const post = await this.prisma.post.findUniqueOrThrow({ where: { id: postId } });
@@ -434,4 +511,26 @@ export class NotificationService implements OnModuleInit {
 
         return { status: true, message: 'Deleted new tag post notifications' };
     }
+
+
+
+    async addLocalisationFollow(follower: UserSession, localisationId: number): Promise<ResponseMessage> {
+        await this.prisma.localisationFollow.create({ data: {
+            followerId: follower.id,
+            localisationId
+        }});
+
+        return { status: true, message: 'Added new localisation post notifications' };
+    }
+
+    async deleteLocalisationFollow(follower: UserSession, localisationId: number): Promise<ResponseMessage> {
+        await this.prisma.localisationFollow.delete({ where: {
+            followerId_localisationId: {
+                followerId: follower.id,
+                localisationId
+            }
+        }});
+
+        return { status: true, message: 'Deleted new localisation post notifications' };
+    } 
 }

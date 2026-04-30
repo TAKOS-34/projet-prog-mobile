@@ -10,9 +10,6 @@ export class UpdatePostDto {
     type?: PostType;
 
     @IsOptional()
-    localisation?: string;
-
-    @IsOptional()
     @MaxLength(280, { message: "Description must not be longer than 280 characters" })
     description?: string;
 }

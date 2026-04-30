@@ -6,9 +6,6 @@ model Post {
     isEdited     Boolean   @default(false)
     type         PostType  @default(OTHER)
     title        String    @db.VarChar(64)
-    localisation String   
-    long         Float
-    lat          Float
     description  String?   @db.VarChar(280)
     audio        String?
     audioDuration Int?
@@ -21,6 +18,9 @@ model Post {
     reports  Report[]
     notifications Notification[]
     postTags PostTag[]
+
+    localisationId Int
+    Localisation   Localisation @relation(fields: [localisationId], references: [id], onDelete: Cascade)
 
     groupId Int?
     Group   Group? @relation(fields: [groupId], references: [id], onDelete: Restrict)
@@ -68,6 +68,21 @@ model PostTag {
     tag    Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
 
     @@id([postId, tagId])
+}
+
+
+
+model Localisation {
+    id    Int       @id @default(autoincrement())
+    name  String    @unique
+    long  Float
+    lat   Float
+
+    nbUses Int @default(0)
+
+    posts         Post[]
+    followers     LocalisationFollow[]
+    notifications Notification[]
 }
 
 

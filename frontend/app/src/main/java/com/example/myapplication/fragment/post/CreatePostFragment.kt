@@ -25,6 +25,7 @@ import com.example.myapplication.R
 import com.example.myapplication.dto.group.GroupInfosDto
 import com.example.myapplication.dto.post.PostType
 import com.example.myapplication.utils.ApiClient
+import com.example.myapplication.utils.LocalisationSuggester
 import com.example.myapplication.utils.resolveBackendUrl
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.chip.Chip
@@ -52,6 +53,7 @@ class CreatePostFragment : Fragment() {
     private lateinit var tilTags: TextInputLayout
     private lateinit var etTags: TextInputEditText
     private lateinit var cgSuggestedTags: ChipGroup
+    private lateinit var cgLocationSuggestions: ChipGroup
     private lateinit var btnIaTags: MaterialButton
     private lateinit var pbIaLoading: ProgressBar
     private lateinit var btnSelectAudio: MaterialButton
@@ -105,6 +107,7 @@ class CreatePostFragment : Fragment() {
 
         setupTagSuggestions()
         fetchPopularTags()
+        setupLocationSuggestions()
         fetchMyGroups()
 
         return view
@@ -205,6 +208,52 @@ class CreatePostFragment : Fragment() {
         })
     }
 
+    private fun setupLocationSuggestions() {
+        val handler = Handler(Looper.getMainLooper())
+        var pending: Runnable? = null
+        var ignoreNext = false
+
+        etLocation.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                pending?.let { handler.removeCallbacks(it) }
+                if (ignoreNext) { ignoreNext = false; return }
+                val q = s?.toString()?.trim().orEmpty()
+                if (q.length < 2) {
+                    cgLocationSuggestions.removeAllViews()
+                    return
+                }
+                pending = Runnable {
+                    LocalisationSuggester.suggest(q) { results ->
+                        activity?.runOnUiThread { renderLocationChips(results) { picked ->
+                            ignoreNext = true
+                            etLocation.setText(picked)
+                            etLocation.setSelection(etLocation.text?.length ?: 0)
+                            cgLocationSuggestions.removeAllViews()
+                        } }
+                    }
+                }
+                handler.postDelayed(pending!!, 350)
+            }
+            override fun afterTextChanged(s: Editable?) {}
+        })
+    }
+
+    private fun renderLocationChips(
+        results: List<com.example.myapplication.utils.LocalisationSuggestion>,
+        onPick: (String) -> Unit
+    ) {
+        cgLocationSuggestions.removeAllViews()
+        results.forEach { suggestion ->
+            val chip = Chip(context).apply {
+                text = suggestion.label
+                isClickable = true
+                setOnClickListener { onPick(suggestion.name) }
+            }
+            cgLocationSuggestions.addView(chip)
+        }
+    }
+
     private fun fetchPopularTags() {
         ApiClient.get("tag/popular") { body, _, _ ->
             body?.let { updateTagChips(it) }
@@ -291,6 +340,7 @@ class CreatePostFragment : Fragment() {
         tilTags = view.findViewById(R.id.tilTags)
         etTags = view.findViewById(R.id.etTags)
         cgSuggestedTags = view.findViewById(R.id.cgSuggestedTags)
+        cgLocationSuggestions = view.findViewById(R.id.cgLocationSuggestions)
         btnSelectAudio = view.findViewById(R.id.btnSelectAudio)
         tvAudioStatus = view.findViewById(R.id.tvAudioStatus)
         btnPublish = view.findViewById(R.id.btnPublish)

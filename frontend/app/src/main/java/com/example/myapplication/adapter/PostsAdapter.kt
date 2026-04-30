@@ -34,12 +34,13 @@ class PostsAdapter(
     private val onUserClick: (PostDto) -> Unit = {},
     private val onImageClick: (PostDto) -> Unit = {},
     private val onGroupClick: (PostDto) -> Unit = {},
-    private val onTagClick: ((String) -> Unit)? = null
+    private val onTagClick: ((String) -> Unit)? = null,
+    private val onLocationNameClick: ((String) -> Unit)? = null
 ) : ListAdapter<PostDto, PostsAdapter.PostViewHolder>(DIFF) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PostViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.item_post, parent, false)
-        return PostViewHolder(view, onLike, onComment, onReport, onLocation, onEdit, onDelete, onUserClick, onImageClick, onGroupClick, onTagClick)
+        return PostViewHolder(view, onLike, onComment, onReport, onLocation, onEdit, onDelete, onUserClick, onImageClick, onGroupClick, onTagClick, onLocationNameClick)
     }
 
     override fun onBindViewHolder(holder: PostViewHolder, position: Int) {
@@ -62,7 +63,8 @@ class PostsAdapter(
         private val onUserClick: (PostDto) -> Unit,
         private val onImageClick: (PostDto) -> Unit,
         private val onGroupClick: (PostDto) -> Unit,
-        private val onTagClick: ((String) -> Unit)?
+        private val onTagClick: ((String) -> Unit)?,
+        private val onLocationNameClick: ((String) -> Unit)?
     ) : RecyclerView.ViewHolder(itemView) {
 
         private val ivImage: ImageView = itemView.findViewById(R.id.ivPostImage)
@@ -126,6 +128,13 @@ class PostsAdapter(
                 DateUtils.formatRelativeDate(context, post.creationDate)
             )
             tvLocation.text = post.localisation
+            if (onLocationNameClick != null) {
+                tvLocation.isClickable = true
+                tvLocation.setOnClickListener { onLocationNameClick.invoke(post.localisation) }
+            } else {
+                tvLocation.isClickable = false
+                tvLocation.setOnClickListener(null)
+            }
 
             tvCommentCount.text = post.nbComments.toString()
 

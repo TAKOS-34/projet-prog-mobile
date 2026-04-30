@@ -71,10 +71,16 @@
     <string name="groups_empty">Vous n\'avez rejoint aucun groupe</string>
     <string name="groups_search_empty">Aucun résultat</string>
     <string name="search_title">RECHERCHE</string>
-    <string name="search_q_hint">Titre, description, localisation...</string>
+    <string name="search_q_hint">Titre, description, utilisateur, groupe...</string>
     <string name="search_tag_hint">Tag</string>
     <string name="search_type_hint">Type</string>
     <string name="search_type_all">Tous</string>
+    <string name="search_loc_hint">Lieu</string>
+    <string name="search_dist_hint">Distance</string>
+    <string name="search_dist_any">Toutes</string>
+    <string name="search_around_me">Autour de moi</string>
+    <string name="btn_search_action">Rechercher</string>
+    <string name="error_location_unavailable">Localisation indisponible</string>
     <string name="search_empty">Aucun résultat</string>
     <string name="notification_title">NOTIFICATIONS</string>
     <string name="notification_empty">Aucune notification</string>
@@ -88,6 +94,9 @@
     <string name="notif_following_empty_users">Aucun utilisateur suivi</string>
     <string name="notif_following_tags">TAGS</string>
     <string name="notif_following_empty_tags">Aucun tag suivi</string>
+    <string name="notif_following_localisations">LOCALISATIONS</string>
+    <string name="notif_following_empty_localisations">Aucune localisation suivie</string>
+    <string name="notif_localisation_post">Nouveau post à %1$s</string>
     <string name="notif_following_unfollow">Se désabonner</string>
     <string name="notif_group_post">Nouveau post dans %1$s</string>
     <string name="notif_tag_post">Nouveau post avec #%1$s</string>

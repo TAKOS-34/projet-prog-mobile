@@ -4,18 +4,27 @@ import { PrismaService } from "src/prisma/prisma.service";
 import { FeedInfos, PostInfos } from "./dto/postInfos.dto";
 import { CommentInfos } from "./dto/comment.dto";
 import { PostType } from "@prisma/client";
+import { LocalisationUtil } from "src/utils/localisation/localisation.util";
 
 @Injectable()
 export class PostQueryService {
     constructor(
         private readonly prisma: PrismaService,
-        private readonly cdn: CdnService
+        private readonly cdn: CdnService,
+        private readonly locUtil: LocalisationUtil
     ) {}
 
 
 
-    async getFeed(limit: number, cursor?: string, userId?: number, anonymousToken?: string, q?: string, tag?: string, type?: PostType): Promise<FeedInfos> {
+    async getFeed(limit: number, cursor?: string, userId?: number, anonymousToken?: string, q?: string, tag?: string, type?: PostType, loc?: string, dist?: number): Promise<FeedInfos> {
         const realUser = userId ? { userId } : anonymousToken ? { anonymousUserId: anonymousToken } : null;
+        
+        const cleanLocalisation: string | null = loc ? loc.toLowerCase().trim() : null;
+        let localisationIds: number[] | null = null;
+        if (cleanLocalisation && dist) {
+            localisationIds = await this.getNearbyLocalisationIds(cleanLocalisation, dist);
+            if (!localisationIds || localisationIds.length === 0) return { posts: [], nextCursor: undefined };
+        }
 
         const posts = await this.prisma.post.findMany({
             take: limit + 1,
@@ -27,7 +36,8 @@ export class PostQueryService {
                         OR: [
                             { title: { contains: q, mode: 'insensitive' } },
                             { description: { contains: q, mode: 'insensitive' } },
-                            { localisation: { contains: q, mode: 'insensitive' } }
+                            { User: { username: { contains: q, mode: 'insensitive' } } },
+                            { Group: { name: { contains: q, mode: 'insensitive' } } }
                         ]
                     } : {},
                     tag ? {
@@ -36,6 +46,7 @@ export class PostQueryService {
                     type ? {
                         type
                     } : {},
+                    localisationIds ? { localisationId: { in: localisationIds } } : cleanLocalisation ? { Localisation: { name: cleanLocalisation } } : {},
                     {
                         OR: [
                             { Group: null },
@@ -51,6 +62,7 @@ export class PostQueryService {
             },
             orderBy: [{ creationDate: 'desc' }, { id: 'desc' }],
             include: {
+                Localisation: { select: { id: true, name: true, long: true, lat: true } },
                 Group: { select: { id: true, name: true, avatar: true } },
                 User: { select: { id: true, username: true, avatar: true } },
                 postTags: { select: { tag: { select: { name: true } } } },
@@ -71,9 +83,9 @@ export class PostQueryService {
                 updatedAt: post.updatedAt ?? undefined,
                 title: post.title,
                 type: post.type,
-                localisation: post.localisation,
-                long: post.long,
-                lat: post.lat,
+                localisation: post.Localisation.name,
+                long: Number(post.Localisation.long),
+                lat: Number(post.Localisation.lat),
                 description: post.description ?? undefined,
                 audio: post.audio ? this.cdn.getAudioUrl(post.audio) : undefined,
                 audioDuration: post.audioDuration ?? undefined,
@@ -101,6 +113,7 @@ export class PostQueryService {
         const post = await this.prisma.post.findUniqueOrThrow({
             where: { id: postId },
             include: {
+                Localisation: { select: { id: true, name: true, long: true, lat: true } },
                 Group: { select: { id: true, name: true, avatar: true } },
                 User: { select: { id: true, username: true, avatar: true } },
                 postTags: { select: { tag: { select: { name: true } } } },
@@ -116,9 +129,9 @@ export class PostQueryService {
             updatedAt: post.updatedAt ?? undefined,
             title: post.title,
             type: post.type,
-            localisation: post.localisation,
-            long: post.long,
-            lat: post.lat,
+            localisation: post.Localisation.name,
+            long: Number(post.Localisation.long),
+            lat: Number(post.Localisation.lat),
             description: post.description ?? undefined,
             audio: post.audio ? this.cdn.getAudioUrl(post.audio) : undefined,
             nbLikes: post.nbLikes,
@@ -205,5 +218,41 @@ export class PostQueryService {
             isLiked: c.commentLikes?.length > 0,
             isYours: userId ? userId === c.User.id : false
         }));
+    }
+
+
+
+    private async getNearbyLocalisationIds(locName: string, dist: number): Promise<number[] | null> {
+        let lat: number, lng: number;
+
+        const refLoc = await this.prisma.localisation.findFirst({
+            where: { name: locName },
+            select: { lat: true, long: true }
+        });
+
+        if (refLoc) {
+            lat = Number(refLoc.lat);
+            lng = Number(refLoc.long);
+        } else {
+            const coords = await this.locUtil.getCoordinates(locName);
+            lat = coords.lat;
+            lng = coords.long;
+        }
+
+        const latDelta = dist / 111;
+        const lngDelta = dist / (111 * Math.cos((lat * Math.PI) / 180));
+
+        const nearby = await this.prisma.$queryRaw<{ id: number }[]>`
+            SELECT id FROM "Localisation"
+            WHERE lat BETWEEN ${lat - latDelta} AND ${lat + latDelta}
+                AND long BETWEEN ${lng - lngDelta} AND ${lng + lngDelta}
+                AND (6371 * acos(
+                    cos(radians(${lat})) * cos(radians(lat)) *
+                    cos(radians(long) - radians(${lng})) +
+                    sin(radians(${lat})) * sin(radians(lat))
+                )) <= ${dist}
+            `;
+
+        return nearby.map(r => r.id);
     }
 }

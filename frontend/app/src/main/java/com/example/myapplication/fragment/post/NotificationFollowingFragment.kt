@@ -22,13 +22,16 @@ class NotificationFollowingFragment : Fragment() {
     private lateinit var groupsAdapter: FollowingAdapter
     private lateinit var usersAdapter: FollowingAdapter
     private lateinit var tagsAdapter: FollowingAdapter
+    private lateinit var localisationsAdapter: FollowingAdapter
 
     private lateinit var rvGroups: RecyclerView
     private lateinit var rvUsers: RecyclerView
     private lateinit var rvTags: RecyclerView
+    private lateinit var rvLocalisations: RecyclerView
     private lateinit var tvGroupsEmpty: TextView
     private lateinit var tvUsersEmpty: TextView
     private lateinit var tvTagsEmpty: TextView
+    private lateinit var tvLocalisationsEmpty: TextView
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -39,16 +42,20 @@ class NotificationFollowingFragment : Fragment() {
         rvGroups = view.findViewById(R.id.rvGroupsFollowing)
         rvUsers = view.findViewById(R.id.rvUsersFollowing)
         rvTags = view.findViewById(R.id.rvTagsFollowing)
+        rvLocalisations = view.findViewById(R.id.rvLocalisationsFollowing)
         tvGroupsEmpty = view.findViewById(R.id.tvGroupsEmpty)
         tvUsersEmpty = view.findViewById(R.id.tvUsersEmpty)
         tvTagsEmpty = view.findViewById(R.id.tvTagsEmpty)
+        tvLocalisationsEmpty = view.findViewById(R.id.tvLocalisationsEmpty)
 
         groupsAdapter = FollowingAdapter { unfollow(it) }
         usersAdapter = FollowingAdapter { unfollow(it) }
         tagsAdapter = FollowingAdapter { unfollow(it) }
+        localisationsAdapter = FollowingAdapter { unfollow(it) }
         rvGroups.adapter = groupsAdapter
         rvUsers.adapter = usersAdapter
         rvTags.adapter = tagsAdapter
+        rvLocalisations.adapter = localisationsAdapter
 
         view.findViewById<ImageView>(R.id.btnBack).setOnClickListener {
             findNavController().navigateUp()
@@ -69,6 +76,7 @@ class NotificationFollowingFragment : Fragment() {
                         renderSection(all.filter { it.type.equals("group", true) }, groupsAdapter, rvGroups, tvGroupsEmpty)
                         renderSection(all.filter { it.type.equals("user", true) }, usersAdapter, rvUsers, tvUsersEmpty)
                         renderSection(all.filter { it.type.equals("tag", true) }, tagsAdapter, rvTags, tvTagsEmpty)
+                        renderSection(all.filter { it.type.equals("localisation", true) }, localisationsAdapter, rvLocalisations, tvLocalisationsEmpty)
                     } catch (e: Exception) {
                         e.printStackTrace()
                     }

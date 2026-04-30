@@ -28,3 +28,14 @@ model TagFollow {
 
     @@id([followerId, tagId])
 }
+
+
+
+model LocalisationFollow {
+    followerId     Int
+    localisationId Int
+    follower       User          @relation(fields: [followerId], references: [id], onDelete: Cascade)
+    following      Localisation  @relation(fields: [localisationId], references: [id], onDelete: Cascade)
+
+    @@id([followerId, localisationId])
+}

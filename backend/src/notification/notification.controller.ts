@@ -90,4 +90,16 @@ export class NotificationController {
     deleteTagFollow(@GetUser() user: UserSession, @Param('tagId') tagId: number): Promise<ResponseMessage> {
         return this.notificationService.deleteTagFollow(user, tagId);
     }
+
+    @UseGuards(AuthGuard)
+    @Post('/localisation/:localisationId')
+    addlocalisationFollow(@GetUser() user: UserSession, @Param('localisationId') localisationId: number): Promise<ResponseMessage> {
+        return this.notificationService.addLocalisationFollow(user, localisationId);
+    }
+
+    @UseGuards(AuthGuard)
+    @Delete('/localisation/:localisationId')
+    deletelocalisationFollow(@GetUser() user: UserSession, @Param('localisationId') localisationId: number): Promise<ResponseMessage> {
+        return this.notificationService.deleteLocalisationFollow(user, localisationId);
+    }
 }

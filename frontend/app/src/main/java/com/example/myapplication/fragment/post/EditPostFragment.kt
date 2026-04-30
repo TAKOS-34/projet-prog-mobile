@@ -28,7 +28,6 @@ class EditPostFragment : Fragment() {
     private lateinit var etTitle: TextInputEditText
     private lateinit var tilType: TextInputLayout
     private lateinit var atvType: AutoCompleteTextView
-    private lateinit var etLocation: TextInputEditText
     private lateinit var etDescription: TextInputEditText
     private lateinit var btnUpdate: MaterialButton
 
@@ -46,12 +45,10 @@ class EditPostFragment : Fragment() {
         etTitle = view.findViewById(R.id.etTitle)
         tilType = view.findViewById(R.id.tilType)
         atvType = view.findViewById(R.id.atvType)
-        etLocation = view.findViewById(R.id.etLocation)
         etDescription = view.findViewById(R.id.etDescription)
         btnUpdate = view.findViewById(R.id.btnUpdatePost)
 
         etTitle.hint = post.title
-        etLocation.hint = post.localisation
         etDescription.hint = post.description.orEmpty()
 
         setupTypeDropdown()
@@ -84,15 +81,12 @@ class EditPostFragment : Fragment() {
     private fun performUpdate() {
         val newTitle = etTitle.text.toString().trim().takeIf { it.isNotEmpty() && it != post.title }
         val newType = selectedPostType?.name?.takeIf { it != post.type }
-        val newLocation = etLocation.text.toString().trim()
-            .takeIf { it.isNotEmpty() && it != post.localisation }
         val newDescription = etDescription.text.toString().trim()
             .takeIf { it.isNotEmpty() && it != post.description.orEmpty() }
 
         val dto = UpdatePostRequestDto(
             title = newTitle,
             type = newType,
-            localisation = newLocation,
             description = newDescription
         )
 

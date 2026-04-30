@@ -54,6 +54,10 @@ class FollowingAdapter(
                     tvName.text = "#${item.targetTagName.orEmpty()}"
                     ivAvatar.visibility = View.GONE
                 }
+                "localisation" -> {
+                    tvName.text = item.targetLocalisationName.orEmpty()
+                    ivAvatar.visibility = View.GONE
+                }
             }
             btnUnfollow.setOnClickListener { onUnfollow(item) }
         }
@@ -81,6 +85,7 @@ class FollowingAdapter(
             "group" -> item.targetGroupId
             "user" -> item.targetUserId
             "tag" -> item.targetTagId
+            "localisation" -> item.targetLocalisationId
             else -> null
         }
     }

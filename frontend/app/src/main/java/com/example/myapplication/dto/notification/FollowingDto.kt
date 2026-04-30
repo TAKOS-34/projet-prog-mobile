@@ -12,5 +12,8 @@ data class FollowingDto(
     val targetGroupAvatar: String? = null,
 
     val targetTagId: Int? = null,
-    val targetTagName: String? = null
+    val targetTagName: String? = null,
+
+    val targetLocalisationId: Int? = null,
+    val targetLocalisationName: String? = null
 )

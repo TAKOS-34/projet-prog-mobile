@@ -110,6 +110,7 @@ export class GroupService {
         const posts = await this.prisma.post.findMany({
             where: { groupId },
             include: {
+                Localisation: { select: { id: true, name: true, long: true, lat: true } },
                 Group: { select: { id: true, name: true, avatar: true } },
                 User: { select: { id: true, username: true, avatar: true } },
                 postTags: { select: { tag: { select: { name: true } } } },
@@ -126,9 +127,9 @@ export class GroupService {
             updatedAt: post.updatedAt ?? undefined,
             title: post.title,
             type: post.type,
-            localisation: post.localisation,
-            long: post.long,
-            lat: post.lat,
+            localisation: post.Localisation.name,
+            long: Number(post.Localisation.long),
+            lat: Number(post.Localisation.lat),
             description: post.description ?? undefined,
             audio: post.audio ? this.cdn.getAudioUrl(post.audio) : undefined,
             nbLikes: post.nbLikes,

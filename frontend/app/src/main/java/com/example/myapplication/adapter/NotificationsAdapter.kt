@@ -83,12 +83,14 @@ class NotificationsAdapter(
                 else
                     context.getString(R.string.notif_post_liked, notif.targetUsername)
                 else -> when {
-                    !notif.targetUsername.isNullOrBlank() && notif.groupName.isNullOrBlank() && notif.tagName.isNullOrBlank() ->
+                    !notif.targetUsername.isNullOrBlank() && notif.groupName.isNullOrBlank() && notif.tagName.isNullOrBlank() && notif.localisationName.isNullOrBlank() ->
                         context.getString(R.string.notif_user_post, notif.targetUsername)
                     !notif.groupName.isNullOrBlank() ->
                         context.getString(R.string.notif_group_post, notif.groupName)
                     !notif.tagName.isNullOrBlank() ->
                         context.getString(R.string.notif_tag_post, notif.tagName)
+                    !notif.localisationName.isNullOrBlank() ->
+                        context.getString(R.string.notif_localisation_post, notif.localisationName)
                     else -> ""
                 }
             }

@@ -30,6 +30,7 @@ model User {
     userFollowing  UserFollow[]  @relation("UserFollowsGiven")
     groupFollowing GroupFollow[]
     tagFollowing   TagFollow[]
+    localisationFollowing LocalisationFollow[]
 }
 
 

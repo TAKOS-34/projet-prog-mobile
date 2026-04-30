@@ -12,20 +12,21 @@ import { UpdatePostDto } from './dto/updatePost.dto';
 import { randomUUID } from 'crypto';
 import { NotificationService } from 'src/notification/notification.service';
 import { parseBuffer } from 'music-metadata';
+import { LocalisationUtil } from 'src/utils/localisation/localisation.util';
 
 @Injectable()
 export class PostCommandService {
-    private readonly geocoder: NodeGeocoder.Geocoder = NodeGeocoder({ provider: 'openstreetmap' });
-
     constructor(
         private readonly prisma: PrismaService,
         private readonly cdn: CdnService,
-        private readonly notification: NotificationService
+        private readonly notification: NotificationService,
+        private readonly locUtil: LocalisationUtil
     ) {}
 
 
     async createPost(image: Express.Multer.File, post: CreatePostDto, user: UserSession, audio?: Express.Multer.File): Promise<ResponseMessage> {
-        const { long, lat } = await this.getCoordinates(post.localisation);
+        const cleanLocalisation = post.localisation.toLowerCase().trim();
+        const { long, lat } = await this.locUtil.getCoordinates(cleanLocalisation);
         const imageExt: string = image.mimetype.replace('image/', '');
         const cleanTags: string[] = (post.tags ?? []).map(t => t.toLowerCase().trim().split(/\s+/)[0]).filter(t => t !== '');
         const audioName = audio ? (randomUUID() + '.' + audio.mimetype.replace('audio/', '')) : null;
@@ -43,19 +44,22 @@ export class PostCommandService {
         }
 
         try {
-            const newPost = await this.prisma.post.create({
-                data: {
+
+            const localisation = await this.prisma.localisation.upsert({
+                where: { name: cleanLocalisation }, update: {},
+                create: { name: cleanLocalisation, long: long, lat: lat }
+            });
+
+            const newPost = await this.prisma.post.create({ data: {
                 imageExt,
-                lat,
-                long,
                 userId: user.id,
                 title: post.title,
                 type: post.type,
-                localisation: post.localisation.toLowerCase().trim(),
                 description: post.description ?? null,
                 groupId: post.groupId ?? null,
                 audio: audioName,
                 audioDuration: audioDurationMs,
+                localisationId: localisation.id,
                 postTags: {
                     create: cleanTags.map(tagName => ({
                         tag: {
@@ -65,8 +69,7 @@ export class PostCommandService {
                             }
                         }
                     }))
-                }
-                },
+                }},
                 select: { id: true }
             });
 
@@ -81,6 +84,7 @@ export class PostCommandService {
             }
 
             this.notification.notifyNewPostUser(user.id, newPost.id, post.title, post.groupId);
+            this.notification.notifyNewPostLocalisation(user.id, newPost.id, post.title, cleanLocalisation, post.groupId);
 
             if (post.groupId) {
                 this.notification.notifyNewPostGroup(post.groupId, user.id, newPost.id, post.title);
@@ -100,23 +104,32 @@ export class PostCommandService {
 
 
     async updatePost(postId: string, post: UpdatePostDto, user: UserSession): Promise<ResponseMessage> {
-        const { title, type, description, localisation } = post;
-        const coords = localisation ? await this.getCoordinates(localisation) : undefined;
+        const postExists = await this.prisma.post.findUnique({
+            where: { id: postId },
+            select: { userId: true }
+        });
 
-        await this.prisma.post.updateMany({
-            data: {
-                isEdited: true,
-                updatedAt: new Date(),
-                ...(title && { title }),
-                ...(description && { description }),
-                ...(type && { type }),
-                ...(localisation && { localisation: localisation.toLowerCase().trim() }),
-                ...(coords && { long: coords.long, lat: coords.lat })
-            },
-            where: {
-                id: postId,
-                userId: user.id,
-            }
+        if (!postExists) {
+            throw new NotFoundException('Post does not exist');
+        }
+
+        if (postExists.userId !== user.id) {
+            throw new UnauthorizedException('You can only update your own posts');
+        }
+
+        const { title, type, description } = post;
+
+        const updateData: any = {
+            isEdited: true,
+            updatedAt: new Date(),
+            ...(title && { title }),
+            ...(description && { description }),
+            ...(type && { type }),
+        };
+
+        await this.prisma.post.update({
+            data: updateData,
+            where: { id: postId }
         });
 
         return { status: true, message: 'Post updated' };
@@ -167,18 +180,6 @@ export class PostCommandService {
         // Notification to admins
 
         return { status: true, message: 'Post reported' };
-    }
-
-
-
-    private async getCoordinates(address: string): Promise<{ long: number, lat: number }> {
-        const res = await this.geocoder.geocode(address);
-
-        if (!res.length || !res[0].latitude || !res[0].longitude) {
-            throw new BadRequestException('Localisation is not correct');
-        }
-
-        return { long: res[0].longitude, lat: res[0].latitude };
     }
 
 

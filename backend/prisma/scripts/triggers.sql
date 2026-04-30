@@ -119,3 +119,19 @@ $$ LANGUAGE plpgsql;
 
 DROP TRIGGER IF EXISTS tr_tag_usage_count ON "PostTag";
 CREATE TRIGGER tr_tag_usage_count AFTER INSERT OR DELETE ON "PostTag" FOR EACH ROW EXECUTE FUNCTION update_tag_usage_count();
+
+
+
+CREATE OR REPLACE FUNCTION update_localisation_usage_count() RETURNS TRIGGER AS $$
+BEGIN
+    IF (TG_OP = 'INSERT') THEN
+        UPDATE "Localisation" SET "nbUses" = "nbUses" + 1 WHERE id = NEW."localisationId";
+    ELSIF (TG_OP = 'DELETE') THEN
+        UPDATE "Localisation" SET "nbUses" = "nbUses" - 1 WHERE id = OLD."localisationId";
+    END IF;
+    RETURN NULL;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS tr_localisation_usage_count ON "Post";
+CREATE TRIGGER tr_localisation_usage_count AFTER INSERT OR DELETE ON "Post" FOR EACH ROW EXECUTE FUNCTION update_localisation_usage_count();
