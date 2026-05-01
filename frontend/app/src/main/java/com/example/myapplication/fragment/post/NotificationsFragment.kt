@@ -16,9 +16,8 @@ import com.example.myapplication.adapter.NotificationsAdapter
 import com.example.myapplication.dto.notification.NotificationDto
 import com.example.myapplication.utils.ApiClient
 import com.example.myapplication.utils.AuthViewModel
+import com.example.myapplication.utils.NotificationsPaginator
 import com.google.android.material.button.MaterialButton
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 
 class NotificationsFragment : Fragment() {
 
@@ -27,6 +26,7 @@ class NotificationsFragment : Fragment() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var tvEmpty: TextView
     private lateinit var adapter: NotificationsAdapter
+    private lateinit var paginator: NotificationsPaginator
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -57,39 +57,29 @@ class NotificationsFragment : Fragment() {
         }
         recyclerView.adapter = adapter
 
-        fetchNotifications()
+        paginator = NotificationsPaginator(
+            recyclerView = recyclerView,
+            adapter = adapter,
+            onUi = { block -> activity?.runOnUiThread(block) },
+            onResults = { isEmpty -> renderState(isEmpty) },
+            onPageLoaded = { page -> markPageAsRead(page) }
+        )
+        paginator.reset()
 
         return view
     }
 
-    private fun fetchNotifications() {
-        ApiClient.get("notification") { body, _, error ->
-            activity?.runOnUiThread {
-                if (error == null && body != null) {
-                    try {
-                        val type = object : TypeToken<List<NotificationDto>>() {}.type
-                        val notifications: List<NotificationDto> = Gson().fromJson(body, type)
-                        renderState(notifications.isEmpty())
-                        adapter.submitList(notifications)
+    private fun markPageAsRead(page: List<NotificationDto>) {
+        val unreadIds = page.filter { !it.isRead }.map { it.id }
+        if (unreadIds.isEmpty()) return
 
-                        val unreadIds = notifications.filter { !it.isRead }.map { it.id }
-                        if (unreadIds.isNotEmpty()) markAsRead(unreadIds, notifications)
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                    }
-                }
-            }
-        }
-    }
-
-    private fun markAsRead(ids: List<Int>, current: List<NotificationDto>) {
         val startedAt = System.currentTimeMillis()
-        ApiClient.patch("notification/mark-as-read", mapOf("notificationIds" to ids)) { _, _, error ->
+        ApiClient.patch("notification/mark-as-read", mapOf("notificationIds" to unreadIds)) { _, _, error ->
             if (error == null) {
                 val remaining = (1000 - (System.currentTimeMillis() - startedAt)).coerceAtLeast(0)
                 Handler(Looper.getMainLooper()).postDelayed({
                     if (isAdded) {
-                        adapter.submitList(current.map { it.copy(isRead = true) })
+                        paginator.markItemsAsRead(unreadIds.toSet())
                         (activity as? com.example.myapplication.fragment.MainActivity)?.refreshNotificationBadge()
                     }
                 }, remaining)

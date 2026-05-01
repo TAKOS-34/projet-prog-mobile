@@ -113,12 +113,17 @@ export class GroupAdminService {
                 userId
             }}),
 
-            this.prisma.groupFollow.delete({
+            this.prisma.groupFollow.deleteMany({
                 where: {
-                    followerId_groupId: {
-                        followerId: userId,
-                        groupId: group.id
-                    }
+                    followerId: userId,
+                    groupId: group.id
+                }
+            }),
+
+            this.prisma.bookmarks.deleteMany({
+                where: {
+                    userId,
+                    post: { groupId: group.id }
                 }
             })
         ]);

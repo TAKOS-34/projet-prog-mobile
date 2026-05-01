@@ -5,6 +5,7 @@ import { FeedInfos, PostInfos } from "./dto/postInfos.dto";
 import { CommentInfos } from "./dto/comment.dto";
 import { PostType } from "@prisma/client";
 import { LocalisationUtil } from "src/utils/localisation/localisation.util";
+import { getNextCursor } from "src/utils/paginator/paginate.util";
 
 @Injectable()
 export class PostQueryService {
@@ -63,19 +64,16 @@ export class PostQueryService {
             orderBy: [{ creationDate: 'desc' }, { id: 'desc' }],
             include: {
                 Localisation: { select: { id: true, name: true, long: true, lat: true } },
-                Group: { select: { id: true, name: true, avatar: true } },
+                Group: { select: { id: true, name: true, avatar: true, members: userId ? { where: { userId }, select: { userId: true } } : false } },
                 User: { select: { id: true, username: true, avatar: true } },
                 postTags: { select: { tag: { select: { name: true } } } },
-                likes: realUser ? { where: realUser, select: { id: true } } : false
+                likes: realUser ? { where: realUser, select: { id: true } } : false,
+                bookmarks: realUser ? { where: realUser, select: { userId: true } } : false
             }
         });
 
-        const hasNextPage = posts.length > limit;
-        const pagePosts = hasNextPage ? posts.slice(0, limit) : posts;
-        const nextCursor = hasNextPage ? pagePosts[pagePosts.length - 1]?.id : undefined;
-
         return {
-            posts: pagePosts.map(post => ({
+            posts: posts.map(post => ({
                 id: post.id,
                 image: this.cdn.getPostUrl(post.id, post.imageExt),
                 creationDate: post.creationDate,
@@ -97,11 +95,13 @@ export class PostQueryService {
                 groupId: post.Group?.id ?? undefined,
                 groupName: post.Group?.name ?? undefined,
                 groupAvatar: post.Group?.avatar ? this.cdn.getGroupAvatarUrl(post.Group.avatar) : undefined,
+                isMember: userId && post.Group ? post.Group.members?.length > 0 : undefined,
                 tags: post.postTags.map(pt => pt.tag.name),
                 isLiked: post.likes?.length > 0,
-                isYours: userId ? userId === post.User.id : false
+                isYours: userId ? userId === post.User.id : false,
+                isBookmarked: userId ? post.bookmarks?.length > 0 : false
             })),
-            nextCursor
+            nextCursor: getNextCursor(posts, limit)
         };
     }
 
@@ -114,10 +114,11 @@ export class PostQueryService {
             where: { id: postId },
             include: {
                 Localisation: { select: { id: true, name: true, long: true, lat: true } },
-                Group: { select: { id: true, name: true, avatar: true } },
+                Group: { select: { id: true, name: true, avatar: true, members: userId ? { where: { userId }, select: { userId: true } } : false } },
                 User: { select: { id: true, username: true, avatar: true } },
                 postTags: { select: { tag: { select: { name: true } } } },
-                likes: realUser ? { where: realUser, select: { id: true } } : false
+                likes: realUser ? { where: realUser, select: { id: true } } : false,
+                bookmarks: realUser ? { where: realUser, select: { userId: true } } : false
             }
         });
 
@@ -142,8 +143,10 @@ export class PostQueryService {
             groupId: post.Group?.id ?? undefined,
             groupName: post.Group?.name ?? undefined,
             groupAvatar: post.Group?.avatar ? this.cdn.getGroupAvatarUrl(post.Group.avatar) : undefined,
+            isMember: userId && post.Group ? post.Group.members?.length > 0 : undefined,
             tags: post.postTags.map(pt => pt.tag.name),
-            isLiked: post.likes?.length > 0
+            isLiked: post.likes?.length > 0,
+            isBookmarked: post.bookmarks?.length > 0,
         };
     }
 

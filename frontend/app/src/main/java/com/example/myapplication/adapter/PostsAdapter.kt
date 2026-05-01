@@ -35,12 +35,13 @@ class PostsAdapter(
     private val onImageClick: (PostDto) -> Unit = {},
     private val onGroupClick: (PostDto) -> Unit = {},
     private val onTagClick: ((String) -> Unit)? = null,
-    private val onLocationNameClick: ((String) -> Unit)? = null
+    private val onLocationNameClick: ((String) -> Unit)? = null,
+    private val onBookmark: ((PostDto, Boolean) -> Unit)? = null
 ) : ListAdapter<PostDto, PostsAdapter.PostViewHolder>(DIFF) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PostViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.item_post, parent, false)
-        return PostViewHolder(view, onLike, onComment, onReport, onLocation, onEdit, onDelete, onUserClick, onImageClick, onGroupClick, onTagClick, onLocationNameClick)
+        return PostViewHolder(view, onLike, onComment, onReport, onLocation, onEdit, onDelete, onUserClick, onImageClick, onGroupClick, onTagClick, onLocationNameClick, onBookmark)
     }
 
     override fun onBindViewHolder(holder: PostViewHolder, position: Int) {
@@ -64,7 +65,8 @@ class PostsAdapter(
         private val onImageClick: (PostDto) -> Unit,
         private val onGroupClick: (PostDto) -> Unit,
         private val onTagClick: ((String) -> Unit)?,
-        private val onLocationNameClick: ((String) -> Unit)?
+        private val onLocationNameClick: ((String) -> Unit)?,
+        private val onBookmark: ((PostDto, Boolean) -> Unit)?
     ) : RecyclerView.ViewHolder(itemView) {
 
         private val ivImage: ImageView = itemView.findViewById(R.id.ivPostImage)
@@ -90,6 +92,7 @@ class PostsAdapter(
         private val tvCommentCount: TextView = itemView.findViewById(R.id.tvCommentCount)
         private val btnLocation: ImageView = itemView.findViewById(R.id.btnLocation)
         private val btnReport: ImageView = itemView.findViewById(R.id.btnReport)
+        private val btnBookmark: ImageView = itemView.findViewById(R.id.btnBookmark)
 
         private var isLikedCurrent = false
         private var likeCountCurrent = 0
@@ -185,6 +188,21 @@ class PostsAdapter(
             btnReport.setOnClickListener { onReport(post) }
             btnLocation.setOnClickListener { onLocation(post) }
 
+            val canBookmark = onBookmark != null && (post.groupId == null || post.isMember)
+            if (canBookmark) {
+                btnBookmark.visibility = View.VISIBLE
+                var isBookmarkedCurrent = post.isBookmarked
+                applyBookmarkState(context, isBookmarkedCurrent)
+                btnBookmark.setOnClickListener {
+                    isBookmarkedCurrent = !isBookmarkedCurrent
+                    applyBookmarkState(context, isBookmarkedCurrent)
+                    onBookmark.invoke(post, isBookmarkedCurrent)
+                }
+            } else {
+                btnBookmark.visibility = View.GONE
+                btnBookmark.setOnClickListener(null)
+            }
+
             ivAvatar.setOnClickListener { onUserClick(post) }
             tvAuthor.setOnClickListener { onUserClick(post) }
             ivImage.setOnClickListener { onImageClick(post) }
@@ -276,6 +294,13 @@ class PostsAdapter(
             mediaPlayer = null
             isPlaying = false
             audioDurationMs = 0
+        }
+
+        private fun applyBookmarkState(context: android.content.Context, isBookmarked: Boolean) {
+            btnBookmark.setImageResource(if (isBookmarked) R.drawable.ic_bookmark_filled else R.drawable.ic_bookmark)
+            btnBookmark.setColorFilter(
+                ContextCompat.getColor(context, if (isBookmarked) R.color.primary else R.color.text_secondary)
+            )
         }
 
         private fun applyLikeState(context: android.content.Context) {

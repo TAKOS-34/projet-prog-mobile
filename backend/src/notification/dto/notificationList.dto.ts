@@ -21,3 +21,8 @@ export type NotificationList = {
     localisationId?: number,
     localisationName?: string
 }
+
+export type NotificationInfos = {
+    notifications: NotificationList[];
+    nextCursor?: number;
+}

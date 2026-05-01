@@ -98,6 +98,10 @@ class ProfileFragment : Fragment() {
             findNavController().navigate(R.id.sessionsFragment)
         }
 
+        view.findViewById<MaterialButton>(R.id.btnBookmarks).setOnClickListener {
+            findNavController().navigate(R.id.bookmarksFragment)
+        }
+
         view.findViewById<MaterialButton>(R.id.btnLogout).setOnClickListener {
             FcmToken.fetchFcmToken { fcmToken ->
                 authViewModel.logout(fcmToken) {

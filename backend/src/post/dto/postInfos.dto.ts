@@ -20,8 +20,10 @@ export type PostInfos = {
     groupId?: number;
     groupName?: string;
     groupAvatar?: string;
+    isMember?: boolean;
     tags: string[];
     isLiked: boolean;
+    isBookmarked: boolean;
 }
 
 export type FeedInfos = {

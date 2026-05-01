@@ -38,6 +38,7 @@ class GroupDetailFragment : Fragment() {
     private lateinit var group: GroupInfosDto
     private lateinit var postsAdapter: PostsAdapter
     private lateinit var rvPosts: RecyclerView
+    private var postsPaginator: com.example.myapplication.utils.PostFeedPaginator? = null
     private lateinit var scrollInfo: NestedScrollView
     private var postsLoaded = false
 
@@ -118,11 +119,14 @@ class GroupDetailFragment : Fragment() {
             if (group.isGroupPrivate) View.VISIBLE else View.GONE
 
         btnFollowGroup = view.findViewById(R.id.btnFollowGroup)
-        group.isFollowing?.let { initial ->
+        val isFollowing = group.isFollowing
+        if (isFollowing != null) {
             btnFollowGroup?.visibility = View.VISIBLE
-            isFollowingGroup = initial
+            isFollowingGroup = isFollowing
             applyFollowState()
             btnFollowGroup?.setOnClickListener { toggleFollowGroup() }
+        } else {
+            btnFollowGroup?.visibility = View.GONE
         }
 
         val tvDescription = view.findViewById<TextView>(R.id.tvDetailDescription)
@@ -174,6 +178,8 @@ class GroupDetailFragment : Fragment() {
                     val bundle = Bundle().apply { putInt(GroupRequestsFragment.ARG_GROUP_ID, group.id) }
                     findNavController().navigate(R.id.groupRequestsFragment, bundle)
                 }
+            } else {
+                btnRequests.visibility = View.GONE
             }
 
             fabEditAvatar.visibility = View.VISIBLE
@@ -192,6 +198,12 @@ class GroupDetailFragment : Fragment() {
 
             btnDelete.visibility = View.VISIBLE
             btnDelete.setOnClickListener { confirmDeleteGroup() }
+        } else {
+            btnBanned.visibility = View.GONE
+            btnRequests.visibility = View.GONE
+            fabEditAvatar.visibility = View.GONE
+            btnEdit.visibility = View.GONE
+            btnDelete.visibility = View.GONE
         }
 
         val btnJoin = view.findViewById<MaterialButton>(R.id.btnJoinGroupDetail)
@@ -216,9 +228,16 @@ class GroupDetailFragment : Fragment() {
                 btnSeePostsAction.setOnClickListener {
                     toggle.check(R.id.btnTabPosts)
                 }
+                btnSeeMember.visibility = View.VISIBLE
             } else {
+                btnSeePostsAction.visibility = View.GONE
                 btnSeeMember.visibility = View.GONE
             }
+        } else {
+            btnJoin.visibility = View.GONE
+            btnJoin.setOnClickListener(null)
+            btnSeeMember.visibility = View.VISIBLE
+            btnSeePostsAction.visibility = View.VISIBLE
         }
     }
 
@@ -334,20 +353,27 @@ class GroupDetailFragment : Fragment() {
     }
 
     private fun setupPostsTab() {
+        postsLoaded = false
+        rvPosts.clearOnScrollListeners()
         postsAdapter = buildPostsAdapter(onChanged = {
             postsLoaded = false
             fetchPosts()
         })
         rvPosts.adapter = postsAdapter
+        postsPaginator = com.example.myapplication.utils.PostFeedPaginator(
+            recyclerView = rvPosts,
+            adapter = postsAdapter,
+            baseUrl = { "group/${group.id}/posts" },
+            onUi = { block -> activity?.runOnUiThread(block) }
+        )
     }
 
     private fun setupTabs(view: View) {
         val toggle = view.findViewById<MaterialButtonToggleGroup>(R.id.tgGroupTabs)
 
-        if (!group.isMember && group.isGroupPrivate) {
-            toggle.visibility = View.GONE
-        }
+        toggle.visibility = if (!group.isMember && group.isGroupPrivate) View.GONE else View.VISIBLE
 
+        toggle.clearOnButtonCheckedListeners()
         toggle.check(R.id.btnTabInfo)
         toggle.addOnButtonCheckedListener { _, checkedId, isChecked ->
             if (!isChecked) return@addOnButtonCheckedListener
@@ -366,20 +392,8 @@ class GroupDetailFragment : Fragment() {
     }
 
     private fun fetchPosts() {
-        ApiClient.get("group/${group.id}/posts") { body, _, error ->
-            activity?.runOnUiThread {
-                if (error == null && body != null) {
-                    try {
-                        val type = object : TypeToken<List<PostDto>>() {}.type
-                        val posts: List<PostDto> = Gson().fromJson(body, type)
-                        postsAdapter.submitList(posts)
-                        postsLoaded = true
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                    }
-                }
-            }
-        }
+        postsPaginator?.reset()
+        postsLoaded = true
     }
 
     companion object {

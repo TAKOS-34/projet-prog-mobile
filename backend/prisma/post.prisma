@@ -18,6 +18,7 @@ model Post {
     reports  Report[]
     notifications Notification[]
     postTags PostTag[]
+    bookmarks Bookmarks[]
 
     localisationId Int
     Localisation   Localisation @relation(fields: [localisationId], references: [id], onDelete: Cascade)
@@ -45,6 +46,18 @@ enum PostType {
     HIDDEN_GEM         // Lieux secrets, hors des sentiers battus
     OTHER              // Autres
 }
+
+
+
+model Bookmarks {
+    postId String @db.Uuid()
+    userId Int
+    post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+    user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    @@id([postId, userId])
+}
+
 
 
 

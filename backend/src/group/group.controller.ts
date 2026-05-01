@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Param, UseGuards, Body, UseInterceptors, UploadedFile, ParseFilePipe, MaxFileSizeValidator, FileTypeValidator, HttpCode, Delete, ParseIntPipe } from '@nestjs/common';
+import { Controller, Post, Get, Param, UseGuards, Body, UseInterceptors, UploadedFile, ParseFilePipe, MaxFileSizeValidator, FileTypeValidator, HttpCode, Delete, ParseIntPipe, Query } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { GroupService } from './group.service';
 import { AuthGuard } from 'src/auth/auth.guard';
@@ -11,7 +11,7 @@ import { UserList } from 'src/group/dto/userList.dto';
 import { GroupInfos } from './dto/groupInfos.dto';
 import { AuthOptionalGuard } from 'src/auth/auth.optionnal.guard';
 import { GetAnonymous } from 'src/utils/decorator/get-anonymous.decorator';
-import { PostInfos } from 'src/post/dto/postInfos.dto';
+import { FeedInfos } from 'src/post/dto/postInfos.dto';
 
 @Controller('group')
 export class GroupController {
@@ -38,8 +38,8 @@ export class GroupController {
 
     @UseGuards(GroupProtectGuard, AuthOptionalGuard)
     @Get('/:groupId/posts')
-    getGroupPosts(@Param('groupId') groupId: number, @GetUser() user?: UserSession, @GetAnonymous() anonymous?: string): Promise<PostInfos[]> {
-        return this.groupService.getGroupPosts(groupId);
+    getGroupPosts(@Param('groupId') groupId: number, @Query('limit') limit: number = 20, @Query('cursor') cursor?: string, @GetUser() user?: UserSession, @GetAnonymous() anonymous?: string): Promise<FeedInfos> {
+        return this.groupService.getGroupPosts(groupId, limit, user?.id, anonymous, cursor);
     }
 
 

@@ -58,8 +58,27 @@ fun Fragment.buildPostsAdapter(onChanged: () -> Unit): PostsAdapter = PostsAdapt
     onLocationNameClick = if (SessionManager.getUserId() != null) { name ->
         val bundle = Bundle().apply { putString(LocalisationViewerFragment.ARG_LOCALISATION, name) }
         findNavController().navigate(R.id.localisationViewerFragment, bundle)
+    } else null,
+    onBookmark = if (SessionManager.getUserId() != null) { post, isNowBookmarked ->
+        togglePostBookmark(post, isNowBookmarked)
     } else null
 )
+
+private fun Fragment.togglePostBookmark(post: PostDto, isNowBookmarked: Boolean) {
+    val msg = if (isNowBookmarked) R.string.success_bookmarked else R.string.success_unbookmarked
+    val call: (String?, Int, String?) -> Unit = { _, _, error ->
+        if (error == null) {
+            activity?.runOnUiThread {
+                Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+    if (isNowBookmarked) {
+        ApiClient.post("bookmark/${post.id}", emptyMap<String, String>(), call)
+    } else {
+        ApiClient.delete("bookmark/${post.id}", call)
+    }
+}
 
 private fun togglePostLike(post: PostDto, isNowLiked: Boolean) {
     if (isNowLiked) {

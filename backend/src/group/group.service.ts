@@ -8,7 +8,8 @@ import { randomUUID } from 'crypto';
 import sharp from 'sharp';
 import { UserList } from 'src/group/dto/userList.dto';
 import { GroupInfos } from './dto/groupInfos.dto';
-import { PostInfos } from 'src/post/dto/postInfos.dto';
+import { FeedInfos} from 'src/post/dto/postInfos.dto';
+import { getNextCursor } from 'src/utils/paginator/paginate.util';
 
 @Injectable()
 export class GroupService {
@@ -104,46 +105,55 @@ export class GroupService {
         }));
     }
 
-    async getGroupPosts(groupId: number, userId?: number, anonymousToken?: string): Promise<PostInfos[]> {
+    async getGroupPosts(groupId: number, limit: number, userId?: number, anonymousToken?: string, cursor?: string): Promise<FeedInfos> {
         const realUser = userId ? { userId } : anonymousToken ? { anonymousUserId: anonymousToken } : null;
 
         const posts = await this.prisma.post.findMany({
+            take: limit + 1,
+            skip: cursor ? 1 : 0,
+            ...(cursor ? { cursor: { id: cursor } } : {}),
             where: { groupId },
             include: {
                 Localisation: { select: { id: true, name: true, long: true, lat: true } },
-                Group: { select: { id: true, name: true, avatar: true } },
+                Group: { select: { id: true, name: true, avatar: true, members: userId ? { where: { userId }, select: { userId: true } } : false } },
                 User: { select: { id: true, username: true, avatar: true } },
                 postTags: { select: { tag: { select: { name: true } } } },
-                likes: realUser ? { where: realUser, select: { id: true } } : false
+                likes: realUser ? { where: realUser, select: { id: true } } : false,
+                bookmarks: realUser ? { where: realUser, select: { userId: true } } : false
             },
             orderBy: [{ creationDate: 'desc' }, { id: 'desc' }]
         });
 
-        return posts.map(post => ({
-            id: post.id,
-            image: this.cdn.getPostUrl(post.id, post.imageExt),
-            creationDate: post.creationDate,
-            isEdited: post.isEdited,
-            updatedAt: post.updatedAt ?? undefined,
-            title: post.title,
-            type: post.type,
-            localisation: post.Localisation.name,
-            long: Number(post.Localisation.long),
-            lat: Number(post.Localisation.lat),
-            description: post.description ?? undefined,
-            audio: post.audio ? this.cdn.getAudioUrl(post.audio) : undefined,
-            nbLikes: post.nbLikes,
-            nbComments: post.nbComments,
-            userId: post.User.id,
-            username: post.User.username,
-            avatar: this.cdn.getAvatarUrl(post.User.avatar),
-            groupId: post.Group?.id ?? undefined,
-            groupName: post.Group?.name ?? undefined,
-            groupAvatar: post.Group?.avatar ? this.cdn.getGroupAvatarUrl(post.Group.avatar) : undefined,
-            tags: post.postTags.map(pt => pt.tag.name),
-            isLiked: post.likes?.length > 0,
-            isYours: userId ? userId === post.User.id : false
-        }));
+        return {
+            posts: posts.map(post => ({
+                id: post.id,
+                image: this.cdn.getPostUrl(post.id, post.imageExt),
+                creationDate: post.creationDate,
+                isEdited: post.isEdited,
+                updatedAt: post.updatedAt ?? undefined,
+                title: post.title,
+                type: post.type,
+                localisation: post.Localisation.name,
+                long: Number(post.Localisation.long),
+                lat: Number(post.Localisation.lat),
+                description: post.description ?? undefined,
+                audio: post.audio ? this.cdn.getAudioUrl(post.audio) : undefined,
+                nbLikes: post.nbLikes,
+                nbComments: post.nbComments,
+                userId: post.User.id,
+                username: post.User.username,
+                avatar: this.cdn.getAvatarUrl(post.User.avatar),
+                groupId: post.Group?.id ?? undefined,
+                groupName: post.Group?.name ?? undefined,
+                groupAvatar: post.Group?.avatar ? this.cdn.getGroupAvatarUrl(post.Group.avatar) : undefined,
+                isMember: userId && post.Group ? post.Group.members?.length > 0 : undefined,
+                tags: post.postTags.map(pt => pt.tag.name),
+                isLiked: post.likes?.length > 0,
+                isYours: userId ? userId === post.User.id : false,
+                isBookmarked: post.bookmarks?.length > 0
+            })),
+            nextCursor: getNextCursor(posts, limit)
+        };
     }
 
 
@@ -255,23 +265,30 @@ export class GroupService {
             throw new BadRequestException('You cannot quit the group as group admin');
         }
 
-        await this.prisma.member.delete({
-            where: {
-                groupId_userId: {
-                    userId: user.id,
-                    groupId
+        await this.prisma.$transaction([
+            this.prisma.member.delete({
+                where: {
+                    groupId_userId: {
+                        userId: user.id,
+                        groupId
+                    }
                 }
-            }
-        });
+            }),
 
-        await this.prisma.groupFollow.delete({
-            where: {
-                followerId_groupId: {
+            this.prisma.groupFollow.deleteMany({
+                where: {
                     followerId: user.id,
                     groupId
                 }
-            }
-        });
+            }),
+
+            this.prisma.bookmarks.deleteMany({
+                where: {
+                    userId: user.id,
+                    post: { groupId }
+                }
+            })
+        ]);
 
         return { status: true, message: 'Group quited' };
     }

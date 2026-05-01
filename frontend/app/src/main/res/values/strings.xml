@@ -200,6 +200,11 @@
     <string name="success_avatar_upload">Photo mise à jour !</string>
     <string name="error_avatar_upload">Erreur lors de l\'envoi de la photo</string>
     <string name="btn_active_sessions">Sessions actives</string>
+    <string name="btn_bookmarks">Voir les signets</string>
+    <string name="bookmarks_title">VOS SIGNETS</string>
+    <string name="bookmarks_empty">Aucun signet</string>
+    <string name="success_bookmarked">Ajouté aux signets</string>
+    <string name="success_unbookmarked">Retiré des signets</string>
     <string name="sessions_title">Sessions actives</string>
     <string name="sessions_subtitle">Appareils actuellement connectés à votre compte</string>
     <string name="sessions_empty">Aucune session active</string>

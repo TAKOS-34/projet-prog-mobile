@@ -5,7 +5,7 @@ import { ResponseMessage } from 'src/utils/dto/responseMessage.dto';
 import { UpdateFcmTokenDto } from './dto/updateFcmToken.dto';
 import { GetUser } from 'src/utils/decorator/get-user.decorator';
 import type { UserSession } from 'src/utils/dto/userSession.dto';
-import type { NotificationList } from './dto/notificationList.dto';
+import type { NotificationInfos } from './dto/notificationList.dto';
 import { ReadNotificationListDto } from './dto/readNotificationList.dto';
 import { UserFollowingList } from './dto/userFollowingList.dto';
 
@@ -17,8 +17,8 @@ export class NotificationController {
 
     @UseGuards(AuthGuard)
     @Get()
-    getNotifications(@Query('limit') limit: string = '20', @GetUser() user: UserSession, @Query('cursor') cursor?: number): Promise<NotificationList[]> {
-        return this.notificationService.getNotifications(parseInt(limit, 10), user, cursor);
+    getNotifications(@Query('limit') limit: number = 20, @GetUser() user: UserSession, @Query('cursor') cursor?: number): Promise<NotificationInfos> {
+        return this.notificationService.getNotifications(limit, user, cursor);
     }
 
 

@@ -70,6 +70,12 @@
         tools:layout="@layout/fragment_sessions" />
 
     <fragment
+        android:id="@+id/bookmarksFragment"
+        android:name="com.example.myapplication.fragment.profile.BookmarksFragment"
+        android:label="@string/bookmarks_title"
+        tools:layout="@layout/fragment_bookmarks" />
+
+    <fragment
         android:id="@+id/createPostFragment"
         android:name="com.example.myapplication.fragment.post.CreatePostFragment"
         android:label="Créer un post"

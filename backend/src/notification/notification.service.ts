@@ -3,11 +3,12 @@ import * as admin from 'firebase-admin';
 import { join } from 'path';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { ResponseMessage } from 'src/utils/dto/responseMessage.dto';
-import { NotificationList } from './dto/notificationList.dto';
+import { NotificationInfos } from './dto/notificationList.dto';
 import { CdnService } from 'src/cdn/cdn.service';
 import { UserSession } from 'src/utils/dto/userSession.dto';
 import { NotificationType } from '@prisma/client';
 import { UserFollowingList } from './dto/userFollowingList.dto';
+import { getNextCursor } from 'src/utils/paginator/paginate.util';
 
 @Injectable()
 export class NotificationService implements OnModuleInit {
@@ -38,7 +39,7 @@ export class NotificationService implements OnModuleInit {
 
 
 
-    async getNotifications(limit: number, user: UserSession, cursor?: number): Promise<NotificationList[]> {
+    async getNotifications(limit: number, user: UserSession, cursor?: number): Promise<NotificationInfos> {
         const take = Math.min(Math.max(limit, 1), 50);
 
         const notifications = await this.prisma.notification.findMany({
@@ -56,29 +57,32 @@ export class NotificationService implements OnModuleInit {
             }
         });
 
-        return notifications.map(n => ({
-            id: n.id,
-            type: n.type,
-            creationDate: n.creationDate,
-            isRead: n.isRead,
+        return {
+            notifications: notifications.map(n => ({
+                id: n.id,
+                type: n.type,
+                creationDate: n.creationDate,
+                isRead: n.isRead,
 
-            postId: n.targetPostId ?? undefined,
-            postImage: (n.targetPostId && n.post?.imageExt) ? this.cdn.getPostUrl(n.targetPostId, n.post.imageExt) : undefined,
+                postId: n.targetPostId ?? undefined,
+                postImage: (n.targetPostId && n.post?.imageExt) ? this.cdn.getPostUrl(n.targetPostId, n.post.imageExt) : undefined,
 
-            targetUserId: n.targetUser?.id,
-            targetUsername: n.targetUser?.username,
-            targetUserAvatar: n.targetUser?.avatar ? this.cdn.getAvatarUrl(n.targetUser.avatar) : this.cdn.getAvatarUrl(null),
+                targetUserId: n.targetUser?.id,
+                targetUsername: n.targetUser?.username,
+                targetUserAvatar: n.targetUser?.avatar ? this.cdn.getAvatarUrl(n.targetUser.avatar) : this.cdn.getAvatarUrl(null),
 
-            groupId: n.targetGroupId ?? undefined,
-            groupName: n.group?.name,
-            groupAvatar: n.group?.avatar ? this.cdn.getGroupAvatarUrl(n.group.avatar) : undefined,
+                groupId: n.targetGroupId ?? undefined,
+                groupName: n.group?.name,
+                groupAvatar: n.group?.avatar ? this.cdn.getGroupAvatarUrl(n.group.avatar) : undefined,
 
-            tagId: n.tag?.id,
-            tagName: n.tag?.name,
+                tagId: n.tag?.id,
+                tagName: n.tag?.name,
 
-            localisationId: n.localisation?.id,
-            localisationName: n.localisation?.name
-        }));
+                localisationId: n.localisation?.id,
+                localisationName: n.localisation?.name
+            })),
+            nextCursor: getNextCursor(notifications, limit)
+        };
     }
 
 

@@ -19,6 +19,7 @@ import { NotificationModule } from './notification/notification.module';
 import { FollowModule } from './follow/follow.module';
 import { LocalisationModule } from './localisation/localisation.module';
 import { DbCronModule } from './utils/cron/db.cron.module';
+import { BookmarkModule } from './bookmark/bookmark.module';
 
 @Module({
     imports: [
@@ -48,7 +49,7 @@ import { DbCronModule } from './utils/cron/db.cron.module';
                 options: { strict: true }
             }
         }),
-        AuthModule, ProfileModule, CdnModule, PostModule, GroupModule, GroupAdminModule, LikeModule, CommentModule, TagModule, SearchModule, NotificationModule, FollowModule, LocalisationModule, DbCronModule
+        AuthModule, ProfileModule, CdnModule, PostModule, GroupModule, GroupAdminModule, LikeModule, CommentModule, TagModule, SearchModule, NotificationModule, FollowModule, LocalisationModule, DbCronModule, BookmarkModule
     ],
     controllers: [],
 })
