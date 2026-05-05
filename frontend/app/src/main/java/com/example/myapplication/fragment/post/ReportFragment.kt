@@ -81,7 +81,7 @@ class ReportFragment : Fragment() {
                     Toast.makeText(context, R.string.success_report_sent, Toast.LENGTH_SHORT).show()
                     findNavController().navigateUp()
                 } else {
-                    Toast.makeText(context, error ?: getString(R.string.error_report_failed), Toast.LENGTH_LONG).show()
+                    Toast.makeText(context, R.string.error_report_failed, Toast.LENGTH_LONG).show()
                 }
             }
         }

@@ -37,7 +37,7 @@
     <string name="btn_update_profile">Modifier</string>
     <string name="btn_delete_account">Supprimer mon compte</string>
     <string name="delete_account_confirm_title">Supprimer votre compte ?</string>
-    <string name="delete_account_confirm_message">Cette action est irréversible. Toutes vos données seront définitivement supprimées.</string>
+    <string name="delete_account_confirm_message">Cette action est irréversible. Toutes vos données seront définitivement supprimées</string>
     <string name="success_profile_update">Profil mis à jour !</string>
     <string name="error_profile_update">Erreur lors de la mise à jour</string>
     <string name="profile_member_since">Membre depuis le</string>
@@ -148,7 +148,7 @@
     <string name="success_group_deleted">Groupe supprimé</string>
     <string name="groups_quit_btn">Quitter le groupe</string>
     <string name="groups_quit_confirm_title">Quitter le groupe ?</string>
-    <string name="groups_quit_confirm_message">Vous ne ferez plus partie de ce groupe.</string>
+    <string name="groups_quit_confirm_message">Vous ne ferez plus partie de ce groupe</string>
     <string name="group_no_posts">Pas de posts pour le moment</string>
     <string name="success_group_quit">Vous avez quitté le groupe</string>
     <string name="success_group_avatar">Photo du groupe mise à jour !</string>
@@ -179,7 +179,7 @@
     <string name="error_image_required">Une image est requise</string>
     <string name="error_title_required">Le titre est requis</string>
     <string name="report_title">Signaler un post</string>
-    <string name="report_subtitle">Aidez-nous à garder la communauté sûre.</string>
+    <string name="report_subtitle">Aidez-nous à garder la communauté sûre</string>
     <string name="report_reason_inappropriate">Contenu inapproprié</string>
     <string name="report_reason_wrong_loc">Localisation erronée</string>
     <string name="report_reason_spam">Spam</string>
@@ -189,7 +189,7 @@
     <string name="label_report_details">DÉTAILS (OPTIONNEL)</string>
     <string name="btn_submit_report">Envoyer le signalement</string>
     <string name="success_report_sent">Signalement envoyé avec succès</string>
-    <string name="error_report_failed">Échec de l\'envoi du signalement</string>
+    <string name="error_report_failed">Vous avez déjà signalé ce post</string>
     <string name="error_report_reason_required">Veuillez choisir une raison</string>
     <string name="btn_join_group">Rejoindre</string>
     <string name="btn_request_join_group">Demander à rejoindre</string>
@@ -214,7 +214,7 @@
     <string name="success_session_deleted">Session supprimée</string>
     <string name="error_session_delete">Erreur lors de la suppression</string>
     <string name="delete_comment_confirm_title">Supprimer le commentaire ?</string>
-    <string name="delete_comment_confirm_message">Voulez-vous vraiment supprimer ce commentaire ? Cette action est irréversible.</string>
+    <string name="delete_comment_confirm_message">Voulez-vous vraiment supprimer ce commentaire ? Cette action est irréversibl.</string>
     <string name="delete_comment_btn">Supprimer</string>
     <string name="post_date">Date et heure</string>
     <string name="post_coordinates">Coordonées</string>

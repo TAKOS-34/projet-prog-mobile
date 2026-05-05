@@ -1,11 +1,15 @@
-import { Injectable, StreamableFile, NotFoundException } from '@nestjs/common';
-import { join, basename } from 'path';
-import { existsSync, createReadStream } from 'fs';
+import { Injectable, StreamableFile, NotFoundException, OnModuleInit } from '@nestjs/common';
+import { join, basename,  } from 'path';
+import { existsSync, createReadStream, mkdirSync } from 'fs';
 
 @Injectable()
-export class CdnService {
+export class CdnService implements OnModuleInit {
     private readonly avatarDir: string = process.env.AVATAR_DIR ?? 'cdn/avatar';
     private readonly avatarUrl: string = process.env.AVATAR_URL ?? '';
+
+    private readonly groupAvatarDir: string = process.env.GROUP_AVATAR_DIR ?? 'cdn/group';
+    private readonly groupAvatarUrl: string = process.env.GROUP_AVATAR_URL ?? '';
+
     private readonly defaultAvatar: string = 'default.jpg';
 
     private readonly postDir: string = process.env.POST_DIR ?? 'cdn/post';
@@ -14,10 +18,22 @@ export class CdnService {
     private readonly audioDir: string = process.env.POST_AUDIO_DIR ?? 'cdn/audio';
     private readonly audioUrl: string = process.env.POST_AUDIO_URL ?? '';
 
-    private readonly groupAvatarDir: string = process.env.GROUP_AVATAR_DIR ?? 'cdn/group';
-    private readonly groupAvatarUrl: string = process.env.GROUP_AVATAR_URL ?? '';
-
     constructor() {}
+
+    onModuleInit() {
+        const path: string[] = [
+            join(process.cwd(), this.avatarDir),
+            join(process.cwd(), this.groupAvatarDir),
+            join(process.cwd(), this.postDir),
+            join(process.cwd(), this.audioDir)
+        ];
+
+        for (const p of path) {
+            if (!existsSync(p)) {
+                mkdirSync(p, { recursive: true });
+            }
+        }
+    }
 
 
 
