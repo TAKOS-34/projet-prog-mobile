@@ -14,7 +14,7 @@
         android:title="MENU" />
     <item
         android:id="@+id/nav_notifications"
-        android:icon="@android:drawable/ic_dialog_info"
+        android:icon="@drawable/ic_bell"
         android:title="NOTIFICATIONS" />
     <item
         android:id="@+id/nav_profile"
