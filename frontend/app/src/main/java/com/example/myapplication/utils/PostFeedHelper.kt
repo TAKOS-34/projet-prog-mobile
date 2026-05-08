@@ -42,8 +42,10 @@ fun Fragment.buildPostsAdapter(onChanged: () -> Unit): PostsAdapter = PostsAdapt
         findNavController().navigate(R.id.profileViewerFragment, bundle)
     },
     onImageClick = { post ->
-        val bundle = Bundle().apply { putString(PostViewerFragment.ARG_POST_ID, post.id) }
-        findNavController().navigate(R.id.postViewerFragment, bundle)
+        if (findNavController().currentDestination?.id != R.id.postViewerFragment) {
+            val bundle = Bundle().apply { putString(PostViewerFragment.ARG_POST_ID, post.id) }
+            findNavController().navigate(R.id.postViewerFragment, bundle)
+        }
     },
     onGroupClick = { post ->
         post.groupId?.let { id ->
