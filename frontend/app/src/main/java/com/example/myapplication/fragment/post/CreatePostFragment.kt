@@ -1,6 +1,7 @@
 package com.example.myapplication.fragment.post
 
 import android.net.Uri
+import android.provider.OpenableColumns
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -80,7 +81,11 @@ class CreatePostFragment : Fragment() {
     private val audioPickerLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
         uri?.let {
             selectedAudioUri = it
-            tvAudioStatus.text = getString(R.string.audio_selection)
+            val fileName = requireContext().contentResolver
+                .query(it, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)
+                ?.use { cursor -> cursor.moveToFirst(); cursor.getString(0) }
+                ?: getString(R.string.audio_selection)
+            tvAudioStatus.text = fileName
             tvAudioStatus.visibility = View.VISIBLE
         }
     }
