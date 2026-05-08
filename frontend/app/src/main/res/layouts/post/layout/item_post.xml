@@ -26,29 +26,29 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <ImageView
-            android:id="@+id/btnEdit"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:background="@drawable/bg_action_btn"
-            android:padding="6dp"
-            android:src="@android:drawable/ic_menu_edit"
-            android:visibility="gone"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:tint="@color/text_primary" />
-
-        <ImageView
             android:id="@+id/btnDelete"
             android:layout_width="32dp"
             android:layout_height="32dp"
-            android:layout_marginEnd="4dp"
             android:background="@drawable/bg_action_btn"
             android:padding="6dp"
             android:src="@android:drawable/ic_menu_delete"
             android:visibility="gone"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/btnEdit"
+            app:layout_constraintEnd_toEndOf="parent"
             app:tint="@color/error" />
+
+        <ImageView
+            android:id="@+id/btnEdit"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_marginEnd="4dp"
+            android:background="@drawable/bg_action_btn"
+            android:padding="6dp"
+            android:src="@android:drawable/ic_menu_edit"
+            android:visibility="gone"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/btnDelete"
+            app:tint="@color/text_primary" />
 
         <LinearLayout
             android:id="@+id/llGroupBadge"
