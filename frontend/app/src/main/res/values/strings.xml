@@ -231,6 +231,8 @@
     <string name="comment_response">Réponse à @%1$s</string>
     <string name="comment_answer">Répondre</string>
     <string name="tag_prefix">#%1$s</string>
+    <string name="tags_more_count">+%1$d</string>
+    <string name="tags_all_label">Tous les tags</string>
     <string name="format_audio_timer">0:00 / %1$s</string>
     <string name="format_post_username_date">%1$s %2$s · %3$s</string>
     <string name="register">Inscription</string>

@@ -21,7 +21,9 @@ import com.example.myapplication.utils.AdminGroupsCache
 import com.example.myapplication.utils.DateUtils
 import com.example.myapplication.utils.SessionManager
 import com.example.myapplication.utils.resolveBackendUrl
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.chip.Chip
+import com.google.android.material.chip.ChipGroup
 import androidx.core.graphics.toColorInt
 
 class PostsAdapter(
@@ -86,6 +88,7 @@ class PostsAdapter(
         private val btnPlayAudio: ImageView = itemView.findViewById(R.id.btnPlayAudio)
         private val tvAudioTimer: TextView = itemView.findViewById(R.id.tvAudioTimer)
         private val llTags: LinearLayout = itemView.findViewById(R.id.llTags)
+        private val chipMoreTags: Chip = itemView.findViewById(R.id.chipMoreTags)
         private val btnLike: ImageView = itemView.findViewById(R.id.btnLike)
         private val tvLikeCount: TextView = itemView.findViewById(R.id.tvLikeCount)
         private val btnComment: ImageView = itemView.findViewById(R.id.btnComment)
@@ -225,11 +228,19 @@ class PostsAdapter(
             }
 
             llTags.removeAllViews()
-            post.tags.forEach { tag ->
+            val screenWidthPx = context.resources.displayMetrics.widthPixels
+            val moreChipReservedPx = (60 * dp).toInt()
+            val maxChipWidthPx = (screenWidthPx - (32 * dp).toInt() - moreChipReservedPx - (24 * dp).toInt() - (8 * dp).toInt() * 3) / 3
+            val textPaint = android.text.TextPaint().apply { textSize = 11f * context.resources.displayMetrics.scaledDensity }
+            val chipInnerPx = (20 * dp).toInt()
+            post.tags.take(3).forEach { tag ->
+                val raw = context.getString(R.string.tag_prefix, tag)
+                val label = android.text.TextUtils.ellipsize(raw, textPaint, (maxChipWidthPx - chipInnerPx).toFloat().coerceAtLeast(0f), android.text.TextUtils.TruncateAt.END).toString()
                 val chip = Chip(context).apply {
-                    text = context.getString(R.string.tag_prefix, tag)
-                    chipBackgroundColor = android.content.res.ColorStateList.valueOf("#D1FAE5".toColorInt())
-                    setTextColor("#065F46".toColorInt())
+                    text = label
+                    maxWidth = maxChipWidthPx
+                    chipBackgroundColor = android.content.res.ColorStateList.valueOf(ContextCompat.getColor(context, R.color.surface_variant))
+                    setTextColor(ContextCompat.getColor(context, R.color.text_secondary))
                     isClickable = onTagClick != null
                     isCheckable = false
                     if (onTagClick != null) setOnClickListener { onTagClick.invoke(tag) }
@@ -246,6 +257,56 @@ class PostsAdapter(
                 }
                 llTags.addView(chip)
             }
+            val extraCount = post.tags.size - 3
+            if (extraCount > 0) {
+                chipMoreTags.text = context.getString(R.string.tags_more_count, extraCount)
+                chipMoreTags.visibility = View.VISIBLE
+                chipMoreTags.setOnClickListener { showAllTagsBottomSheet(context, post.tags) }
+            } else {
+                chipMoreTags.visibility = View.GONE
+                chipMoreTags.setOnClickListener(null)
+            }
+        }
+
+        private fun showAllTagsBottomSheet(context: android.content.Context, tags: List<String>) {
+            val dp = context.resources.displayMetrics.density
+            val dialog = BottomSheetDialog(context)
+            val container = LinearLayout(context).apply {
+                orientation = LinearLayout.VERTICAL
+                setPadding((20 * dp).toInt(), (20 * dp).toInt(), (20 * dp).toInt(), (32 * dp).toInt())
+            }
+            container.addView(TextView(context).apply {
+                text = context.getString(R.string.tags_all_label)
+                textSize = 16f
+                setTextColor(ContextCompat.getColor(context, R.color.text_primary))
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                ).apply { bottomMargin = (16 * dp).toInt() }
+            })
+            val chipGroup = ChipGroup(context)
+            tags.forEach { tag ->
+                chipGroup.addView(Chip(context).apply {
+                    text = context.getString(R.string.tag_prefix, tag)
+                    chipBackgroundColor = android.content.res.ColorStateList.valueOf(ContextCompat.getColor(context, R.color.surface_variant))
+                    setTextColor(ContextCompat.getColor(context, R.color.text_secondary))
+                    isClickable = onTagClick != null
+                    isCheckable = false
+                    chipStrokeWidth = 0f
+                    chipMinHeight = 0f
+                    textSize = 11f
+                    chipStartPadding = 10 * dp
+                    chipEndPadding = 10 * dp
+                    setPadding(0, (6 * dp).toInt(), 0, (6 * dp).toInt())
+                    if (onTagClick != null) setOnClickListener {
+                        onTagClick.invoke(tag)
+                        dialog.dismiss()
+                    }
+                })
+            }
+            container.addView(chipGroup)
+            dialog.setContentView(container)
+            dialog.show()
         }
 
         private fun toggleAudio(url: String) {
