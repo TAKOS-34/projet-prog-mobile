@@ -6,7 +6,11 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginHorizontal="16dp"
-    android:layout_marginBottom="24dp">
+    android:layout_marginBottom="24dp"
+    app:cardBackgroundColor="@color/surface_variant"
+    app:cardElevation="0dp"
+    app:strokeWidth="2dp"
+    app:strokeColor="@color/primary">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -87,7 +91,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:gravity="top"
+            android:gravity="center_vertical"
             android:layout_marginHorizontal="16dp"
             android:layout_marginTop="14dp"
             app:layout_constraintTop_toBottomOf="@id/llGroupBadge"

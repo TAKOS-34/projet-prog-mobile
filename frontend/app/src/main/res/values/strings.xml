@@ -70,6 +70,8 @@
     <string name="groups_search_hint">Rechercher un groupe...</string>
     <string name="groups_empty">Vous n\'avez rejoint aucun groupe</string>
     <string name="groups_search_empty">Aucun résultat</string>
+    <string name="groups_popular_label">Groupes populaires</string>
+    <string name="groups_my_label">Vos groupes</string>
     <string name="search_title">RECHERCHE</string>
     <string name="search_q_hint">Titre, description, utilisateur, groupe...</string>
     <string name="search_tag_hint">Tag</string>

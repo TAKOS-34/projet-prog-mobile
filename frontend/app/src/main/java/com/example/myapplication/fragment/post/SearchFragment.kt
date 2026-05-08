@@ -60,6 +60,7 @@ class SearchFragment : Fragment() {
     private var selectedType: PostType? = null
     private var selectedDistanceKm: Int? = null
     private var ignoreNextLocChange = false
+    private var popularTagsCache: List<String> = emptyList()
 
     private val handler = Handler(Looper.getMainLooper())
     private var suggestRunnable: Runnable? = null
@@ -126,51 +127,105 @@ class SearchFragment : Fragment() {
     }
 
     private fun setupTagSuggestions() {
+        etTag.filters = arrayOf(android.text.InputFilter { source, start, end, _, _, _ ->
+            val filtered = StringBuilder()
+            var changed = false
+            for (i in start until end) {
+                val c = source[i]
+                if (c.isLetterOrDigit() || c == '-' || c == '_' || c == ',') filtered.append(c)
+                else changed = true
+            }
+            if (changed) filtered.toString() else null
+        })
+
         etTag.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 suggestRunnable?.let { handler.removeCallbacks(it) }
-                val query = s?.toString()?.trim().orEmpty()
+                val query = s?.toString()?.split(",")?.lastOrNull()?.trim() ?: ""
                 if (query.length >= 2) {
                     suggestRunnable = Runnable { fetchSuggestions(query) }
                     handler.postDelayed(suggestRunnable!!, 300)
-                } else if (query.isEmpty()) {
-                    fetchPopularTags()
                 }
             }
-            override fun afterTextChanged(s: Editable?) {}
+            override fun afterTextChanged(s: Editable?) {
+                val currentText = s?.toString() ?: return
+                val committedTags = if (currentText.endsWith(","))
+                    currentText.split(",").map { it.trim() }.filter { it.isNotEmpty() }
+                else
+                    currentText.split(",").map { it.trim() }.dropLast(1).filter { it.isNotEmpty() }
+                for (i in 0 until cgTags.childCount) {
+                    val chip = cgTags.getChildAt(i) as? Chip ?: continue
+                    chip.isChecked = committedTags.contains(chip.text.toString())
+                }
+            }
         })
+
+        etTag.imeOptions = EditorInfo.IME_ACTION_DONE
+        etTag.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                val current = etTag.text.toString()
+                if (current.isNotEmpty() && !current.endsWith(",")) etTag.append(",")
+                true
+            } else false
+        }
     }
 
     private fun fetchPopularTags() {
         ApiClient.get("tag/popular") { body, _, _ ->
-            body?.let { renderTagChips(it) }
+            body?.let { json ->
+                try { popularTagsCache = Gson().fromJson(json, Array<String>::class.java).toList() } catch (e: Exception) {}
+                updateTagChips(json)
+            }
         }
     }
 
     private fun fetchSuggestions(query: String) {
         ApiClient.get("tag/suggest?tag=${URLEncoder.encode(query, Charsets.UTF_8.name())}") { body, _, _ ->
-            body?.let { renderTagChips(it) }
+            body?.let { updateTagChips(it) }
         }
     }
 
-    private fun renderTagChips(json: String) {
+    private fun updateTagChips(json: String) {
         activity?.runOnUiThread {
             try {
-                val tags = Gson().fromJson(json, Array<String>::class.java)
+                val suggestions = Gson().fromJson(json, Array<String>::class.java).toMutableList()
+                popularTagsCache.forEach { if (!suggestions.contains(it)) suggestions.add(it) }
+                val currentText = etTag.text.toString()
+                val committedTags = if (currentText.endsWith(","))
+                    currentText.split(",").map { it.trim() }.filter { it.isNotEmpty() }
+                else
+                    currentText.split(",").map { it.trim() }.dropLast(1).filter { it.isNotEmpty() }
+                committedTags.forEach { if (!suggestions.contains(it)) suggestions.add(it) }
+                val partial = if (!currentText.endsWith(",")) currentText.split(",").lastOrNull()?.trim() ?: "" else ""
+                if (partial.isNotEmpty() && !suggestions.contains(partial)) suggestions.add(0, partial)
                 cgTags.removeAllViews()
-                tags.forEach { tag ->
+                suggestions.forEach { tag ->
                     val chip = Chip(context).apply {
                         text = tag
                         isClickable = true
-                        setOnClickListener {
-                            etTag.setText(tag)
-                            etTag.setSelection(etTag.text?.length ?: 0)
-                        }
+                        isCheckable = true
+                        isChecked = committedTags.contains(tag)
+                        setOnClickListener { addTagToInput(tag) }
                     }
                     cgTags.addView(chip)
                 }
             } catch (e: Exception) { e.printStackTrace() }
+        }
+    }
+
+    private fun addTagToInput(tag: String) {
+        val currentText = etTag.text.toString()
+        val committed = if (currentText.endsWith(","))
+            currentText.split(",").map { it.trim() }.filter { it.isNotEmpty() }.toMutableList()
+        else
+            currentText.split(",").map { it.trim() }.dropLast(1).filter { it.isNotEmpty() }.toMutableList()
+        if (committed.contains(tag)) committed.remove(tag) else committed.add(tag)
+        etTag.setText(if (committed.isEmpty()) "" else committed.joinToString(",") + ",")
+        etTag.setSelection(etTag.text?.length ?: 0)
+        for (i in 0 until cgTags.childCount) {
+            val chip = cgTags.getChildAt(i) as? Chip ?: continue
+            chip.isChecked = committed.contains(chip.text.toString())
         }
     }
 
@@ -296,12 +351,16 @@ class SearchFragment : Fragment() {
 
     private fun buildSearchUrl(): String {
         val q = etQ.text.toString().trim()
-        val tag = etTag.text.toString().trim()
+        val tagText = etTag.text.toString()
+        val confirmedTags = if (tagText.endsWith(","))
+            tagText.split(",").map { it.trim() }.filter { it.isNotEmpty() }
+        else
+            tagText.split(",").map { it.trim() }.dropLast(1).filter { it.isNotEmpty() }
         val type = selectedType?.name
         val loc = etLoc.text.toString().trim()
         val params = mutableListOf<String>()
         if (q.isNotEmpty()) params += "q=${URLEncoder.encode(q, Charsets.UTF_8.name())}"
-        if (tag.isNotEmpty()) params += "tag=${URLEncoder.encode(tag, Charsets.UTF_8.name())}"
+        confirmedTags.forEach { params += "tag=${URLEncoder.encode(it, Charsets.UTF_8.name())}" }
         if (type != null) params += "type=$type"
         if (loc.isNotEmpty()) params += "loc=${URLEncoder.encode(loc, Charsets.UTF_8.name())}"
         if (loc.isNotEmpty() && selectedDistanceKm != null) params += "dist=$selectedDistanceKm"

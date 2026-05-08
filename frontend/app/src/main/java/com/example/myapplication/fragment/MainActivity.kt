@@ -7,8 +7,8 @@ import android.os.Bundle
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.navigation.NavOptions
 import androidx.navigation.fragment.NavHostFragment
-import androidx.navigation.ui.setupWithNavController
 import com.example.myapplication.R
 import com.example.myapplication.utils.ApiClient
 import com.example.myapplication.utils.SessionManager
@@ -34,7 +34,21 @@ class MainActivity : AppCompatActivity() {
         val navController = navHostFragment.navController
         bottomNav = findViewById(R.id.bottom_navigation)
 
-        bottomNav.setupWithNavController(navController)
+        val bottomNavOptions = NavOptions.Builder()
+            .setLaunchSingleTop(true)
+            .setPopUpTo(navController.graph.startDestinationId, inclusive = false)
+            .build()
+
+        bottomNav.setOnItemSelectedListener { item ->
+            if (navController.currentDestination?.id != item.itemId) {
+                navController.navigate(item.itemId, null, bottomNavOptions)
+            }
+            true
+        }
+
+        navController.addOnDestinationChangedListener { _, destination, _ ->
+            bottomNav.menu.findItem(destination.id)?.isChecked = true
+        }
     }
 
     override fun onResume() {
