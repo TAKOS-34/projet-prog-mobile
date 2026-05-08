@@ -70,7 +70,8 @@
             android:id="@+id/ivFilterChevron"
             android:layout_width="20dp"
             android:layout_height="20dp"
-            android:src="@android:drawable/arrow_down_float"
+            android:src="@drawable/ic_chevron_down"
+            app:tint="@color/text_secondary"
             android:contentDescription="@null" />
 
     </LinearLayout>
