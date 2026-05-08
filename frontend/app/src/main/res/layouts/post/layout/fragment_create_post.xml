@@ -69,7 +69,8 @@
             android:text="Suggérer par IA"
             android:visibility="gone"
             android:textSize="10sp"
-            app:layout_constraintTop_toBottomOf="@id/cvPreview"
+            app:layout_constraintTop_toTopOf="@id/tvTagsLabel"
+            app:layout_constraintBottom_toBottomOf="@id/tvTagsLabel"
             app:layout_constraintEnd_toEndOf="parent" />
 
         <ProgressBar
@@ -89,7 +90,7 @@
             android:layout_height="wrap_content"
             android:text="@string/btn_select_image"
             android:layout_marginTop="16dp"
-            app:layout_constraintTop_toBottomOf="@id/btnIaTags" />
+            app:layout_constraintTop_toBottomOf="@id/cvPreview" />
 
         <TextView
             android:id="@+id/tvTitleLabel"
@@ -226,10 +227,12 @@
         <TextView
             android:id="@+id/tvTagsLabel"
             style="@style/Widget.TravelApp.TextView.InputLabel"
+            android:layout_width="0dp"
             android:text="@string/label_post_tags"
             android:layout_marginTop="16dp"
             app:layout_constraintTop_toBottomOf="@id/div3"
-            app:layout_constraintStart_toStartOf="parent" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/btnIaTags" />
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/tilTags"

@@ -35,6 +35,7 @@ import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import android.view.inputmethod.EditorInfo
 import android.widget.AutoCompleteTextView
 
 class CreatePostFragment : Fragment() {
@@ -56,6 +57,7 @@ class CreatePostFragment : Fragment() {
     private lateinit var cgLocationSuggestions: ChipGroup
     private lateinit var btnIaTags: MaterialButton
     private lateinit var pbIaLoading: ProgressBar
+    private var popularTags: List<String> = emptyList()
     private lateinit var btnSelectAudio: MaterialButton
     private lateinit var tvAudioStatus: TextView
     private lateinit var btnPublish: MaterialButton
@@ -204,8 +206,27 @@ class CreatePostFragment : Fragment() {
                     handler.postDelayed(runnable!!, 300)
                 }
             }
-            override fun afterTextChanged(s: Editable?) {}
+            override fun afterTextChanged(s: Editable?) {
+                val currentText = s?.toString() ?: return
+                val committedTags = if (currentText.endsWith(","))
+                    currentText.split(",").map { it.trim() }.filter { it.isNotEmpty() }
+                else
+                    currentText.split(",").map { it.trim() }.dropLast(1).filter { it.isNotEmpty() }
+                for (i in 0 until cgSuggestedTags.childCount) {
+                    val chip = cgSuggestedTags.getChildAt(i) as? Chip ?: continue
+                    chip.isChecked = committedTags.contains(chip.text.toString())
+                }
+            }
         })
+
+        etTags.imeOptions = EditorInfo.IME_ACTION_DONE
+        etTags.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                val current = etTags.text.toString()
+                if (current.isNotEmpty() && !current.endsWith(",")) etTags.append(",")
+                true
+            } else false
+        }
     }
 
     private fun setupLocationSuggestions() {
@@ -256,7 +277,10 @@ class CreatePostFragment : Fragment() {
 
     private fun fetchPopularTags() {
         ApiClient.get("tag/popular") { body, _, _ ->
-            body?.let { updateTagChips(it) }
+            body?.let { json ->
+                try { popularTags = Gson().fromJson(json, Array<String>::class.java).toList() } catch (e: Exception) {}
+                updateTagChips(json)
+            }
         }
     }
 
@@ -296,12 +320,23 @@ class CreatePostFragment : Fragment() {
     private fun updateTagChips(json: String) {
         activity?.runOnUiThread {
             try {
-                val tags = Gson().fromJson(json, Array<String>::class.java)
+                val suggestions = Gson().fromJson(json, Array<String>::class.java).toMutableList()
+                popularTags.forEach { if (!suggestions.contains(it)) suggestions.add(it) }
+                val currentText = etTags.text.toString()
+                val committedTags = if (currentText.endsWith(","))
+                    currentText.split(",").map { it.trim() }.filter { it.isNotEmpty() }
+                else
+                    currentText.split(",").map { it.trim() }.dropLast(1).filter { it.isNotEmpty() }
+                committedTags.forEach { if (!suggestions.contains(it)) suggestions.add(it) }
+                val partial = if (!currentText.endsWith(",")) currentText.split(",").lastOrNull()?.trim() ?: "" else ""
+                if (partial.isNotEmpty() && !suggestions.contains(partial)) suggestions.add(0, partial)
                 cgSuggestedTags.removeAllViews()
-                tags.forEach { tag ->
+                suggestions.forEach { tag ->
                     val chip = Chip(context).apply {
                         text = tag
                         isClickable = true
+                        isCheckable = true
+                        isChecked = committedTags.contains(tag)
                         setOnClickListener { addTagToInput(tag) }
                     }
                     cgSuggestedTags.addView(chip)
@@ -312,15 +347,17 @@ class CreatePostFragment : Fragment() {
 
     private fun addTagToInput(tag: String) {
         val currentText = etTags.text.toString()
-        val tags = currentText.split(",").map { it.trim() }.toMutableList()
-        if (tags.isNotEmpty() && tags.last().isNotEmpty()) {
-            tags[tags.size - 1] = tag
-        } else {
-            tags.add(tag)
-        }
-        val newText = tags.filter { it.isNotEmpty() }.joinToString(",") + ","
-        etTags.setText(newText)
+        val committed = if (currentText.endsWith(","))
+            currentText.split(",").map { it.trim() }.filter { it.isNotEmpty() }.toMutableList()
+        else
+            currentText.split(",").map { it.trim() }.dropLast(1).filter { it.isNotEmpty() }.toMutableList()
+        if (committed.contains(tag)) committed.remove(tag) else committed.add(tag)
+        etTags.setText(if (committed.isEmpty()) "" else committed.joinToString(",") + ",")
         etTags.setSelection(etTags.text?.length ?: 0)
+        for (i in 0 until cgSuggestedTags.childCount) {
+            val chip = cgSuggestedTags.getChildAt(i) as? Chip ?: continue
+            chip.isChecked = committed.contains(chip.text.toString())
+        }
     }
 
     private fun initViews(view: View) {
