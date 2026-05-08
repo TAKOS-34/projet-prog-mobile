@@ -43,124 +43,161 @@
             android:imeOptions="actionSearch" />
     </com.google.android.material.textfield.TextInputLayout>
 
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/tilSearchType"
-        style="@style/Widget.TravelApp.SearchBar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
-        app:hintEnabled="false"
-        app:layout_constraintTop_toBottomOf="@id/tilSearchQ">
-
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/etSearchType"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="@string/search_type_hint"
-            android:paddingVertical="12dp"
-            android:inputType="none"
-            android:focusable="false"
-            android:clickable="true"
-            android:cursorVisible="false" />
-    </com.google.android.material.textfield.TextInputLayout>
-
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/tilSearchTag"
-        style="@style/Widget.TravelApp.SearchBar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
-        app:hintEnabled="false"
-        app:layout_constraintTop_toBottomOf="@id/tilSearchType">
-
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/etSearchTag"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="@string/search_tag_hint"
-            android:paddingVertical="12dp"
-            android:inputType="text"
-            android:imeOptions="actionSearch" />
-    </com.google.android.material.textfield.TextInputLayout>
-
-    <com.google.android.material.chip.ChipGroup
-        android:id="@+id/cgSearchTags"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        app:layout_constraintTop_toBottomOf="@id/tilSearchTag" />
-
     <LinearLayout
-        android:id="@+id/llSearchLocRow"
+        android:id="@+id/llFilterToggle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_marginTop="12dp"
-        app:layout_constraintTop_toBottomOf="@id/cgSearchTags">
+        android:gravity="center_vertical"
+        android:paddingVertical="10dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:background="?attr/selectableItemBackground"
+        android:layout_marginTop="4dp"
+        app:layout_constraintTop_toBottomOf="@id/tilSearchQ"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
 
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/tilSearchLoc"
-            style="@style/Widget.TravelApp.SearchBar"
+        <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            app:hintEnabled="false">
+            android:text="@string/search_filters_toggle"
+            android:textAppearance="@style/TextAppearance.TravelApp.BodyMedium"
+            android:textColor="@color/text_secondary" />
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etSearchLoc"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="@string/search_loc_hint"
-                android:paddingVertical="12dp"
-                android:inputType="text"
-                android:imeOptions="actionSearch" />
-        </com.google.android.material.textfield.TextInputLayout>
+        <ImageView
+            android:id="@+id/ivFilterChevron"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:src="@android:drawable/arrow_down_float"
+            android:contentDescription="@null" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/llFilters"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/llFilterToggle"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
 
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/tilSearchDist"
+            android:id="@+id/tilSearchType"
             style="@style/Widget.TravelApp.SearchBar"
-            android:layout_width="120dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
             app:hintEnabled="false">
 
             <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etSearchDist"
+                android:id="@+id/etSearchType"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="@string/search_dist_hint"
+                android:hint="@string/search_type_hint"
                 android:paddingVertical="12dp"
                 android:inputType="none"
                 android:focusable="false"
                 android:clickable="true"
                 android:cursorVisible="false" />
         </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilSearchTag"
+            style="@style/Widget.TravelApp.SearchBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            app:hintEnabled="false">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etSearchTag"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/search_tag_hint"
+                android:paddingVertical="12dp"
+                android:inputType="text"
+                android:imeOptions="actionSearch" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/cgSearchTags"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp" />
+
+        <LinearLayout
+            android:id="@+id/llSearchLocRow"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="12dp">
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/tilSearchLoc"
+                style="@style/Widget.TravelApp.SearchBar"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                app:hintEnabled="false">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etSearchLoc"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/search_loc_hint"
+                    android:paddingVertical="12dp"
+                    android:inputType="text"
+                    android:imeOptions="actionSearch" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/tilSearchDist"
+                style="@style/Widget.TravelApp.SearchBar"
+                android:layout_width="120dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                app:hintEnabled="false">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etSearchDist"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/search_dist_hint"
+                    android:paddingVertical="12dp"
+                    android:inputType="none"
+                    android:focusable="false"
+                    android:clickable="true"
+                    android:cursorVisible="false" />
+            </com.google.android.material.textfield.TextInputLayout>
+        </LinearLayout>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnAroundMe"
+            style="@style/Widget.TravelApp.Button.Outlined"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:minHeight="0dp"
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="6dp"
+            android:textSize="12sp"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
+            android:text="@string/search_around_me"
+            app:icon="@drawable/ic_location"
+            app:iconSize="14dp" />
+
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/cgSearchLoc"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp" />
+
     </LinearLayout>
-
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnAroundMe"
-        style="@style/Widget.TravelApp.Button.Outlined"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:minHeight="0dp"
-        android:paddingHorizontal="12dp"
-        android:paddingVertical="6dp"
-        android:textSize="12sp"
-        android:insetTop="0dp"
-        android:insetBottom="0dp"
-        android:text="@string/search_around_me"
-        app:icon="@drawable/ic_location"
-        app:iconSize="14dp"
-        app:layout_constraintTop_toBottomOf="@id/llSearchLocRow"
-        app:layout_constraintStart_toStartOf="parent" />
-
-    <com.google.android.material.chip.ChipGroup
-        android:id="@+id/cgSearchLoc"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        app:layout_constraintTop_toBottomOf="@id/btnAroundMe" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnSearch"
@@ -169,7 +206,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:text="@string/btn_search_action"
-        app:layout_constraintTop_toBottomOf="@id/cgSearchLoc" />
+        app:layout_constraintTop_toBottomOf="@id/llFilters" />
 
     <TextView
         android:id="@+id/tvSearchEmpty"

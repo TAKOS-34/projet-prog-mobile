@@ -73,6 +73,7 @@
     <string name="groups_popular_label">Groupes populaires</string>
     <string name="groups_my_label">Vos groupes</string>
     <string name="search_title">RECHERCHE</string>
+    <string name="search_filters_toggle">Filtres avancés</string>
     <string name="search_q_hint">Titre, description, utilisateur, groupe...</string>
     <string name="search_tag_hint">Tag</string>
     <string name="search_type_hint">Type</string>

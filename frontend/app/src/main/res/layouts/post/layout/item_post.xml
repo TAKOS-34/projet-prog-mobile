@@ -27,11 +27,9 @@
 
         <ImageView
             android:id="@+id/btnEdit"
-            android:layout_width="28dp"
-            android:layout_height="28dp"
-            android:layout_marginTop="12dp"
-            android:layout_marginEnd="12dp"
-            android:background="@drawable/bg_bottom_nav"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:background="@drawable/bg_action_btn"
             android:padding="6dp"
             android:src="@android:drawable/ic_menu_edit"
             android:visibility="gone"
@@ -41,11 +39,10 @@
 
         <ImageView
             android:id="@+id/btnDelete"
-            android:layout_width="28dp"
-            android:layout_height="28dp"
-            android:layout_marginTop="12dp"
-            android:layout_marginEnd="8dp"
-            android:background="@drawable/bg_bottom_nav"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_marginEnd="4dp"
+            android:background="@drawable/bg_action_btn"
             android:padding="6dp"
             android:src="@android:drawable/ic_menu_delete"
             android:visibility="gone"

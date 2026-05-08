@@ -16,6 +16,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
+import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.widget.NestedScrollView
 import android.widget.Toast
@@ -57,6 +59,11 @@ class SearchFragment : Fragment() {
     private lateinit var cgTags: ChipGroup
     private lateinit var cgLoc: ChipGroup
 
+    private lateinit var llFilters: LinearLayout
+    private lateinit var llFilterToggle: View
+    private lateinit var ivFilterChevron: ImageView
+    private var filtersExpanded = false
+
     private var selectedType: PostType? = null
     private var selectedDistanceKm: Int? = null
     private var ignoreNextLocChange = false
@@ -90,6 +97,16 @@ class SearchFragment : Fragment() {
         etDist = view.findViewById(R.id.etSearchDist)
         cgTags = view.findViewById(R.id.cgSearchTags)
         cgLoc = view.findViewById(R.id.cgSearchLoc)
+        llFilters = view.findViewById(R.id.llFilters)
+        llFilterToggle = view.findViewById(R.id.llFilterToggle)
+        ivFilterChevron = view.findViewById(R.id.ivFilterChevron)
+
+        llFilterToggle.setOnClickListener {
+            filtersExpanded = !filtersExpanded
+            llFilters.visibility = if (filtersExpanded) View.VISIBLE else View.GONE
+            ivFilterChevron.animate().rotation(if (filtersExpanded) 180f else 0f).setDuration(200).start()
+        }
+
         setupTypeDropdown()
         setupLocSuggestions()
         setupDistanceDropdown()
