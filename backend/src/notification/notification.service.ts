@@ -460,12 +460,19 @@ export class NotificationService implements OnModuleInit {
     }
 
     async deleteUserFollow(follower: UserSession, followingId: number): Promise<ResponseMessage> {
-        await this.prisma.userFollow.delete({ where: {
-            followerId_followingId: {
-                followerId: follower.id,
-                followingId
-            }
-        }});
+        await this.prisma.$transaction([
+            this.prisma.notification.deleteMany({ where: {
+                userId: follower.id,
+                targetUserId: followingId,
+                type: NotificationType.NEW_POST_USER
+            }}),
+            this.prisma.userFollow.delete({ where: {
+                followerId_followingId: {
+                    followerId: follower.id,
+                    followingId
+                }
+            }})
+        ]);
 
         return { status: true, message: 'Deleted user post notifications' };
     }
@@ -484,12 +491,19 @@ export class NotificationService implements OnModuleInit {
     }
 
     async deleteGroupFollow(follower: UserSession, groupId: number): Promise<ResponseMessage> {
-        await this.prisma.groupFollow.delete({ where: {
-            followerId_groupId: {
-                followerId: follower.id,
-                groupId
-            }
-        }});
+        await this.prisma.$transaction([
+            this.prisma.notification.deleteMany({ where: {
+                userId: follower.id,
+                targetGroupId: groupId,
+                type: NotificationType.NEW_POST_GROUP
+            }}),
+            this.prisma.groupFollow.delete({ where: {
+                followerId_groupId: {
+                    followerId: follower.id,
+                    groupId
+                }
+            }})
+        ]);
 
         return { status: true, message: 'Deleted new group post notifications' };
     }
@@ -506,12 +520,19 @@ export class NotificationService implements OnModuleInit {
     }
 
     async deleteTagFollow(follower: UserSession, tagId: number): Promise<ResponseMessage> {
-        await this.prisma.tagFollow.delete({ where: {
-            followerId_tagId: {
-                followerId: follower.id,
-                tagId
-            }
-        }});
+        await this.prisma.$transaction([
+            this.prisma.notification.deleteMany({ where: {
+                userId: follower.id,
+                targetTagId: tagId,
+                type: NotificationType.NEW_POST_TAG
+            }}),
+            this.prisma.tagFollow.delete({ where: {
+                followerId_tagId: {
+                    followerId: follower.id,
+                    tagId
+                }
+            }})
+        ]);
 
         return { status: true, message: 'Deleted new tag post notifications' };
     }
@@ -528,12 +549,19 @@ export class NotificationService implements OnModuleInit {
     }
 
     async deleteLocalisationFollow(follower: UserSession, localisationId: number): Promise<ResponseMessage> {
-        await this.prisma.localisationFollow.delete({ where: {
-            followerId_localisationId: {
-                followerId: follower.id,
-                localisationId
-            }
-        }});
+        await this.prisma.$transaction([
+            this.prisma.notification.deleteMany({ where: {
+                userId: follower.id,
+                targetLocalisationId: localisationId,
+                type: NotificationType.NEW_POST_LOCALISATION
+            }}),
+            this.prisma.localisationFollow.delete({ where: {
+                followerId_localisationId: {
+                    followerId: follower.id,
+                    localisationId
+                }
+            }})
+        ]);
 
         return { status: true, message: 'Deleted new localisation post notifications' };
     } 

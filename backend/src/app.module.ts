@@ -16,7 +16,6 @@ import { CommentModule } from './comment/comment.module';
 import { TagModule } from './tag/tag.module';
 import { SearchModule } from './search/search.module';
 import { NotificationModule } from './notification/notification.module';
-import { FollowModule } from './follow/follow.module';
 import { LocalisationModule } from './localisation/localisation.module';
 import { DbCronModule } from './utils/cron/db.cron.module';
 import { BookmarkModule } from './bookmark/bookmark.module';
@@ -49,7 +48,7 @@ import { BookmarkModule } from './bookmark/bookmark.module';
                 options: { strict: true }
             }
         }),
-        AuthModule, ProfileModule, CdnModule, PostModule, GroupModule, GroupAdminModule, LikeModule, CommentModule, TagModule, SearchModule, NotificationModule, FollowModule, LocalisationModule, DbCronModule, BookmarkModule
+        AuthModule, ProfileModule, CdnModule, PostModule, GroupModule, GroupAdminModule, LikeModule, CommentModule, TagModule, SearchModule, NotificationModule, LocalisationModule, DbCronModule, BookmarkModule
     ],
     controllers: [],
 })
