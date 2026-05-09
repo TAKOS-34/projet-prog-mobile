@@ -68,7 +68,7 @@ export class PostQueryService {
                 User: { select: { id: true, username: true, avatar: true } },
                 postTags: { select: { tag: { select: { name: true } } } },
                 likes: realUser ? { where: realUser, select: { id: true } } : false,
-                bookmarks: realUser ? { where: realUser, select: { userId: true } } : false
+                bookmarks: userId ? { where: { userId }, select: { userId: true } } : false
             }
         });
 
