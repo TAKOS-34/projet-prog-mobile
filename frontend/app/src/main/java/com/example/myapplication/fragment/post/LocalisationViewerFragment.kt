@@ -10,9 +10,13 @@ import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.RecyclerView
 import com.example.myapplication.R
+import com.example.myapplication.adapter.PostsAdapter
 import com.example.myapplication.dto.post.LocalisationDto
 import com.example.myapplication.utils.ApiClient
+import com.example.myapplication.utils.PostFeedPaginator
+import com.example.myapplication.utils.buildPostsAdapter
 import com.google.gson.Gson
 import java.net.URLEncoder
 
@@ -21,6 +25,9 @@ class LocalisationViewerFragment : Fragment() {
     private var localisation: LocalisationDto? = null
 
     private lateinit var btnFollow: ImageView
+    private lateinit var rvPosts: RecyclerView
+    private lateinit var postsAdapter: PostsAdapter
+    private var paginator: PostFeedPaginator? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -35,10 +42,26 @@ class LocalisationViewerFragment : Fragment() {
         btnFollow = view.findViewById(R.id.btnFollowLocalisation)
         btnFollow.setOnClickListener { toggleFollow() }
 
+        rvPosts = view.findViewById(R.id.rvLocalisationPosts)
+        postsAdapter = buildPostsAdapter(onChanged = { paginator?.reset() })
+        rvPosts.adapter = postsAdapter
+
         val identifier = arguments?.getString(ARG_LOCALISATION) ?: return view
         fetchLocalisation(view, identifier)
+        setupPostsPaginator(identifier)
 
         return view
+    }
+
+    private fun setupPostsPaginator(name: String) {
+        val encoded = URLEncoder.encode(name, Charsets.UTF_8.name())
+        paginator = PostFeedPaginator(
+            recyclerView = rvPosts,
+            adapter = postsAdapter,
+            baseUrl = { "post?loc=$encoded" },
+            onUi = { block -> activity?.runOnUiThread(block) }
+        )
+        paginator?.reset()
     }
 
     private fun fetchLocalisation(view: View, identifier: String) {

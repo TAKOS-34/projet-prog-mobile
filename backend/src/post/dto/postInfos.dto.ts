@@ -1,4 +1,4 @@
-export type PostInfos = {
+export type PostDto = {
     id: string;
     image: string;
     creationDate: Date;
@@ -26,7 +26,7 @@ export type PostInfos = {
     isBookmarked: boolean;
 }
 
-export type FeedInfos = {
-    posts: PostInfos[];
+export type PostsInfos = {
+    posts: PostDto[];
     nextCursor?: string;
 }

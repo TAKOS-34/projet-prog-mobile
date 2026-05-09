@@ -377,7 +377,10 @@ class SearchFragment : Fragment() {
         val loc = etLoc.text.toString().trim()
         val params = mutableListOf<String>()
         if (q.isNotEmpty()) params += "q=${URLEncoder.encode(q, Charsets.UTF_8.name())}"
-        confirmedTags.forEach { params += "tag=${URLEncoder.encode(it, Charsets.UTF_8.name())}" }
+        if (confirmedTags.isNotEmpty()) {
+            val tagsParam = confirmedTags.joinToString(",") { URLEncoder.encode(it, Charsets.UTF_8.name()) }
+            params += URLEncoder.encode("tag=[$tagsParam]", Charsets.UTF_8.name())
+        }
         if (type != null) params += "type=$type"
         if (loc.isNotEmpty()) params += "loc=${URLEncoder.encode(loc, Charsets.UTF_8.name())}"
         if (loc.isNotEmpty() && selectedDistanceKm != null) params += "dist=$selectedDistanceKm"

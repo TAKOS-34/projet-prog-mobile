@@ -4,7 +4,7 @@ import { AuthGuard } from 'src/auth/auth.guard';
 import type { UserSession } from 'src/utils/dto/userSession.dto';
 import { GetUser } from 'src/utils/decorator/get-user.decorator';
 import { ResponseMessage } from 'src/utils/dto/responseMessage.dto';
-import { FeedInfos } from 'src/post/dto/postInfos.dto';
+import { PostsInfos } from 'src/post/dto/postInfos.dto';
 
 @Controller('bookmark')
 export class BookmarkController {
@@ -30,7 +30,7 @@ export class BookmarkController {
 
     @UseGuards(AuthGuard)
     @Get()
-    getBookmark(@GetUser() user: UserSession, @Query('limit') limit: number = 20, @Query('cursor') cursor?: string): Promise<FeedInfos> {
+    getBookmark(@GetUser() user: UserSession, @Query('limit') limit: number = 20, @Query('cursor') cursor?: string): Promise<PostsInfos> {
         return this.bookmarkService.getBookmark(user, limit, cursor);
     }
 }

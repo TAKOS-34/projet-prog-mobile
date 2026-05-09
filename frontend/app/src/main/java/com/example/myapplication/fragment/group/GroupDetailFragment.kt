@@ -364,7 +364,12 @@ class GroupDetailFragment : Fragment() {
             recyclerView = rvPosts,
             adapter = postsAdapter,
             baseUrl = { "group/${group.id}/posts" },
-            onUi = { block -> activity?.runOnUiThread(block) }
+            onUi = { block -> activity?.runOnUiThread(block) },
+            onError = { code ->
+                if (code == 403) {
+                    Toast.makeText(context, R.string.error_join_group_banned, Toast.LENGTH_LONG).show()
+                }
+            }
         )
     }
 

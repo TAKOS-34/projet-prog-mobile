@@ -3,6 +3,7 @@ import type { UserSession } from 'src/utils/dto/userSession.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { ResponseMessage } from 'src/utils/dto/responseMessage.dto';
 import { NotificationService } from 'src/notification/notification.service';
+import { NotificationType } from '@prisma/client';
 
 @Injectable()
 export class LikeService {
@@ -37,10 +38,17 @@ export class LikeService {
 
     async deleteLikePost(postId: string, user: UserSession, anonymousToken: string): Promise<ResponseMessage> {
         if (user) {
-            await this.prisma.like.deleteMany({ where: {
-                postId,
-                userId: user.id
-            }});
+            await this.prisma.$transaction([
+                this.prisma.like.deleteMany({ where: {
+                    postId,
+                    userId: user.id
+                }}),
+                this.prisma.notification.deleteMany({ where: {
+                    targetPostId: postId,
+                    targetUserId: user.id,
+                    type: NotificationType.NEW_POST_LIKE
+                }})
+            ]);
         }
 
         else if (anonymousToken) {

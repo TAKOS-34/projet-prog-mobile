@@ -69,7 +69,7 @@ export class TagService {
             const response = await this.gemini.models.generateContent({
                 model: this.model,
                 contents: [
-                    { text: 'Analyze this image and generate 3 descriptive tags for Instagram. Return ONLY the tags separated by commas. Do not use hashtags, brackets, or any preamble. Example: paris, france, baguette' }, 
+                    { text: 'Analyze this image and generate 3 descriptive tags for Instagram. Return ONLY the tags separated by commas. Do not use hashtags, brackets, any preamble and space (use _ instead), write in lowercase. Example: paris, france, baguette' }, 
                     { inlineData: {
                         mimeType: post.mimetype,
                         data: post.buffer.toString('base64')
@@ -84,8 +84,7 @@ export class TagService {
             return response.text
                 .replace(/[\[\]"'`]/g, '')
                 .split(',')
-                .map(tag => tag.trim())
-                .filter(tag => tag.length > 0);
+                .map(tag => tag.toLowerCase().trim().split(/\s+/)[0]).filter(t => t !== '');
         } catch (error) {
             throw new InternalServerErrorException('Internal server error');
         }

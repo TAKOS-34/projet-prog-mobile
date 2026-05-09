@@ -17,15 +17,53 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
+    <com.google.android.material.button.MaterialButtonToggleGroup
+        android:id="@+id/tgGroupsTabs"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        app:singleSelection="true"
+        app:selectionRequired="true"
+        app:layout_constraintTop_toBottomOf="@id/tvGroupsTitle">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnTabMyGroups"
+            style="@style/Widget.TravelApp.Button.Outlined"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textSize="12sp"
+            android:text="@string/groups_my_label" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnTabSearchGroups"
+            style="@style/Widget.TravelApp.Button.Outlined"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textSize="12sp"
+            android:text="@string/groups_tab_search" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnTabPopularGroups"
+            style="@style/Widget.TravelApp.Button.Outlined"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textSize="12sp"
+            android:text="@string/groups_popular_label" />
+    </com.google.android.material.button.MaterialButtonToggleGroup>
+
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/tilGroupsSearch"
         style="@style/Widget.TravelApp.SearchBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="16dp"
+        android:visibility="gone"
         app:startIconDrawable="@android:drawable/ic_menu_search"
         app:hintEnabled="false"
-        app:layout_constraintTop_toBottomOf="@id/tvGroupsTitle">
+        app:layout_constraintTop_toBottomOf="@id/tgGroupsTabs">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/etGroupsSearch"

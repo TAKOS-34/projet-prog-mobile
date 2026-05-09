@@ -1,7 +1,6 @@
 package com.example.myapplication.fragment.group
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -22,7 +21,9 @@ import com.example.myapplication.utils.ApiClient
 import com.example.myapplication.utils.AuthViewModel
 import com.example.myapplication.utils.requestToJoinGroup
 import com.google.android.material.button.MaterialButton
+import com.google.android.material.button.MaterialButtonToggleGroup
 import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.textfield.TextInputLayout
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import java.net.URLEncoder
@@ -34,6 +35,7 @@ class GroupsFragment : Fragment() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var tvEmpty: TextView
     private lateinit var etSearch: TextInputEditText
+    private lateinit var tilSearch: TextInputLayout
 
     private val groupsAdapter: GroupsAdapter by lazy {
         GroupsAdapter { group ->
@@ -71,28 +73,56 @@ class GroupsFragment : Fragment() {
         recyclerView = view.findViewById(R.id.rvGroups)
         tvEmpty = view.findViewById(R.id.tvGroupsEmpty)
         etSearch = view.findViewById(R.id.etGroupsSearch)
+        tilSearch = view.findViewById(R.id.tilGroupsSearch)
 
         view.findViewById<View>(R.id.fabNewGroup).setOnClickListener {
             findNavController().navigate(R.id.createGroupFragment)
         }
 
-        showMyGroups()
-
         etSearch.setOnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_SEARCH) {
                 val query = etSearch.text.toString().trim()
-                if (query.isEmpty()) showMyGroups() else performSearch(query)
+                if (query.isNotEmpty()) performSearch(query) else clearSearchResults()
                 true
             } else false
         }
+
+        val toggle = view.findViewById<MaterialButtonToggleGroup>(R.id.tgGroupsTabs)
+        toggle.addOnButtonCheckedListener { _, checkedId, isChecked ->
+            if (!isChecked) return@addOnButtonCheckedListener
+            when (checkedId) {
+                R.id.btnTabMyGroups -> showMyGroups()
+                R.id.btnTabSearchGroups -> showSearchTab()
+                R.id.btnTabPopularGroups -> showPopularGroups()
+            }
+        }
+        toggle.check(R.id.btnTabMyGroups)
 
         return view
     }
 
     private fun showMyGroups() {
+        tilSearch.visibility = View.GONE
         recyclerView.adapter = groupsAdapter
         tvEmpty.setText(R.string.groups_empty)
         fetchMyGroups()
+    }
+
+    private fun showSearchTab() {
+        tilSearch.visibility = View.VISIBLE
+        recyclerView.adapter = searchAdapter
+        searchAdapter.submitList(emptyList())
+        tvEmpty.setText(R.string.groups_search_empty)
+        renderState(true)
+        val q = etSearch.text.toString().trim()
+        if (q.isNotEmpty()) performSearch(q)
+    }
+
+    private fun showPopularGroups() {
+        tilSearch.visibility = View.GONE
+        recyclerView.adapter = searchAdapter
+        tvEmpty.setText(R.string.groups_search_empty)
+        fetchPopularGroups()
     }
 
     private fun fetchMyGroups() {
@@ -105,6 +135,25 @@ class GroupsFragment : Fragment() {
                         AdminGroupsCache.set(groups.filter { it.isAdmin }.map { it.id })
                         renderState(groups.isEmpty())
                         groupsAdapter.submitList(groups)
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+                } else {
+                    Toast.makeText(context, R.string.error_load_groups, Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
+
+    private fun fetchPopularGroups() {
+        ApiClient.get("group/popular") { body, _, error ->
+            activity?.runOnUiThread {
+                if (error == null && body != null) {
+                    try {
+                        val type = object : TypeToken<List<GroupSearchDto>>() {}.type
+                        val groups: List<GroupSearchDto> = Gson().fromJson(body, type)
+                        renderState(groups.isEmpty())
+                        searchAdapter.submitList(groups)
                     } catch (e: Exception) {
                         e.printStackTrace()
                     }
@@ -134,6 +183,11 @@ class GroupsFragment : Fragment() {
                 }
             }
         }
+    }
+
+    private fun clearSearchResults() {
+        searchAdapter.submitList(emptyList())
+        renderState(true)
     }
 
     private fun renderState(isEmpty: Boolean) {

@@ -13,8 +13,13 @@ import coil.load
 import coil.transform.CircleCropTransformation
 import com.example.myapplication.R
 import com.example.myapplication.dto.profile.UserPublicProfileDto
+import androidx.recyclerview.widget.RecyclerView
+import com.example.myapplication.adapter.PostsAdapter
 import com.example.myapplication.utils.ApiClient
+import com.example.myapplication.utils.PostFeedPaginator
 import com.example.myapplication.utils.SessionManager
+import com.example.myapplication.utils.buildPostsAdapter
+import java.net.URLEncoder
 import com.example.myapplication.utils.resolveBackendUrl
 import com.example.myapplication.utils.toShortDate
 import com.google.gson.Gson
@@ -26,6 +31,9 @@ class ProfileViewerFragment : Fragment() {
 
     private lateinit var btnFollow: ImageView
     private lateinit var tvSelfBadge: TextView
+    private lateinit var rvPosts: RecyclerView
+    private lateinit var postsAdapter: PostsAdapter
+    private var paginator: PostFeedPaginator? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -42,6 +50,10 @@ class ProfileViewerFragment : Fragment() {
         btnFollow = view.findViewById(R.id.btnFollow)
         tvSelfBadge = view.findViewById(R.id.tvSelfBadge)
         btnFollow.setOnClickListener { toggleFollow() }
+
+        rvPosts = view.findViewById(R.id.rvUserPosts)
+        postsAdapter = buildPostsAdapter(onChanged = { paginator?.reset() })
+        rvPosts.adapter = postsAdapter
 
         fetchProfile(view)
 
@@ -85,6 +97,25 @@ class ProfileViewerFragment : Fragment() {
             tvSelfBadge.visibility = View.GONE
             btnFollow.visibility = View.VISIBLE
             applyFollowState(p.isFollowing)
+        }
+
+        val tvNoPosts = view.findViewById<TextView>(R.id.tvNoUserPosts)
+        if (p.nbPosts <= 0) {
+            tvNoPosts.visibility = View.VISIBLE
+            rvPosts.visibility = View.GONE
+        } else {
+            tvNoPosts.visibility = View.GONE
+            rvPosts.visibility = View.VISIBLE
+            if (paginator == null) {
+                val encoded = URLEncoder.encode(p.username, Charsets.UTF_8.name())
+                paginator = PostFeedPaginator(
+                    recyclerView = rvPosts,
+                    adapter = postsAdapter,
+                    baseUrl = { "post?q=$encoded" },
+                    onUi = { block -> activity?.runOnUiThread(block) }
+                )
+                paginator?.reset()
+            }
         }
     }
 

@@ -10,9 +10,13 @@ import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.RecyclerView
 import com.example.myapplication.R
+import com.example.myapplication.adapter.PostsAdapter
 import com.example.myapplication.dto.post.TagDto
 import com.example.myapplication.utils.ApiClient
+import com.example.myapplication.utils.PostFeedPaginator
+import com.example.myapplication.utils.buildPostsAdapter
 import com.google.gson.Gson
 import java.net.URLEncoder
 
@@ -21,6 +25,9 @@ class TagViewerFragment : Fragment() {
     private var tag: TagDto? = null
 
     private lateinit var btnFollow: ImageView
+    private lateinit var rvPosts: RecyclerView
+    private lateinit var postsAdapter: PostsAdapter
+    private var paginator: PostFeedPaginator? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -35,10 +42,27 @@ class TagViewerFragment : Fragment() {
         btnFollow = view.findViewById(R.id.btnFollowTag)
         btnFollow.setOnClickListener { toggleFollow() }
 
+        rvPosts = view.findViewById(R.id.rvTagPosts)
+        postsAdapter = buildPostsAdapter(onChanged = { paginator?.reset() })
+        rvPosts.adapter = postsAdapter
+
         val identifier = arguments?.getString(ARG_TAG) ?: return view
         fetchTag(view, identifier)
+        setupPostsPaginator(identifier)
 
         return view
+    }
+
+    private fun setupPostsPaginator(tagName: String) {
+        val encodedTag = URLEncoder.encode(tagName, Charsets.UTF_8.name())
+        val tagParam = URLEncoder.encode("tag=[$encodedTag]", Charsets.UTF_8.name())
+        paginator = PostFeedPaginator(
+            recyclerView = rvPosts,
+            adapter = postsAdapter,
+            baseUrl = { "post?$tagParam" },
+            onUi = { block -> activity?.runOnUiThread(block) }
+        )
+        paginator?.reset()
     }
 
     private fun fetchTag(view: View, identifier: String) {

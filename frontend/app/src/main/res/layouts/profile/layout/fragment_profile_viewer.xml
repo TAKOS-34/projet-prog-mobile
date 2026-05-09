@@ -110,54 +110,93 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:paddingVertical="12dp">
+                android:orientation="vertical">
 
                 <LinearLayout
-                    android:layout_width="0dp"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:gravity="center"
-                    android:orientation="vertical">
-                    <TextView
-                        android:id="@+id/tvNbPosts"
-                        style="@style/Widget.TravelApp.TextView.StatNumber"
-                        android:layout_width="wrap_content"
+                    android:orientation="horizontal"
+                    android:paddingVertical="12dp">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        tools:text="1" />
-                    <TextView
-                        style="@style/Widget.TravelApp.TextView.StatLabel"
-                        android:layout_width="wrap_content"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:orientation="vertical">
+                        <TextView
+                            android:id="@+id/tvNbPosts"
+                            style="@style/Widget.TravelApp.TextView.StatNumber"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            tools:text="1" />
+                        <TextView
+                            style="@style/Widget.TravelApp.TextView.StatLabel"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/profile_stat_posts" />
+                    </LinearLayout>
+
+                    <View
+                        android:layout_width="1dp"
+                        android:layout_height="match_parent"
+                        android:background="@color/divider"
+                        android:layout_marginVertical="8dp" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:text="@string/profile_stat_posts" />
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:orientation="vertical">
+                        <TextView
+                            android:id="@+id/tvNbGroups"
+                            style="@style/Widget.TravelApp.TextView.StatNumber"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            tools:text="0" />
+                        <TextView
+                            style="@style/Widget.TravelApp.TextView.StatLabel"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/profile_stat_groups" />
+                    </LinearLayout>
                 </LinearLayout>
 
-                <View
-                    android:layout_width="1dp"
-                    android:layout_height="match_parent"
-                    android:background="@color/divider"
-                    android:layout_marginVertical="8dp" />
-
-                <LinearLayout
-                    android:layout_width="0dp"
+                <TextView
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
                     android:gravity="center"
-                    android:orientation="vertical">
-                    <TextView
-                        android:id="@+id/tvNbGroups"
-                        style="@style/Widget.TravelApp.TextView.StatNumber"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        tools:text="0" />
-                    <TextView
-                        style="@style/Widget.TravelApp.TextView.StatLabel"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/profile_stat_groups" />
-                </LinearLayout>
+                    android:paddingVertical="8dp"
+                    android:text="@string/profile_posts_separator"
+                    android:textAppearance="@style/TextAppearance.TravelApp.LabelMedium"
+                    android:textColor="@color/text_hint" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
+
+        <TextView
+            android:id="@+id/tvNoUserPosts"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="@string/profile_no_posts"
+            android:textAppearance="@style/TextAppearance.TravelApp.BodyMedium"
+            android:textColor="@color/text_secondary"
+            android:visibility="gone"
+            app:layout_constraintTop_toBottomOf="@id/cardStats"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvUserPosts"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:nestedScrollingEnabled="false"
+            android:clipToPadding="false"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            app:layout_constraintTop_toBottomOf="@id/cardStats"
+            tools:listitem="@layout/item_post" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>

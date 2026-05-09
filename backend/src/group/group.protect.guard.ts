@@ -95,7 +95,13 @@ export class GroupProtectGuard implements CanActivate {
         }
 
         if (!group || !group.isGroupPrivate) {
-            return true;
+            if (user == null) return true;
+
+            if (await this.prisma.ban.findUnique({ where: { groupId_userId: { groupId: group?.id ?? -1, userId: user.id } } })) {
+                return false;
+            } else {
+                return true;
+            }
         }
 
         if (!user) {

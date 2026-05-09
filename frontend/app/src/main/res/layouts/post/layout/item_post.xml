@@ -138,7 +138,7 @@
                         android:id="@+id/ivTypeIcon"
                         android:layout_width="12dp"
                         android:layout_height="12dp"
-                        android:src="@drawable/ic_fire"
+                        android:src="@drawable/ic_type"
                         app:tint="@color/primary" />
 
                     <TextView

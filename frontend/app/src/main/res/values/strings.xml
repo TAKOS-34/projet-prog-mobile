@@ -66,12 +66,13 @@
     <string name="post_type_nightlife">Vie nocturne</string>
     <string name="post_type_hidden_gem">Joyau caché</string>
     <string name="post_type_other">Autre</string>
-    <string name="groups_title">VOS GROUPES</string>
+    <string name="groups_title">GROUPES</string>
     <string name="groups_search_hint">Rechercher un groupe...</string>
     <string name="groups_empty">Vous n\'avez rejoint aucun groupe</string>
     <string name="groups_search_empty">Aucun résultat</string>
     <string name="groups_popular_label">Groupes populaires</string>
     <string name="groups_my_label">Vos groupes</string>
+    <string name="groups_tab_search">Recherche</string>
     <string name="search_title">RECHERCHE</string>
     <string name="search_filters_toggle">Filtres avancés</string>
     <string name="search_q_hint">Titre, description, utilisateur, groupe...</string>
@@ -198,6 +199,7 @@
     <string name="btn_request_join_group">Demander à rejoindre</string>
     <string name="btn_view_posts">Voir les posts</string>
     <string name="label_post_type">TYPE <font color="#FF0000">*</font></string>
+    <string name="edit_post_type">TYPE</string>
     <string name="write_comment">Écrire un commentaire...</string>
     <string name="btn_save_avatar">Enregistrer la photo</string>
     <string name="success_avatar_upload">Photo mise à jour !</string>
@@ -206,6 +208,8 @@
     <string name="btn_bookmarks">Voir les signets</string>
     <string name="bookmarks_title">VOS SIGNETS</string>
     <string name="bookmarks_empty">Aucun signet</string>
+    <string name="profile_posts_separator">--- Posts associés ---</string>
+    <string name="profile_no_posts">Aucun post pour le moment</string>
     <string name="success_bookmarked">Ajouté aux signets</string>
     <string name="success_unbookmarked">Retiré des signets</string>
     <string name="sessions_title">Sessions actives</string>

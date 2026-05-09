@@ -11,7 +11,8 @@ import { UserList } from 'src/group/dto/userList.dto';
 import { GroupInfos } from './dto/groupInfos.dto';
 import { AuthOptionalGuard } from 'src/auth/auth.optionnal.guard';
 import { GetAnonymous } from 'src/utils/decorator/get-anonymous.decorator';
-import { FeedInfos } from 'src/post/dto/postInfos.dto';
+import { PostsInfos } from 'src/post/dto/postInfos.dto';
+import { GroupSearch } from 'src/search/dto/groupSearch.dto';
 
 @Controller('group')
 export class GroupController {
@@ -22,6 +23,12 @@ export class GroupController {
     @Get('/my-groups')
     getMyGroups(@GetUser() user: UserSession): Promise<GroupInfos[]> {
         return this.groupService.getMyGroups(user);
+    }
+
+    @UseGuards(AuthOptionalGuard)
+    @Get('/popular')
+    getPopularGroups(@GetUser() user?: UserSession): Promise<GroupSearch[]> {
+        return this.groupService.getPopularGroups(user?.id);
     }
 
     @UseGuards(AuthOptionalGuard)
@@ -38,7 +45,7 @@ export class GroupController {
 
     @UseGuards(GroupProtectGuard, AuthOptionalGuard)
     @Get('/:groupId/posts')
-    getGroupPosts(@Param('groupId') groupId: number, @Query('limit') limit: number = 20, @Query('cursor') cursor?: string, @GetUser() user?: UserSession, @GetAnonymous() anonymous?: string): Promise<FeedInfos> {
+    getGroupPosts(@Param('groupId') groupId: number, @Query('limit') limit: number = 20, @Query('cursor') cursor?: string, @GetUser() user?: UserSession, @GetAnonymous() anonymous?: string): Promise<PostsInfos> {
         return this.groupService.getGroupPosts(groupId, limit, user?.id, anonymous, cursor);
     }
 

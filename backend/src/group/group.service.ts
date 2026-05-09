@@ -8,8 +8,9 @@ import { randomUUID } from 'crypto';
 import sharp from 'sharp';
 import { UserList } from 'src/group/dto/userList.dto';
 import { GroupInfos } from './dto/groupInfos.dto';
-import { FeedInfos} from 'src/post/dto/postInfos.dto';
+import { PostsInfos } from 'src/post/dto/postInfos.dto';
 import { getNextCursor } from 'src/utils/paginator/paginate.util';
+import { GroupSearch } from 'src/search/dto/groupSearch.dto';
 
 @Injectable()
 export class GroupService {
@@ -55,6 +56,36 @@ export class GroupService {
 
 
 
+    async getPopularGroups(userId?: number): Promise<GroupSearch[]> {
+        const groups = await this.prisma.group.findMany({
+            select: {
+                id: true,
+                name: true,
+                avatar: true,
+                creationDate: true,
+                isGroupPrivate: true,
+                nbMembers: true,
+                nbPosts: true,
+                ...(userId ? { members: { where: { userId }, select: { userId: true }, take: 1 } } : {})
+            },
+            orderBy: [{ nbMembers: 'desc' }, { creationDate: 'desc' }],
+            take: 20
+        });
+
+        return groups.map(g => ({
+            id: g.id,
+            name: g.name,
+            avatar: this.cdn.getGroupAvatarUrl(g.avatar),
+            creationDate: g.creationDate,
+            isGroupPrivate: g.isGroupPrivate,
+            isMember: userId ? g.members.length > 0 : false,
+            nbMembers: g.nbMembers,
+            nbPosts: g.nbPosts
+        }));
+    }
+
+
+
     async getGroupInfos(groupId: number, user?: UserSession): Promise<GroupInfos> {
         const group = await this.prisma.group.findUniqueOrThrow({
             where: { id: groupId },
@@ -69,8 +100,7 @@ export class GroupService {
                 nbMembers: true,
                 nbPosts: true,
                 members: user ? { where: { userId: user.id }, select: { userId: true } } : false,
-                followers: user ? { where: { followerId: user.id }, select: { followerId: true }, take: 1 } : false,
-
+                followers: user ? { where: { followerId: user.id }, select: { followerId: true }, take: 1 } : false
             }});
 
         return {
@@ -105,7 +135,7 @@ export class GroupService {
         }));
     }
 
-    async getGroupPosts(groupId: number, limit: number, userId?: number, anonymousToken?: string, cursor?: string): Promise<FeedInfos> {
+    async getGroupPosts(groupId: number, limit: number, userId?: number, anonymousToken?: string, cursor?: string): Promise<PostsInfos> {
         const realUser = userId ? { userId } : anonymousToken ? { anonymousUserId: anonymousToken } : null;
 
         const posts = await this.prisma.post.findMany({

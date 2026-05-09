@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { CdnService } from "src/cdn/cdn.service";
 import { PrismaService } from "src/prisma/prisma.service";
-import { FeedInfos, PostInfos } from "./dto/postInfos.dto";
+import { PostsInfos, PostDto } from "./dto/postInfos.dto";
 import { CommentInfos } from "./dto/comment.dto";
 import { PostType } from "@prisma/client";
 import { LocalisationUtil } from "src/utils/localisation/localisation.util";
@@ -17,9 +17,9 @@ export class PostQueryService {
 
 
 
-    async getFeed(limit: number, cursor?: string, userId?: number, anonymousToken?: string, q?: string, tag?: string, type?: PostType, loc?: string, dist?: number): Promise<FeedInfos> {
+    async getPosts(limit: number, cursor?: string, userId?: number, anonymousToken?: string, q?: string, tag?: string[], type?: PostType, loc?: string, dist?: number): Promise<PostsInfos> {
         const realUser = userId ? { userId } : anonymousToken ? { anonymousUserId: anonymousToken } : null;
-        
+
         const cleanLocalisation: string | null = loc ? loc.toLowerCase().trim() : null;
         let localisationIds: number[] | null = null;
         if (cleanLocalisation && dist) {
@@ -42,7 +42,7 @@ export class PostQueryService {
                         ]
                     } : {},
                     tag ? {
-                        postTags: { some: { tag: { name: tag } } }
+                        postTags: { some: { tag: { name: { in: tag } } } }
                     } : {},
                     type ? {
                         type
@@ -107,7 +107,7 @@ export class PostQueryService {
 
 
 
-    async getPost(postId: string, userId?: number, anonymousToken?: string): Promise<PostInfos> {
+    async getPost(postId: string, userId?: number, anonymousToken?: string): Promise<PostDto> {
         const realUser = userId ? { userId } : anonymousToken ? { anonymousUserId: anonymousToken } : null;
 
         const post = await this.prisma.post.findUniqueOrThrow({

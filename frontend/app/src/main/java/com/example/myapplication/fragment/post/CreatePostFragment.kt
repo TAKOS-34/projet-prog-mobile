@@ -24,6 +24,7 @@ import coil.load
 import coil.transform.CircleCropTransformation
 import com.example.myapplication.R
 import com.example.myapplication.dto.group.GroupInfosDto
+import androidx.core.graphics.toColorInt
 import com.example.myapplication.dto.post.PostType
 import com.example.myapplication.utils.ApiClient
 import com.example.myapplication.utils.LocalisationSuggester
@@ -59,6 +60,7 @@ class CreatePostFragment : Fragment() {
     private lateinit var btnIaTags: MaterialButton
     private lateinit var pbIaLoading: ProgressBar
     private var popularTags: List<String> = emptyList()
+    private var aiSuggestedTags: Set<String> = emptySet()
     private lateinit var btnSelectAudio: MaterialButton
     private lateinit var tvAudioStatus: TextView
     private lateinit var btnPublish: MaterialButton
@@ -315,6 +317,9 @@ class CreatePostFragment : Fragment() {
                     btnIaTags.isEnabled = true
                     pbIaLoading.visibility = View.GONE
                     if (error == null && body != null) {
+                        try {
+                            aiSuggestedTags = Gson().fromJson(body, Array<String>::class.java).toSet()
+                        } catch (e: Exception) { aiSuggestedTags = emptySet() }
                         updateTagChips(body)
                     }
                 }
@@ -336,12 +341,16 @@ class CreatePostFragment : Fragment() {
                 val partial = if (!currentText.endsWith(",")) currentText.split(",").lastOrNull()?.trim() ?: "" else ""
                 if (partial.isNotEmpty() && !suggestions.contains(partial)) suggestions.add(0, partial)
                 cgSuggestedTags.removeAllViews()
+                val aiBg = android.content.res.ColorStateList.valueOf("#E0A775".toColorInt())
                 suggestions.forEach { tag ->
                     val chip = Chip(context).apply {
                         text = tag
                         isClickable = true
                         isCheckable = true
                         isChecked = committedTags.contains(tag)
+                        if (aiSuggestedTags.contains(tag)) {
+                            chipBackgroundColor = aiBg
+                        }
                         setOnClickListener { addTagToInput(tag) }
                     }
                     cgSuggestedTags.addView(chip)

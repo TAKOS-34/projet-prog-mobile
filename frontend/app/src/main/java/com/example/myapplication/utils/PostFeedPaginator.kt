@@ -13,7 +13,8 @@ class PostFeedPaginator(
     private val adapter: PostsAdapter,
     private val baseUrl: () -> String,
     private val onUi: (() -> Unit) -> Unit,
-    private val onResults: (isEmpty: Boolean) -> Unit = {}
+    private val onResults: (isEmpty: Boolean) -> Unit = {},
+    private val onError: (code: Int) -> Unit = {}
 ) {
     private val items = mutableListOf<PostDto>()
     private var nextCursor: String? = null
@@ -52,7 +53,7 @@ class PostFeedPaginator(
             "${sep}cursor=${URLEncoder.encode(it, Charsets.UTF_8.name())}"
         } ?: ""
 
-        ApiClient.get("$url$cursorPart") { body, _, error ->
+        ApiClient.get("$url$cursorPart") { body, code, error ->
             onUi {
                 isLoading = false
                 if (error == null && body != null) {
@@ -66,6 +67,9 @@ class PostFeedPaginator(
                     } catch (e: Exception) {
                         e.printStackTrace()
                     }
+                } else {
+                    hasMore = false
+                    onError(code)
                 }
             }
         }

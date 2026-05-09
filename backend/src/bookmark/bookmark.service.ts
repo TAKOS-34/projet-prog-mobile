@@ -1,6 +1,6 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { CdnService } from 'src/cdn/cdn.service';
-import { FeedInfos } from 'src/post/dto/postInfos.dto';
+import { PostsInfos } from 'src/post/dto/postInfos.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { ResponseMessage } from 'src/utils/dto/responseMessage.dto';
 import { UserSession } from 'src/utils/dto/userSession.dto';
@@ -47,7 +47,7 @@ export class BookmarkService {
 
 
 
-    async getBookmark(user: UserSession, limit: number, cursor?: string): Promise<FeedInfos> {
+    async getBookmark(user: UserSession, limit: number, cursor?: string): Promise<PostsInfos> {
         const bookmarks = await this.prisma.bookmarks.findMany({ where: { userId: user.id } });
 
         const posts = await this.prisma.post.findMany({

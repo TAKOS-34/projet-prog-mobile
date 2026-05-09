@@ -5,7 +5,7 @@ import { ResponseMessage } from 'src/utils/dto/responseMessage.dto';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { GetUser } from 'src/utils/decorator/get-user.decorator';
-import { FeedInfos, PostInfos } from './dto/postInfos.dto';
+import { PostsInfos, PostDto } from './dto/postInfos.dto';
 import { PostQueryService } from './post.query.service';
 import { GroupProtectGuard } from 'src/group/group.protect.guard';
 import { ReportDto } from './dto/report.dto';
@@ -27,23 +27,23 @@ export class PostController {
 
     @Get()
     @UseGuards(AuthOptionalGuard)
-    async getGlobalFeed(
+    async getPosts(
         @Query('limit') limit: number = 20,
         @Query('cursor') cursor?: string,
         @Query('q') q?: string,
-        @Query('tag') tag?: string,
+        @Query('tag') tag?: string[],
         @Query('type') type?: PostType,
         @Query('loc') loc?: string,
         @Query('dist') dist?: number,
         @GetUser() user?: UserSession,
         @GetAnonymous() anonymous?: string
-    ): Promise<FeedInfos> {
-        return this.postQueryService.getFeed(limit, cursor, user?.id, anonymous, q, tag, type, loc, dist);
+    ): Promise<PostsInfos> {
+        return this.postQueryService.getPosts(limit, cursor, user?.id, anonymous, q, tag, type, loc, dist);
     }
 
     @UseGuards(GroupProtectGuard, AuthOptionalGuard)
     @Get('/:postId')
-    getPost(@Param('postId') postId: string, @GetUser() user?: UserSession, @GetAnonymous() anonymous?: string): Promise<PostInfos> {
+    getPost(@Param('postId') postId: string, @GetUser() user?: UserSession, @GetAnonymous() anonymous?: string): Promise<PostDto> {
         return this.postQueryService.getPost(postId, user?.id, anonymous);
     }
 
