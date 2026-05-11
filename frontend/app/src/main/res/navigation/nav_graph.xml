@@ -207,4 +207,10 @@
             app:argType="string" />
     </fragment>
 
+    <fragment
+        android:id="@+id/createTripFragment"
+        android:name="com.example.myapplication.fragment.trip.CreateTripFragment"
+        android:label="@string/trip_form_title"
+        tools:layout="@layout/fragment_create_trip" />
+
     </navigation>

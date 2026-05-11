@@ -65,7 +65,7 @@
     <string name="post_type_panorama">Panorama</string>
     <string name="post_type_historic_site">Site historique</string>
     <string name="post_type_natural_area">Nature</string>
-    <string name="post_type_coastal_water">Plages &amp; eau</string>
+    <string name="post_type_coastal_water">Plages</string>
     <string name="post_type_urban_architecture">Architecture</string>
     <string name="post_type_gastronomy">Gastronomie</string>
     <string name="post_type_unique_stay">Séjour insolite</string>
@@ -270,6 +270,24 @@
     <string name="menu">MENU</string>
     <string name="notifications">NOTIFICATIONS</string>
     <string name="profile">PROFIL</string>
+    <string name="search_tab_search">Recherche</string>
+    <string name="search_tab_map">Carte</string>
+    <string name="map_post_by">Par %1$s</string>
+    <string name="home_tab_travelshare">TravelShare</string>
+    <string name="home_tab_travelpath">TravelPath</string>
+    <string name="trip_form_title">Créer votre voyage</string>
+    <string name="trip_form_subtitle">Planifiez votre itinéraire</string>
+    <string name="trip_city_hint">Ville de destination</string>
+    <string name="trip_mode_city_only">Ville uniquement</string>
+    <string name="trip_mode_route">Depuis ma position</string>
+    <string name="trip_types_label">Types de lieux</string>
+    <string name="trip_budget_label">Budget maximum</string>
+    <string name="trip_time_label">Durée maximale</string>
+    <string name="trip_submit">Générer des itinéraires</string>
+    <string name="trip_empty">Aucuns voyages pour l\'instant</string>
+    <string name="trip_budget_format">%1$d €</string>
+    <string name="trip_time_format">%1$dh</string>
+
     <plurals name="time_minutes_ago">
         <item quantity="one">Il y a %d minute</item>
         <item quantity="other">Il y a %d minutes</item>

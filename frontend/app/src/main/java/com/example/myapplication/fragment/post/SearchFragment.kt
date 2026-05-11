@@ -24,24 +24,39 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.button.MaterialButton
+import com.google.android.material.button.MaterialButtonToggleGroup
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import java.util.Locale
 import androidx.recyclerview.widget.RecyclerView
+import coil.load
+import coil.transform.CircleCropTransformation
 import com.example.myapplication.R
 import com.example.myapplication.adapter.PostsAdapter
+import com.example.myapplication.dto.post.PostDto
 import com.example.myapplication.dto.post.PostType
+import com.example.myapplication.dto.post.PostsResponseDto
 import com.example.myapplication.utils.ApiClient
+import com.example.myapplication.utils.LocalisationFormat
 import com.example.myapplication.utils.LocalisationSuggester
 import com.example.myapplication.utils.LocalisationSuggestion
 import com.example.myapplication.utils.PostFeedPaginator
 import com.example.myapplication.utils.SessionManager
 import com.example.myapplication.utils.buildPostsAdapter
+import com.example.myapplication.utils.resolveBackendUrl
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
+import com.google.android.material.imageview.ShapeableImageView
 import com.google.android.material.textfield.TextInputEditText
 import com.google.gson.Gson
 import java.net.URLEncoder
+import org.osmdroid.config.Configuration
+import org.osmdroid.tileprovider.tilesource.TileSourceFactory
+import org.osmdroid.util.GeoPoint
+import org.osmdroid.views.MapView
+import org.osmdroid.views.overlay.Marker
 
 class SearchFragment : Fragment() {
 
@@ -49,6 +64,8 @@ class SearchFragment : Fragment() {
     private lateinit var paginator: PostFeedPaginator
     private lateinit var recyclerView: RecyclerView
     private lateinit var nsv: NestedScrollView
+    private lateinit var nsvSearch: NestedScrollView
+    private lateinit var mapView: MapView
     private lateinit var tvEmpty: TextView
     private var pendingScrollToResults = false
     private lateinit var etQ: TextInputEditText
@@ -68,6 +85,7 @@ class SearchFragment : Fragment() {
     private var selectedDistanceKm: Int? = null
     private var ignoreNextLocChange = false
     private var popularTagsCache: List<String> = emptyList()
+    private var mapInitialized = false
 
     private val handler = Handler(Looper.getMainLooper())
     private var suggestRunnable: Runnable? = null
@@ -87,6 +105,9 @@ class SearchFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_search, container, false)
+
+        nsvSearch = view.findViewById(R.id.nsvSearch)
+        mapView = view.findViewById(R.id.mapView)
 
         recyclerView = view.findViewById(R.id.rvSearchResults)
         tvEmpty = view.findViewById(R.id.tvSearchEmpty)
@@ -114,7 +135,7 @@ class SearchFragment : Fragment() {
         view.findViewById<MaterialButton>(R.id.btnAroundMe).setOnClickListener { onAroundMeClicked() }
         view.findViewById<MaterialButton>(R.id.btnSearch).setOnClickListener { performSearch() }
 
-        nsv = view as NestedScrollView
+        nsv = nsvSearch
         nsv.setOnScrollChangeListener(NestedScrollView.OnScrollChangeListener { _, _, scrollY, _, _ ->
             val child = nsv.getChildAt(0) ?: return@OnScrollChangeListener
             val threshold = child.measuredHeight - nsv.measuredHeight - 400
@@ -140,7 +161,132 @@ class SearchFragment : Fragment() {
             cgTags.visibility = View.GONE
         }
 
+        view.findViewById<MaterialButtonToggleGroup>(R.id.tgSearchTabs)
+            .addOnButtonCheckedListener { _, checkedId, isChecked ->
+                if (!isChecked) return@addOnButtonCheckedListener
+                when (checkedId) {
+                    R.id.btnTabSearch -> showSearchTab()
+                    R.id.btnTabMap -> showMapTab()
+                }
+            }
+        view.findViewById<MaterialButtonToggleGroup>(R.id.tgSearchTabs).check(R.id.btnTabSearch)
+
         return view
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (mapInitialized) mapView.onResume()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        if (mapInitialized) mapView.onPause()
+    }
+
+    private fun showSearchTab() {
+        nsvSearch.visibility = View.VISIBLE
+        mapView.visibility = View.GONE
+    }
+
+    private fun showMapTab() {
+        nsvSearch.visibility = View.GONE
+        mapView.visibility = View.VISIBLE
+        if (!mapInitialized) {
+            mapInitialized = true
+            initMap()
+        }
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun initMap() {
+        val ctx = requireContext()
+        Configuration.getInstance().load(ctx, ctx.getSharedPreferences("osmdroid", Context.MODE_PRIVATE))
+        Configuration.getInstance().userAgentValue = ctx.packageName
+
+        mapView.setTileSource(TileSourceFactory.MAPNIK)
+        mapView.setMultiTouchControls(true)
+        mapView.controller.setZoom(6.0)
+        mapView.controller.setCenter(GeoPoint(46.2276, 2.2137))
+
+        val lm = ctx.getSystemService(Context.LOCATION_SERVICE) as? LocationManager
+        val hasCoarse = ContextCompat.checkSelfPermission(ctx, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
+        if (hasCoarse && lm != null) {
+            val loc = lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
+                ?: runCatching { lm.getLastKnownLocation(LocationManager.GPS_PROVIDER) }.getOrNull()
+            if (loc != null) {
+                val userPos = GeoPoint(loc.latitude, loc.longitude)
+                mapView.controller.setZoom(12.0)
+                mapView.controller.setCenter(userPos)
+                val userMarker = Marker(mapView).apply {
+                    position = userPos
+                    setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+                    title = "Ma position"
+                    icon = ContextCompat.getDrawable(ctx, R.drawable.ic_location)
+                }
+                mapView.overlays.add(userMarker)
+            }
+        }
+
+        loadPostsOnMap()
+    }
+
+    private fun loadPostsOnMap() {
+        ApiClient.get("post") { body, _, _ ->
+            body?.let { json ->
+                try {
+                    val response = Gson().fromJson(json, PostsResponseDto::class.java)
+                    activity?.runOnUiThread { addPostMarkers(response.posts) }
+                } catch (e: Exception) { e.printStackTrace() }
+            }
+        }
+    }
+
+    private fun addPostMarkers(posts: List<PostDto>) {
+        val ctx = context ?: return
+        posts.forEach { post ->
+            if (post.lat == 0.0 && post.long == 0.0) return@forEach
+            val marker = Marker(mapView).apply {
+                position = GeoPoint(post.lat, post.long)
+                setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+                title = post.title
+                icon = ContextCompat.getDrawable(ctx, R.drawable.ic_location)
+                setOnMarkerClickListener { _, _ ->
+                    showPostBottomSheet(post)
+                    true
+                }
+            }
+            mapView.overlays.add(marker)
+        }
+        mapView.invalidate()
+    }
+
+    private fun showPostBottomSheet(post: PostDto) {
+        val ctx = context ?: return
+        val dialog = BottomSheetDialog(ctx)
+        val sheetView = LayoutInflater.from(ctx).inflate(R.layout.bottom_sheet_map_post, null)
+
+        sheetView.findViewById<ShapeableImageView>(R.id.ivMapPostImage).load(post.image.resolveBackendUrl()) {
+            crossfade(true)
+            placeholder(R.drawable.ic_launcher_background)
+        }
+        sheetView.findViewById<TextView>(R.id.tvMapPostTitle).text = post.title
+        val typeLabel = PostType.fromApiValue(post.type)?.let { getString(it.labelRes) } ?: post.type
+        sheetView.findViewById<TextView>(R.id.tvMapPostMeta).text =
+            getString(R.string.map_post_by, post.username) + " · $typeLabel"
+        sheetView.findViewById<TextView>(R.id.tvMapPostLocation).text =
+            LocalisationFormat.display(post.localisation)
+        sheetView.findViewById<TextView>(R.id.tvMapPostLikes).text = post.nbLikes.toString()
+        sheetView.findViewById<TextView>(R.id.tvMapPostComments).text = post.nbComments.toString()
+
+        sheetView.setOnClickListener {
+            dialog.dismiss()
+            val bundle = Bundle().apply { putString("postId", post.id) }
+            findNavController().navigate(R.id.postViewerFragment, bundle)
+        }
+
+        dialog.setContentView(sheetView)
+        dialog.show()
     }
 
     private fun setupTagSuggestions() {
