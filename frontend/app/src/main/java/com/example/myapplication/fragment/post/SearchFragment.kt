@@ -295,7 +295,7 @@ class SearchFragment : Fragment() {
                 isClickable = true
                 setOnClickListener {
                     ignoreNextLocChange = true
-                    etLoc.setText(suggestion.name)
+                    etLoc.setText(suggestion.label.lowercase())
                     etLoc.setSelection(etLoc.text?.length ?: 0)
                     cgLoc.removeAllViews()
                 }
@@ -378,8 +378,10 @@ class SearchFragment : Fragment() {
         val params = mutableListOf<String>()
         if (q.isNotEmpty()) params += "q=${URLEncoder.encode(q, Charsets.UTF_8.name())}"
         if (confirmedTags.isNotEmpty()) {
-            val tagsParam = confirmedTags.joinToString(",") { URLEncoder.encode(it, Charsets.UTF_8.name()) }
-            params += URLEncoder.encode("tag=[$tagsParam]", Charsets.UTF_8.name())
+            val tagsParam = confirmedTags.joinToString("&") {
+                "tag=${URLEncoder.encode(it, Charsets.UTF_8.name())}"
+            }
+            params += tagsParam
         }
         if (type != null) params += "type=$type"
         if (loc.isNotEmpty()) params += "loc=${URLEncoder.encode(loc, Charsets.UTF_8.name())}"

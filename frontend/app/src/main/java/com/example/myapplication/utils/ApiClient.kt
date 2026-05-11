@@ -3,6 +3,7 @@ package com.example.myapplication.utils
 import android.util.Log
 import com.example.myapplication.BuildConfig
 import com.google.gson.Gson
+import com.google.gson.GsonBuilder
 import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.MediaType.Companion.toMediaType
@@ -24,6 +25,7 @@ object ApiClient {
     }
     
     private val gson = Gson()
+    private val gsonWithNulls = GsonBuilder().serializeNulls().create()
 
     fun post(path: String, dto: Any, onResult: (String?, Int, String?) -> Unit) {
         val json = gson.toJson(dto)
@@ -50,6 +52,21 @@ object ApiClient {
         val request = OkHttpRequest.Builder()
             .url(url)
             .patch(body)
+            .build()
+
+        client.newCall(request).enqueue(createCallback(url, onResult))
+    }
+
+    fun patchMap(path: String, body: Map<String, Any?>, onResult: (String?, Int, String?) -> Unit) {
+        val json = gsonWithNulls.toJson(body)
+        val url = "${BuildConfig.BACKEND_URL}$path"
+        val reqBody = json.toRequestBody("application/json; charset=utf-8".toMediaType())
+
+        Log.d(TAG, ">>> EXECUTING PATCH $url")
+
+        val request = OkHttpRequest.Builder()
+            .url(url)
+            .patch(reqBody)
             .build()
 
         client.newCall(request).enqueue(createCallback(url, onResult))

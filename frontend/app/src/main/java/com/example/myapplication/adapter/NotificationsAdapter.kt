@@ -90,7 +90,8 @@ class NotificationsAdapter(
                     !notif.tagName.isNullOrBlank() ->
                         context.getString(R.string.notif_tag_post, notif.tagName)
                     !notif.localisationName.isNullOrBlank() ->
-                        context.getString(R.string.notif_localisation_post, notif.localisationName)
+                        context.getString(R.string.notif_localisation_post,
+                            com.example.myapplication.utils.LocalisationFormat.display(notif.localisationName))
                     else -> ""
                 }
             }

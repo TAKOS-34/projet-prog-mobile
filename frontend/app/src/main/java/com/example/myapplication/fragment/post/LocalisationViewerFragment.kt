@@ -8,6 +8,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.content.ContextCompat
+import androidx.core.widget.NestedScrollView
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
@@ -50,6 +51,13 @@ class LocalisationViewerFragment : Fragment() {
         fetchLocalisation(view, identifier)
         setupPostsPaginator(identifier)
 
+        val nsv = view as NestedScrollView
+        nsv.setOnScrollChangeListener(NestedScrollView.OnScrollChangeListener { _, _, scrollY, _, _ ->
+            val child = nsv.getChildAt(0) ?: return@OnScrollChangeListener
+            val threshold = child.measuredHeight - nsv.measuredHeight - 400
+            if (scrollY >= threshold) paginator?.tryLoadMore()
+        })
+
         return view
     }
 
@@ -66,7 +74,7 @@ class LocalisationViewerFragment : Fragment() {
 
     private fun fetchLocalisation(view: View, identifier: String) {
         val encoded = URLEncoder.encode(identifier, Charsets.UTF_8.name())
-        ApiClient.get("localisation/$encoded") { body, _, error ->
+        ApiClient.get("localisation?name=$encoded") { body, _, error ->
             activity?.runOnUiThread {
                 if (error == null && body != null) {
                     try {
@@ -81,7 +89,8 @@ class LocalisationViewerFragment : Fragment() {
     }
 
     private fun renderLocalisation(view: View, l: LocalisationDto) {
-        view.findViewById<TextView>(R.id.tvLocalisationName).text = l.name
+        view.findViewById<TextView>(R.id.tvLocalisationName).text =
+            com.example.myapplication.utils.LocalisationFormat.display(l.name)
         view.findViewById<TextView>(R.id.tvLocalisationUsage).text =
             getString(R.string.tag_viewer_usage, l.nbUses)
         view.findViewById<ImageView>(R.id.ivFire).visibility =

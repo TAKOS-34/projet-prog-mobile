@@ -168,6 +168,11 @@ export class GroupService {
                 lat: Number(post.Localisation.lat),
                 description: post.description ?? undefined,
                 audio: post.audio ? this.cdn.getAudioUrl(post.audio) : undefined,
+                audioDuration: post.audioDuration ?? undefined,
+                minPrice: post.minPrice ?? undefined,
+                maxPrice: post.maxPrice ?? undefined,
+                minDuration: post.minDuration ?? undefined,
+                maxDuration: post.maxDuration ?? undefined,
                 nbLikes: post.nbLikes,
                 nbComments: post.nbComments,
                 userId: post.User.id,
@@ -312,7 +317,7 @@ export class GroupService {
                 }
             }),
 
-            this.prisma.bookmarks.deleteMany({
+            this.prisma.bookmark.deleteMany({
                 where: {
                     userId: user.id,
                     post: { groupId }

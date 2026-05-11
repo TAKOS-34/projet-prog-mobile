@@ -66,6 +66,19 @@ class CreatePostFragment : Fragment() {
     private lateinit var btnPublish: MaterialButton
     private lateinit var tilGroup: TextInputLayout
     private lateinit var etGroup: TextInputEditText
+    private lateinit var tvPriceLabel: TextView
+    private lateinit var tilPrice: TextInputLayout
+    private lateinit var etPrice: TextInputEditText
+    private lateinit var divPrice: View
+    private lateinit var tvDurationLabel: TextView
+    private lateinit var tilDuration: TextInputLayout
+    private lateinit var etDuration: TextInputEditText
+    private lateinit var divDuration: View
+
+    private var selectedMinPrice: Int? = null
+    private var selectedMaxPrice: Int? = null
+    private var selectedMinDuration: Int? = null
+    private var selectedMaxDuration: Int? = null
 
     private var selectedImageUri: Uri? = null
     private var selectedAudioUri: Uri? = null
@@ -276,7 +289,7 @@ class CreatePostFragment : Fragment() {
             val chip = Chip(context).apply {
                 text = suggestion.label
                 isClickable = true
-                setOnClickListener { onPick(suggestion.name) }
+                setOnClickListener { onPick(suggestion.label.lowercase()) }
             }
             cgLocationSuggestions.addView(chip)
         }
@@ -397,6 +410,14 @@ class CreatePostFragment : Fragment() {
         btnPublish = view.findViewById(R.id.btnPublish)
         tilGroup = view.findViewById(R.id.tilGroup)
         etGroup = view.findViewById(R.id.etGroup)
+        tvPriceLabel = view.findViewById(R.id.tvPriceLabel)
+        tilPrice = view.findViewById(R.id.tilPrice)
+        etPrice = view.findViewById(R.id.etPrice)
+        divPrice = view.findViewById(R.id.divPrice)
+        tvDurationLabel = view.findViewById(R.id.tvDurationLabel)
+        tilDuration = view.findViewById(R.id.tilDuration)
+        etDuration = view.findViewById(R.id.etDuration)
+        divDuration = view.findViewById(R.id.divDuration)
     }
 
     private fun setupTypeDropdown() {
@@ -406,7 +427,81 @@ class CreatePostFragment : Fragment() {
         atvType.setOnItemClickListener { _, _, position, _ ->
             selectedPostType = types[position]
             tilType.error = null
+            refreshMetricInputs()
         }
+
+        etPrice.setOnClickListener { showPriceDialog() }
+        etDuration.setOnClickListener { showDurationDialog() }
+    }
+
+    private fun refreshMetricInputs() {
+        val type = selectedPostType
+        val showPrice = com.example.myapplication.utils.PostMetrics.supportsPrice(type)
+        val showDuration = com.example.myapplication.utils.PostMetrics.supportsDuration(type)
+
+        tvPriceLabel.visibility = if (showPrice) View.VISIBLE else View.GONE
+        tilPrice.visibility = if (showPrice) View.VISIBLE else View.GONE
+        divPrice.visibility = if (showPrice) View.VISIBLE else View.GONE
+        if (!showPrice) {
+            selectedMinPrice = null
+            selectedMaxPrice = null
+            etPrice.setText("")
+        }
+
+        tvDurationLabel.visibility = if (showDuration) View.VISIBLE else View.GONE
+        tilDuration.visibility = if (showDuration) View.VISIBLE else View.GONE
+        divDuration.visibility = if (showDuration) View.VISIBLE else View.GONE
+        if (!showDuration) {
+            selectedMinDuration = null
+            selectedMaxDuration = null
+            etDuration.setText("")
+        }
+    }
+
+    private fun showPriceDialog() {
+        val ctx = requireContext()
+        val labels = listOf(getString(R.string.picker_unspecified)) +
+            com.example.myapplication.utils.PostMetrics.PRICE_RANGES.map { (min, max) ->
+                com.example.myapplication.utils.PostMetrics.formatPrice(ctx, min, max) ?: ""
+            }
+        com.google.android.material.dialog.MaterialAlertDialogBuilder(ctx)
+            .setTitle(R.string.label_post_price)
+            .setItems(labels.toTypedArray()) { _, position ->
+                if (position == 0) {
+                    selectedMinPrice = null
+                    selectedMaxPrice = null
+                    etPrice.setText("")
+                } else {
+                    val range = com.example.myapplication.utils.PostMetrics.PRICE_RANGES[position - 1]
+                    selectedMinPrice = range.first
+                    selectedMaxPrice = range.second
+                    etPrice.setText(labels[position])
+                }
+            }
+            .show()
+    }
+
+    private fun showDurationDialog() {
+        val ctx = requireContext()
+        val labels = listOf(getString(R.string.picker_unspecified)) +
+            com.example.myapplication.utils.PostMetrics.DURATION_RANGES_MIN.map { (min, max) ->
+                com.example.myapplication.utils.PostMetrics.formatDuration(ctx, min, max) ?: ""
+            }
+        com.google.android.material.dialog.MaterialAlertDialogBuilder(ctx)
+            .setTitle(R.string.label_post_duration)
+            .setItems(labels.toTypedArray()) { _, position ->
+                if (position == 0) {
+                    selectedMinDuration = null
+                    selectedMaxDuration = null
+                    etDuration.setText("")
+                } else {
+                    val range = com.example.myapplication.utils.PostMetrics.DURATION_RANGES_MIN[position - 1]
+                    selectedMinDuration = range.first
+                    selectedMaxDuration = range.second
+                    etDuration.setText(labels[position])
+                }
+            }
+            .show()
     }
 
     private fun validateFields(): Boolean {
@@ -459,6 +554,10 @@ class CreatePostFragment : Fragment() {
         parts["description"] = description
         parts["tags"] = tags
         parts["groupId"] = selectedGroupId
+        parts["minPrice"] = selectedMinPrice
+        parts["maxPrice"] = selectedMaxPrice
+        parts["minDuration"] = selectedMinDuration
+        parts["maxDuration"] = selectedMaxDuration
 
         val imageBytes = context.contentResolver.openInputStream(imageUri)?.readBytes() ?: return
         val imageMime = context.contentResolver.getType(imageUri) ?: "image/jpeg"

@@ -31,7 +31,10 @@ model User {
     groupFollowing GroupFollow[]
     tagFollowing   TagFollow[]
     localisationFollowing LocalisationFollow[]
-    bookmarks Bookmarks[]
+    bookmarks Bookmark[]
+    trips     Trip[]
+    tripBookmarks TripBookmark[]
+    tripLikes     TripLike[]
 }
 
 

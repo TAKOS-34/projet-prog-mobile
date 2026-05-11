@@ -25,7 +25,7 @@ export class BookmarkService {
             throw new UnauthorizedException(`You're not in the group`);
         }
 
-        await this.prisma.bookmarks.create({ data: {
+        await this.prisma.bookmark.create({ data: {
             userId: user.id, postId: postId
         }});
 
@@ -35,7 +35,7 @@ export class BookmarkService {
 
 
     async deleteBookmark(postId: string, user: UserSession): Promise<ResponseMessage> {
-        await this.prisma.bookmarks.delete({ where: {
+        await this.prisma.bookmark.delete({ where: {
             postId_userId: {
                 postId: postId,
                 userId: user.id
@@ -48,7 +48,7 @@ export class BookmarkService {
 
 
     async getBookmark(user: UserSession, limit: number, cursor?: string): Promise<PostsInfos> {
-        const bookmarks = await this.prisma.bookmarks.findMany({ where: { userId: user.id } });
+        const bookmarks = await this.prisma.bookmark.findMany({ where: { userId: user.id } });
 
         const posts = await this.prisma.post.findMany({
             where: { id: { in: bookmarks.map(b => b.postId) } },

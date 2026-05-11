@@ -43,8 +43,6 @@ object LocalisationSuggester {
                 val parts = mutableListOf(name)
                 val city = props.optString("city", "").trim()
                 if (city.isNotBlank() && city != name) parts += city
-                val country = props.optString("country", "").trim()
-                if (country.isNotBlank()) parts += country
                 val label = parts.joinToString(", ")
                 if (seen.add(label)) results += LocalisationSuggestion(name, label)
             }

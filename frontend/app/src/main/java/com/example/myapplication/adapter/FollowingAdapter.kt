@@ -55,7 +55,7 @@ class FollowingAdapter(
                     ivAvatar.visibility = View.GONE
                 }
                 "localisation" -> {
-                    tvName.text = item.targetLocalisationName.orEmpty()
+                    tvName.text = com.example.myapplication.utils.LocalisationFormat.display(item.targetLocalisationName)
                     ivAvatar.visibility = View.GONE
                 }
             }

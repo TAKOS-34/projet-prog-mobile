@@ -1,5 +1,5 @@
-import { IsNotEmpty, IsOptional, MaxLength, IsArray, IsString } from "class-validator";
-import { Transform } from 'class-transformer';
+import { IsNotEmpty, IsOptional, MaxLength, IsArray, IsString, Min, Max } from "class-validator";
+import { Transform, Type } from 'class-transformer';
 import { PostType } from "@prisma/client";
 
 export class CreatePostDto {
@@ -16,6 +16,28 @@ export class CreatePostDto {
     @IsOptional()
     @MaxLength(280, { message: "Description must not be longer than 280 characters" })
     description?: string;
+
+    @IsOptional()
+    @Type(() => Number)
+    @Min(0)
+    minPrice?: number;
+
+    @IsOptional()
+    @Type(() => Number)
+    @Min(0)
+    @Max(1000)
+    maxPrice?: number;
+
+    @IsOptional()
+    @Type(() => Number)
+    @Min(0)
+    minDuration?: number;
+
+    @IsOptional()
+    @Type(() => Number)
+    @Min(0)
+    @Max(480)
+    maxDuration?: number;
 
     @IsOptional()
     @Transform(({ value }) => Number(value))

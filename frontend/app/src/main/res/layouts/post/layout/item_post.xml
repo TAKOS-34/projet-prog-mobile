@@ -175,6 +175,64 @@
             </LinearLayout>
         </LinearLayout>
 
+        <LinearLayout
+            android:id="@+id/llMetrics"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginTop="8dp"
+            android:visibility="gone"
+            app:layout_constraintTop_toBottomOf="@id/llPostHeader"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <ImageView
+                android:id="@+id/ivPriceIcon"
+                android:layout_width="14dp"
+                android:layout_height="14dp"
+                android:src="@drawable/ic_ticket"
+                android:visibility="gone"
+                app:tint="#10B981"
+                android:contentDescription="@null" />
+
+            <TextView
+                android:id="@+id/tvPostPrice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:textAppearance="@style/TextAppearance.TravelApp.LabelMedium"
+                android:textColor="#10B981"
+                android:visibility="gone"
+                tools:text="0-10€" />
+
+            <Space
+                android:id="@+id/spacerMetrics"
+                android:layout_width="12dp"
+                android:layout_height="1dp"
+                android:visibility="gone" />
+
+            <ImageView
+                android:id="@+id/ivDurationIcon"
+                android:layout_width="14dp"
+                android:layout_height="14dp"
+                android:src="@drawable/ic_clock"
+                android:visibility="gone"
+                app:tint="#3B82F6"
+                android:contentDescription="@null" />
+
+            <TextView
+                android:id="@+id/tvPostDuration"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:textAppearance="@style/TextAppearance.TravelApp.LabelMedium"
+                android:textColor="#3B82F6"
+                android:visibility="gone"
+                tools:text="30-45 min" />
+        </LinearLayout>
+
         <TextView
             android:id="@+id/tvDescription"
             android:layout_width="0dp"
@@ -185,7 +243,7 @@
             android:maxLines="3"
             android:ellipsize="end"
             android:visibility="gone"
-            app:layout_constraintTop_toBottomOf="@id/llPostHeader"
+            app:layout_constraintTop_toBottomOf="@id/llMetrics"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
 

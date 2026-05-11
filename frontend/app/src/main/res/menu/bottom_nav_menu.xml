@@ -3,21 +3,21 @@
     <item
         android:id="@+id/nav_search"
         android:icon="@android:drawable/ic_menu_search"
-        android:title="RECHERCHE" />
+        android:title="@string/research" />
     <item
         android:id="@+id/nav_groups"
         android:icon="@android:drawable/ic_menu_myplaces"
-        android:title="GROUPES" />
+        android:title="@string/groups" />
     <item
         android:id="@+id/nav_menu"
         android:icon="@android:drawable/ic_menu_add"
-        android:title="MENU" />
+        android:title="@string/menu" />
     <item
         android:id="@+id/nav_notifications"
         android:icon="@drawable/ic_bell"
-        android:title="NOTIFICATIONS" />
+        android:title="@string/notifications" />
     <item
         android:id="@+id/nav_profile"
         android:icon="@android:drawable/ic_menu_view"
-        android:title="PROFILE" />
+        android:title="@string/profile" />
 </menu>

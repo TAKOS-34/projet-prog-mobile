@@ -20,6 +20,7 @@ export class LocalisationService {
                     followers: { where: { followerId: user.id }, select: { followerId: true } }
                 }
             }),
+
             this.prisma.localisation.findMany({ select: { id: true }, orderBy: { nbUses: 'desc' }, take: 5 })
         ]);
 

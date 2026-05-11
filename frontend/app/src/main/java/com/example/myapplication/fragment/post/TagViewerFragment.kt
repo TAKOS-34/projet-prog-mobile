@@ -8,6 +8,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.content.ContextCompat
+import androidx.core.widget.NestedScrollView
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
@@ -48,18 +49,26 @@ class TagViewerFragment : Fragment() {
 
         val identifier = arguments?.getString(ARG_TAG) ?: return view
         fetchTag(view, identifier)
-        setupPostsPaginator(identifier)
+        setupPostsPaginator(listOf(identifier))
+
+        val nsv = view as NestedScrollView
+        nsv.setOnScrollChangeListener(NestedScrollView.OnScrollChangeListener { _, _, scrollY, _, _ ->
+            val child = nsv.getChildAt(0) ?: return@OnScrollChangeListener
+            val threshold = child.measuredHeight - nsv.measuredHeight - 400
+            if (scrollY >= threshold) paginator?.tryLoadMore()
+        })
 
         return view
     }
 
-    private fun setupPostsPaginator(tagName: String) {
-        val encodedTag = URLEncoder.encode(tagName, Charsets.UTF_8.name())
-        val tagParam = URLEncoder.encode("tag=[$encodedTag]", Charsets.UTF_8.name())
+    private fun setupPostsPaginator(tagNames: List<String>) {
+        val tagParams = tagNames.joinToString("&") {
+            "tag=${URLEncoder.encode(it, Charsets.UTF_8.name())}"
+        }
         paginator = PostFeedPaginator(
             recyclerView = rvPosts,
             adapter = postsAdapter,
-            baseUrl = { "post?$tagParam" },
+            baseUrl = { "post?$tagParams" },
             onUi = { block -> activity?.runOnUiThread(block) }
         )
         paginator?.reset()

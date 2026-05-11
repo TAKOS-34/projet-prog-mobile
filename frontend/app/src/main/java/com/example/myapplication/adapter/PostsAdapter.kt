@@ -96,6 +96,12 @@ class PostsAdapter(
         private val btnLocation: ImageView = itemView.findViewById(R.id.btnLocation)
         private val btnReport: ImageView = itemView.findViewById(R.id.btnReport)
         private val btnBookmark: ImageView = itemView.findViewById(R.id.btnBookmark)
+        private val llMetrics: LinearLayout = itemView.findViewById(R.id.llMetrics)
+        private val ivPriceIcon: ImageView = itemView.findViewById(R.id.ivPriceIcon)
+        private val tvPostPrice: TextView = itemView.findViewById(R.id.tvPostPrice)
+        private val ivDurationIcon: ImageView = itemView.findViewById(R.id.ivDurationIcon)
+        private val tvPostDuration: TextView = itemView.findViewById(R.id.tvPostDuration)
+        private val spacerMetrics: View = itemView.findViewById(R.id.spacerMetrics)
 
         private var isLikedCurrent = false
         private var likeCountCurrent = 0
@@ -133,7 +139,7 @@ class PostsAdapter(
                 post.username,
                 DateUtils.formatRelativeDate(context, post.creationDate)
             )
-            tvLocation.text = post.localisation
+            tvLocation.text = com.example.myapplication.utils.LocalisationFormat.display(post.localisation)
             if (onLocationNameClick != null) {
                 tvLocation.isClickable = true
                 tvLocation.setOnClickListener { onLocationNameClick.invoke(post.localisation) }
@@ -157,6 +163,27 @@ class PostsAdapter(
             } else {
                 llGroupBadge.visibility = View.GONE
             }
+
+            val priceLabel = com.example.myapplication.utils.PostMetrics.formatPrice(context, post.minPrice, post.maxPrice)
+            val durationLabel = com.example.myapplication.utils.PostMetrics.formatDuration(context, post.minDuration, post.maxDuration)
+            if (priceLabel != null) {
+                ivPriceIcon.visibility = View.VISIBLE
+                tvPostPrice.visibility = View.VISIBLE
+                tvPostPrice.text = priceLabel
+            } else {
+                ivPriceIcon.visibility = View.GONE
+                tvPostPrice.visibility = View.GONE
+            }
+            if (durationLabel != null) {
+                ivDurationIcon.visibility = View.VISIBLE
+                tvPostDuration.visibility = View.VISIBLE
+                tvPostDuration.text = durationLabel
+            } else {
+                ivDurationIcon.visibility = View.GONE
+                tvPostDuration.visibility = View.GONE
+            }
+            spacerMetrics.visibility = if (priceLabel != null && durationLabel != null) View.VISIBLE else View.GONE
+            llMetrics.visibility = if (priceLabel != null || durationLabel != null) View.VISIBLE else View.GONE
 
             if (!post.description.isNullOrBlank()) {
                 tvDescription.text = post.description

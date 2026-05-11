@@ -60,6 +60,10 @@ export class PostCommandService {
                 audio: audioName,
                 audioDuration: audioDurationMs,
                 localisationId: localisation.id,
+                minPrice: post.minPrice ?? null,
+                maxPrice: post.maxPrice ?? null,
+                minDuration: post.minDuration ?? null,
+                maxDuration: post.maxDuration ?? null,
                 postTags: {
                     create: cleanTags.map(tagName => ({
                         tag: {
@@ -117,14 +121,19 @@ export class PostCommandService {
             throw new UnauthorizedException('You can only update your own posts');
         }
 
-        const { title, type, description } = post;
+        const { title, type, description, minPrice, maxPrice, minDuration, maxDuration } = post;
 
-        const updateData: any = {
+        console.log(minPrice, maxPrice, minDuration, maxDuration)
+        const updateData = {
             isEdited: true,
             updatedAt: new Date(),
             ...(title && { title }),
             ...(description && { description }),
             ...(type && { type }),
+            ...(minPrice !== undefined && { minPrice }),
+            ...(maxPrice !== undefined && { maxPrice }),
+            ...(minDuration !== undefined && { minDuration }),
+            ...(maxDuration !== undefined && { maxDuration }),
         };
 
         await this.prisma.post.update({

@@ -135,3 +135,35 @@ $$ LANGUAGE plpgsql;
 
 DROP TRIGGER IF EXISTS tr_localisation_usage_count ON "Post";
 CREATE TRIGGER tr_localisation_usage_count AFTER INSERT OR DELETE ON "Post" FOR EACH ROW EXECUTE FUNCTION update_localisation_usage_count();
+
+
+
+CREATE OR REPLACE FUNCTION update_trip_like_count() RETURNS TRIGGER AS $$
+BEGIN
+    IF (TG_OP = 'INSERT') THEN
+        UPDATE "Trip" SET "nbLikes" = "nbLikes" + 1 WHERE id = NEW."tripId";
+    ELSIF (TG_OP = 'DELETE') THEN
+        UPDATE "Trip" SET "nbLikes" = "nbLikes" - 1 WHERE id = OLD."tripId";
+    END IF;
+    RETURN NULL;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS tr_trip_like_count ON "TripLike";
+CREATE TRIGGER tr_trip_like_count AFTER INSERT OR DELETE ON "TripLike" FOR EACH ROW EXECUTE FUNCTION update_trip_like_count();
+
+
+
+CREATE OR REPLACE FUNCTION update_trip_bookmark_count() RETURNS TRIGGER AS $$
+BEGIN
+    IF (TG_OP = 'INSERT') THEN
+        UPDATE "Trip" SET "nbBookmarks" = "nbBookmarks" + 1 WHERE id = NEW."tripId";
+    ELSIF (TG_OP = 'DELETE') THEN
+        UPDATE "Trip" SET "nbBookmarks" = "nbBookmarks" - 1 WHERE id = OLD."tripId";
+    END IF;
+    RETURN NULL;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS tr_trip_bookmark_count ON "TripBookmark";
+CREATE TRIGGER tr_trip_bookmark_count AFTER INSERT OR DELETE ON "TripBookmark" FOR EACH ROW EXECUTE FUNCTION update_trip_bookmark_count();

@@ -27,6 +27,8 @@ export class PostQueryService {
             if (!localisationIds || localisationIds.length === 0) return { posts: [], nextCursor: undefined };
         }
 
+        const tags = tag ? (Array.isArray(tag) ? tag : [tag]) : undefined;
+
         const posts = await this.prisma.post.findMany({
             take: limit + 1,
             skip: cursor ? 1 : 0,
@@ -41,11 +43,10 @@ export class PostQueryService {
                             { Group: { name: { contains: q, mode: 'insensitive' } } }
                         ]
                     } : {},
-                    tag ? {
-                        postTags: { some: { tag: { name: { in: tag } } } }
-                    } : {},
-                    type ? {
-                        type
+                    tags && tags.length > 0 ? {
+                        AND: tags.map(tagName => ({ 
+                            postTags: { some: { tag: { name: tagName } } } 
+                        }))
                     } : {},
                     localisationIds ? { localisationId: { in: localisationIds } } : cleanLocalisation ? { Localisation: { name: cleanLocalisation } } : {},
                     {
@@ -87,6 +88,10 @@ export class PostQueryService {
                 description: post.description ?? undefined,
                 audio: post.audio ? this.cdn.getAudioUrl(post.audio) : undefined,
                 audioDuration: post.audioDuration ?? undefined,
+                minPrice: post.minPrice ?? undefined,
+                maxPrice: post.maxPrice ?? undefined,
+                minDuration: post.minDuration ?? undefined,
+                maxDuration: post.maxDuration ?? undefined,
                 nbLikes: post.nbLikes,
                 nbComments: post.nbComments,
                 userId: post.User.id,
@@ -135,6 +140,11 @@ export class PostQueryService {
             lat: Number(post.Localisation.lat),
             description: post.description ?? undefined,
             audio: post.audio ? this.cdn.getAudioUrl(post.audio) : undefined,
+            audioDuration: post.audioDuration ?? undefined,
+            minPrice: post.minPrice ?? undefined,
+            maxPrice: post.maxPrice ?? undefined,
+            minDuration: post.minDuration ?? undefined,
+            maxDuration: post.maxDuration ?? undefined,
             nbLikes: post.nbLikes,
             nbComments: post.nbComments,
             userId: post.User.id,

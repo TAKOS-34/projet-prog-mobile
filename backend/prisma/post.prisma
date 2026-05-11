@@ -4,11 +4,16 @@ model Post {
     creationDate DateTime  @default(now())
     updatedAt    DateTime?
     isEdited     Boolean   @default(false)
-    type         PostType  @default(OTHER)
     title        String    @db.VarChar(64)
     description  String?   @db.VarChar(280)
     audio        String?
     audioDuration Int?
+
+    type        PostType  @default(OTHER)
+    maxPrice    Int?
+    minPrice    Int?
+    minDuration Int?
+    maxDuration Int?
 
     nbLikes    Int @default(0)
     nbComments Int @default(0)
@@ -18,7 +23,8 @@ model Post {
     reports  Report[]
     notifications Notification[]
     postTags PostTag[]
-    bookmarks Bookmarks[]
+    bookmarks Bookmark[]
+    tripsStep TripStep[]
 
     localisationId Int
     Localisation   Localisation @relation(fields: [localisationId], references: [id], onDelete: Cascade)
@@ -49,7 +55,7 @@ enum PostType {
 
 
 
-model Bookmarks {
+model Bookmark {
     postId String @db.Uuid()
     userId Int
     post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)

@@ -12,6 +12,10 @@ export type PostDto = {
     type: string;
     audio?: string;
     audioDuration?: number;
+    minPrice?: number;
+    maxPrice?: number;
+    minDuration?: number;
+    maxDuration?: number;
     nbLikes: number;
     nbComments: number;
     userId: number,

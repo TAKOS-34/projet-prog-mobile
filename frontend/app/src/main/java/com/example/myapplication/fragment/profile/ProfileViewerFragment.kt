@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
+import androidx.core.widget.NestedScrollView
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import coil.load
@@ -29,6 +30,7 @@ class ProfileViewerFragment : Fragment() {
     private var userId: Int = 0
     private var profile: UserPublicProfileDto? = null
 
+    private lateinit var nsv: NestedScrollView
     private lateinit var btnFollow: ImageView
     private lateinit var tvSelfBadge: TextView
     private lateinit var rvPosts: RecyclerView
@@ -42,6 +44,13 @@ class ProfileViewerFragment : Fragment() {
         val view = inflater.inflate(R.layout.fragment_profile_viewer, container, false)
 
         userId = arguments?.getInt(ARG_USER_ID) ?: return view
+
+        nsv = view as NestedScrollView
+        nsv.setOnScrollChangeListener(NestedScrollView.OnScrollChangeListener { _, _, scrollY, _, _ ->
+            val child = nsv.getChildAt(0) ?: return@OnScrollChangeListener
+            val threshold = child.measuredHeight - nsv.measuredHeight - 400
+            if (scrollY >= threshold) paginator?.tryLoadMore()
+        })
 
         view.findViewById<ImageView>(R.id.btnBack).setOnClickListener {
             findNavController().navigateUp()
