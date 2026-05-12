@@ -7,11 +7,11 @@ import { PrismaModule } from 'src/prisma/prisma.module';
 import { PostQueryService } from './post.query.service';
 import { GroupModule } from 'src/group/group.module';
 import { NotificationModule } from 'src/notification/notification.module';
-import { LocalisationUtil } from 'src/utils/localisation/localisation.util';
+import { LocalisationModule } from 'src/localisation/localisation.module';
 
 @Module({
-    imports: [AuthModule, CdnModule, PrismaModule, GroupModule, NotificationModule],
+    imports: [AuthModule, CdnModule, PrismaModule, GroupModule, NotificationModule, LocalisationModule],
     controllers: [PostController],
-    providers: [PostCommandService, PostQueryService, LocalisationUtil],
+    providers: [PostCommandService, PostQueryService],
 })
 export class PostModule {}

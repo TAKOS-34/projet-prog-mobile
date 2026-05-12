@@ -4,15 +4,15 @@ import { PrismaService } from "src/prisma/prisma.service";
 import { PostsInfos, PostDto } from "./dto/postInfos.dto";
 import { CommentInfos } from "./dto/comment.dto";
 import { PostType } from "@prisma/client";
-import { LocalisationUtil } from "src/utils/localisation/localisation.util";
 import { getNextCursor } from "src/utils/paginator/paginate.util";
+import { LocalisationService } from "src/localisation/localisation.service";
 
 @Injectable()
 export class PostQueryService {
     constructor(
         private readonly prisma: PrismaService,
         private readonly cdn: CdnService,
-        private readonly locUtil: LocalisationUtil
+        private readonly loc: LocalisationService
     ) {}
 
 
@@ -23,7 +23,7 @@ export class PostQueryService {
         const cleanLocalisation: string | null = loc ? loc.toLowerCase().trim() : null;
         let localisationIds: number[] | null = null;
         if (cleanLocalisation && dist) {
-            localisationIds = await this.getNearbyLocalisationIds(cleanLocalisation, dist);
+            localisationIds = await this.loc.getNearbyLocalisationIds(cleanLocalisation, dist);
             if (!localisationIds || localisationIds.length === 0) return { posts: [], nextCursor: undefined };
         }
 
@@ -231,41 +231,5 @@ export class PostQueryService {
             isLiked: c.commentLikes?.length > 0,
             isYours: userId ? userId === c.User.id : false
         }));
-    }
-
-
-
-    private async getNearbyLocalisationIds(locName: string, dist: number): Promise<number[] | null> {
-        let lat: number, lng: number;
-
-        const refLoc = await this.prisma.localisation.findFirst({
-            where: { name: locName },
-            select: { lat: true, long: true }
-        });
-
-        if (refLoc) {
-            lat = Number(refLoc.lat);
-            lng = Number(refLoc.long);
-        } else {
-            const coords = await this.locUtil.getCoordinates(locName);
-            lat = coords.lat;
-            lng = coords.long;
-        }
-
-        const latDelta = dist / 111;
-        const lngDelta = dist / (111 * Math.cos((lat * Math.PI) / 180));
-
-        const nearby = await this.prisma.$queryRaw<{ id: number }[]>`
-            SELECT id FROM "Localisation"
-            WHERE lat BETWEEN ${lat - latDelta} AND ${lat + latDelta}
-                AND long BETWEEN ${lng - lngDelta} AND ${lng + lngDelta}
-                AND (6371 * acos(
-                    cos(radians(${lat})) * cos(radians(lat)) *
-                    cos(radians(long) - radians(${lng})) +
-                    sin(radians(${lat})) * sin(radians(lat))
-                )) <= ${dist}
-            `;
-
-        return nearby.map(r => r.id);
     }
 }

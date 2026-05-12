@@ -187,6 +187,8 @@
     <string name="success_post_updated">Post mis à jour !</string>
     <string name="error_post_update">Erreur lors de la mise à jour</string>
     <string name="error_location_required">La localisation est requise</string>
+    <string name="error_city_required">La ville de destination est requise</string>
+    <string name="error_type_required">Le type est requis</string>
     <string name="error_image_required">Une image est requise</string>
     <string name="error_title_required">Le titre est requis</string>
     <string name="report_title">Signaler un post</string>

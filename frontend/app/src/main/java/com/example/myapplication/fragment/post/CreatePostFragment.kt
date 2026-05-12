@@ -520,7 +520,7 @@ class CreatePostFragment : Fragment() {
         }
 
         if (selectedPostType == null) {
-            tilType.error = getString(R.string.error_field_required)
+            tilType.error = getString(R.string.error_type_required)
             isValid = false
         } else {
             tilType.error = null

@@ -52,7 +52,6 @@ class CreateTripFragment : Fragment() {
 
         etCity = view.findViewById(R.id.etTripCity)
         cgCitySuggestions = view.findViewById(R.id.cgCitySuggestions)
-        tgMode = view.findViewById(R.id.tgTripMode)
         cgPostTypes = view.findViewById(R.id.cgPostTypes)
         sliderBudget = view.findViewById(R.id.sliderBudget)
         sliderTime = view.findViewById(R.id.sliderTime)
@@ -64,13 +63,15 @@ class CreateTripFragment : Fragment() {
         tvBudgetLabel.text = getString(R.string.trip_budget_label)
         tvTimeLabel.text = getString(R.string.trip_time_label)
 
-        view.findViewById<MaterialButton>(R.id.btnModeCityOnly).isChecked = true
-
         setupCitySuggestions()
         setupPostTypeChips()
         setupSliders()
 
-        view.findViewById<MaterialButton>(R.id.btnSubmitTrip).setOnClickListener { onSubmit() }
+        view.findViewById<MaterialButton>(R.id.btnSubmitTrip).setOnClickListener {
+            if (validateFields()) {
+                onSubmit()
+            }
+        }
 
         return view
     }
@@ -136,17 +137,23 @@ class CreateTripFragment : Fragment() {
         }
     }
 
+    private fun validateFields(): Boolean {
+        var isValid = true
+
+        if (etCity.text.toString().trim().isEmpty()) {
+            etCity.error = getString(R.string.error_city_required)
+            isValid = false
+        }
+
+        return isValid
+    }
+
     private fun onSubmit() {
         val city = etCity.text.toString().trim()
-        if (city.isEmpty()) {
-            Toast.makeText(context, R.string.error_field_required, Toast.LENGTH_SHORT).show()
-            return
-        }
-        val isRoute = tgMode.checkedButtonId == R.id.btnModeRoute
         val budget = sliderBudget.value.toInt()
-        val hours = sliderTime.value.toInt()
+        val hours = sliderTime.value.toInt() * 60
         val types = selectedTypes.map { it.name }
 
-        Toast.makeText(context, "TravelPath : $city, route=$isRoute, budget=${budget}€, ${hours}h, types=$types", Toast.LENGTH_LONG).show()
+        Toast.makeText(context, "TravelPath : $city, budget=${budget}€, ${hours}h, types=$types", Toast.LENGTH_LONG).show()
     }
 }

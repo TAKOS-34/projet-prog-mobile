@@ -7,6 +7,7 @@ import { PrismaModule } from 'src/prisma/prisma.module';
 @Module({
   imports: [AuthModule, PrismaModule],
   controllers: [LocalisationController],
-  providers: [LocalisationService]
+  providers: [LocalisationService],
+  exports: [LocalisationService]
 })
 export class LocalisationModule {}

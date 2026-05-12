@@ -12,7 +12,7 @@ import { UpdatePostDto } from './dto/updatePost.dto';
 import { randomUUID } from 'crypto';
 import { NotificationService } from 'src/notification/notification.service';
 import { parseBuffer } from 'music-metadata';
-import { LocalisationUtil } from 'src/utils/localisation/localisation.util';
+import { LocalisationService } from 'src/localisation/localisation.service';
 
 @Injectable()
 export class PostCommandService {
@@ -20,13 +20,13 @@ export class PostCommandService {
         private readonly prisma: PrismaService,
         private readonly cdn: CdnService,
         private readonly notification: NotificationService,
-        private readonly locUtil: LocalisationUtil
+        private readonly loc: LocalisationService
     ) {}
 
 
     async createPost(image: Express.Multer.File, post: CreatePostDto, user: UserSession, audio?: Express.Multer.File): Promise<ResponseMessage> {
         const cleanLocalisation = post.localisation.toLowerCase().trim();
-        const { long, lat } = await this.locUtil.getCoordinates(cleanLocalisation);
+        const { long, lat } = await this.loc.getCoordinates(cleanLocalisation);
         const imageExt: string = image.mimetype.replace('image/', '');
         const cleanTags: string[] = (post.tags ?? []).map(t => t.toLowerCase().trim().split(/\s+/)[0]).filter(t => t !== '');
         const audioName = audio ? (randomUUID() + '.' + audio.mimetype.replace('audio/', '')) : null;
@@ -123,7 +123,6 @@ export class PostCommandService {
 
         const { title, type, description, minPrice, maxPrice, minDuration, maxDuration } = post;
 
-        console.log(minPrice, maxPrice, minDuration, maxDuration)
         const updateData = {
             isEdited: true,
             updatedAt: new Date(),
