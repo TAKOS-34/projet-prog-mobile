@@ -55,7 +55,7 @@ export class BookmarkController {
 
     @UseGuards(AuthGuard)
     @Get('/trip')
-    getTripBookmark(@GetUser() user: UserSession, @Query('limit') limit: number = 20, @Query('cursor') cursor?: string): Promise<TripInfos> {
+    getTripBookmark(@GetUser() user: UserSession, @Query('limit') limit: number = 20, @Query('cursor') cursor?: number): Promise<TripInfos> {
         return this.bookmarkService.getTripBookmark(user, limit, cursor);
     }
 }
