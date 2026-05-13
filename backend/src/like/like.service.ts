@@ -16,14 +16,14 @@ export class LikeService {
 
     async addLikePost(postId: string, user: UserSession, anonymousToken: string): Promise<ResponseMessage> {
         if (user) {
-            await this.prisma.like.create({ data: {
+            await this.prisma.postLike.create({ data: {
                 postId,
                 userId: user.id
             }});
         }
 
         else if (anonymousToken) {
-            await this.prisma.like.create({ data: {
+            await this.prisma.postLike.create({ data: {
                 postId,
                 anonymousUserId: anonymousToken
             }});
@@ -39,7 +39,7 @@ export class LikeService {
     async deleteLikePost(postId: string, user: UserSession, anonymousToken: string): Promise<ResponseMessage> {
         if (user) {
             await this.prisma.$transaction([
-                this.prisma.like.deleteMany({ where: {
+                this.prisma.postLike.deleteMany({ where: {
                     postId,
                     userId: user.id
                 }}),
@@ -52,7 +52,7 @@ export class LikeService {
         }
 
         else if (anonymousToken) {
-            await this.prisma.like.deleteMany({ where: {
+            await this.prisma.postLike.deleteMany({ where: {
                 postId,
                 anonymousUserId: anonymousToken
             }});
@@ -99,5 +99,25 @@ export class LikeService {
         }
 
         return { status: true, message: 'Comment like deleted' };
+    }
+
+
+    async addLikeTrip(tripId: number, user: UserSession): Promise<ResponseMessage> {
+        await this.prisma.tripLike.create({ data: {
+            tripId,
+            userId: user.id
+        }});
+
+        return { status: true, message: 'Trip like added' };
+    }
+
+
+
+    async deleteLikeTrip(tripId: number, user: UserSession): Promise<ResponseMessage> {
+        await this.prisma.tripLike.delete({ where: {
+            tripId_userId: { tripId, userId: user.id }
+        }});
+
+        return { status: true, message: 'Trip like deleted' };
     }
 }

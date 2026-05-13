@@ -18,12 +18,12 @@ model Post {
     nbLikes    Int @default(0)
     nbComments Int @default(0)
 
-    likes    Like[]
+    likes    PostLike[]
     comments Comment[]
     reports  Report[]
     notifications Notification[]
     postTags PostTag[]
-    bookmarks Bookmark[]
+    bookmarks PostBookmark[]
     tripsStep TripStep[]
 
     localisationId Int
@@ -55,7 +55,7 @@ enum PostType {
 
 
 
-model Bookmark {
+model PostBookmark {
     postId String @db.Uuid()
     userId Int
     post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
@@ -63,7 +63,6 @@ model Bookmark {
 
     @@id([postId, userId])
 }
-
 
 
 
@@ -102,11 +101,12 @@ model Localisation {
     posts         Post[]
     followers     LocalisationFollow[]
     notifications Notification[]
+    trips         Trip[]
 }
 
 
 
-model Like {
+model PostLike {
     id Int @id @default(autoincrement())
 
     postId String @db.Uuid()

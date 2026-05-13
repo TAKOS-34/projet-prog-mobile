@@ -25,8 +25,8 @@ class ImagePicker(
     fun pick() {
         val ctx = fragment.requireContext()
         val items = arrayOf(
-            ctx.getString(R.string.picker_source_gallery),
-            ctx.getString(R.string.picker_source_camera)
+            ctx.getString(R.string.picker_source_camera),
+            ctx.getString(R.string.picker_source_gallery)
         )
         MaterialAlertDialogBuilder(ctx)
             .setTitle(R.string.picker_source_title)

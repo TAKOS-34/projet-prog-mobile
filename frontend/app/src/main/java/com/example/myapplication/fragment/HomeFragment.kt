@@ -54,13 +54,14 @@ class HomeFragment : Fragment() {
         fabNewPost.visibility = if (isLogged) View.VISIBLE else View.GONE
         fabNewPost.setOnClickListener { findNavController().navigate(R.id.createPostFragment) }
 
+        fabNewTrip.visibility = if (isLogged) View.VISIBLE else View.GONE
         fabNewTrip.setOnClickListener { findNavController().navigate(R.id.createTripFragment) }
 
         view.findViewById<MaterialButtonToggleGroup>(R.id.tgFeedTabs)
             .addOnButtonCheckedListener { _, checkedId, isChecked ->
                 if (!isChecked) return@addOnButtonCheckedListener
                 when (checkedId) {
-                    R.id.btnTabTravelShare -> showTravelShare()
+                    R.id.btnTabTravelShare -> showTravelShare(isLogged)
                     R.id.btnTabTravelPath -> showTravelPath(isLogged)
                 }
             }
@@ -70,11 +71,11 @@ class HomeFragment : Fragment() {
         return view
     }
 
-    private fun showTravelShare() {
+    private fun showTravelShare(isLogged: Boolean) {
         rvPosts.visibility = View.VISIBLE
         rvTrips.visibility = View.GONE
         tvTripsEmpty.visibility = View.GONE
-        fabNewPost.visibility = if (SessionManager.getUserId() != null) View.VISIBLE else View.GONE
+        fabNewPost.visibility = if (isLogged) View.VISIBLE else View.GONE
         fabNewTrip.visibility = View.GONE
     }
 
@@ -83,6 +84,6 @@ class HomeFragment : Fragment() {
         rvTrips.visibility = View.GONE
         tvTripsEmpty.visibility = View.VISIBLE
         fabNewPost.visibility = View.GONE
-        fabNewTrip.visibility = if (SessionManager.getUserId() != null) View.VISIBLE else View.GONE
+        fabNewTrip.visibility = if (isLogged) View.VISIBLE else View.GONE
     }
 }

@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
+import { TripStatus } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
@@ -95,7 +96,19 @@ export class DbCronService {
         await this.prisma.user.deleteMany({
             where: {
                 creationDate: { lte: expirationLimit },
-                isEmailVerified: true
+                isEmailVerified: false
+            }
+        });
+    }
+
+
+
+    @Cron(CronExpression.EVERY_30_MINUTES)
+    async removeNotValidatedTrp() {
+        await this.prisma.trip.deleteMany({
+            where: {
+                expiresAt: { lt: new Date() },
+                status: TripStatus.NOT_VALIDATED
             }
         });
     }

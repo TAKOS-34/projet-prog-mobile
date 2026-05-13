@@ -2,6 +2,7 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { CdnService } from 'src/cdn/cdn.service';
 import { PostsInfos } from 'src/post/dto/postInfos.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { TripInfos } from 'src/trip/dto/tripInfos.dto';
 import { ResponseMessage } from 'src/utils/dto/responseMessage.dto';
 import { UserSession } from 'src/utils/dto/userSession.dto';
 import { getNextCursor } from 'src/utils/paginator/paginate.util';
@@ -15,7 +16,7 @@ export class BookmarkService {
 
 
 
-    async addBookmark(postId: string, user: UserSession): Promise<ResponseMessage> {
+    async addPostBookmark(postId: string, user: UserSession): Promise<ResponseMessage> {
         const post = await this.prisma.post.findUniqueOrThrow({ where: { id: postId } });
 
         if (post.groupId && !await this.prisma.member.findUnique({
@@ -25,7 +26,7 @@ export class BookmarkService {
             throw new UnauthorizedException(`You're not in the group`);
         }
 
-        await this.prisma.bookmark.create({ data: {
+        await this.prisma.postBookmark.create({ data: {
             userId: user.id, postId: postId
         }});
 
@@ -34,8 +35,8 @@ export class BookmarkService {
 
 
 
-    async deleteBookmark(postId: string, user: UserSession): Promise<ResponseMessage> {
-        await this.prisma.bookmark.delete({ where: {
+    async deletePostBookmark(postId: string, user: UserSession): Promise<ResponseMessage> {
+        await this.prisma.postBookmark.delete({ where: {
             postId_userId: {
                 postId: postId,
                 userId: user.id
@@ -47,8 +48,8 @@ export class BookmarkService {
 
 
 
-    async getBookmark(user: UserSession, limit: number, cursor?: string): Promise<PostsInfos> {
-        const bookmarks = await this.prisma.bookmark.findMany({ where: { userId: user.id } });
+    async getPostBookmark(user: UserSession, limit: number, cursor?: string): Promise<PostsInfos> {
+        const bookmarks = await this.prisma.postBookmark.findMany({ where: { userId: user.id } });
 
         const posts = await this.prisma.post.findMany({
             where: { id: { in: bookmarks.map(b => b.postId) } },
@@ -96,6 +97,83 @@ export class BookmarkService {
                 isBookmarked: post.bookmarks?.length > 0
             })),
             nextCursor: getNextCursor(posts, limit)
+        };
+    }
+
+
+
+    async addTripBookmark(tripId: number, user: UserSession): Promise<ResponseMessage> {
+        await this.prisma.tripBookmark.create({ data: {
+            tripId,
+            userId: user.id
+        }});
+
+        return { status: true, message: 'Bookmark added' };
+    }
+
+
+
+    async deleteTripBookmark(tripId: number, user: UserSession): Promise<ResponseMessage> {
+        await this.prisma.tripBookmark.delete({ where: {
+            tripId_userId: { tripId, userId: user.id }
+        }});
+
+        return { status: true, message: 'Bookmark deleted' };
+    }
+
+
+
+    async getTripBookmark(user: UserSession, limit: number, cursor?: number): Promise<TripInfos> {
+        const bookmarks = await this.prisma.tripBookmark.findMany({ where: { userId: user.id } });
+
+        const trips = await this.prisma.trip.findMany({
+            where: { id: { in: bookmarks.map(b => b.tripId) } },
+            take: limit + 1,
+            skip: cursor ? 1 : 0,
+            ...(cursor ? { cursor: { id: cursor } } : {}),
+            orderBy: { creationDate: 'desc' },
+            include: {
+                tripSteps: {
+                    orderBy: { stepNumber: 'asc' },
+                    include: { Post: { include: { Localisation: true } } }
+                },
+                likes: { where: { userId: user.id }, select: { tripId: true } },
+                bookmarks: { where: { userId: user.id }, select: { userId: true } },
+                User: { select: { id: true, username: true, avatar: true } },
+                StartLocalisation: { select: { id: true, name: true, long: true, lat: true, nbUses: true } }
+            }
+        });
+
+        return {
+            trips: trips.map(trip => ({
+                id: trip.id,
+                startLocalisation: trip.StartLocalisation ?? undefined,
+                creationDate: trip.creationDate,
+                totalDuration: trip.duration,
+                totalCost: trip.budget,
+                totalStep: trip.tripSteps.length,
+                weather: trip.weather,
+                difficulty: trip.difficulty ?? undefined,
+                nbLikes: trip.nbLikes ?? 0,
+                nbBookmarks: trip.nbBookmarks ?? 0,
+                isLiked: trip.likes?.length > 0,
+                isBookmarked: trip.bookmarks?.length > 0,
+                userId: trip.User.id,
+                username: trip.User.username,
+                avatar: this.cdn.getAvatarUrl(trip.User.avatar),
+                steps: trip.tripSteps.map(step => {
+                    const { Localisation, ...postData } = step.Post;
+                    return {
+                        post: postData,
+                        localisation: Localisation,
+                        travelTimeFromPrevious: step.travelTimeFromPrevious,
+                        isTravelTimeFromPreviousTrusted: step.isTravelTimeFromPreviousTrusted,
+                        visitDuration: step.visitDuration,
+                        isVisitDurationTrusted: step.isVisitDurationTrusted
+                    };
+                })
+            })),
+            nextCursor: getNextCursor(trips, limit)
         };
     }
 }

@@ -6,6 +6,7 @@ import type { UserSession } from 'src/utils/dto/userSession.dto';
 import { GetAnonymous } from 'src/utils/decorator/get-anonymous.decorator';
 import { AuthOptionalGuard } from '../auth/auth.optionnal.guard';
 import { GroupProtectGuard } from 'src/group/group.protect.guard';
+import { AuthGuard } from 'src/auth/auth.guard';
 
 @Controller('like')
 export class LikeController {
@@ -39,5 +40,21 @@ export class LikeController {
     @Delete('/comment/:commentId')
     deleteLikeComment(@Param('commentId') commentId: number, @GetUser() user: UserSession, @GetAnonymous() anonymous: string): Promise<ResponseMessage> {
         return this.likeService.deleteLikeComment(commentId, user, anonymous);
+    }
+
+
+
+    @UseGuards(AuthGuard)
+    @Post('/trip/:tripId')
+    addLikeTrip(@Param('tripId') tripId: number, @GetUser() user: UserSession): Promise<ResponseMessage> {
+        return this.likeService.addLikeTrip(tripId, user);
+    }
+
+
+
+    @UseGuards(AuthGuard)
+    @Delete('/trip/:tripId')
+    deleteLikeTrip(@Param('tripId') tripId: number, @GetUser() user: UserSession): Promise<ResponseMessage> {
+        return this.likeService.deleteLikeTrip(tripId, user);
     }
 }

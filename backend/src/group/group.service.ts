@@ -317,7 +317,7 @@ export class GroupService {
                 }
             }),
 
-            this.prisma.bookmark.deleteMany({
+            this.prisma.postBookmark.deleteMany({
                 where: {
                     userId: user.id,
                     post: { groupId }

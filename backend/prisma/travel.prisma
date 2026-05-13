@@ -6,9 +6,10 @@ model Trip {
     category      TripCategory
     startingTime  TripStartingTime
     transportMode TripTransportMode
+    weather       WeatherCode
     difficulty    Int?
     status        TripStatus   @default(NOT_VALIDATED)
-    expiresAt     DateTime?    @default(dbgenerated("now() + interval '20 minutes'"))
+    expiresAt     DateTime?    @default(dbgenerated("now() + interval '30 minutes'"))
 
     nbLikes     Int @default(0)
     nbBookmarks Int @default(0)
@@ -16,9 +17,12 @@ model Trip {
     userId Int
     User   User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-    tripSteps     TripStep[]
-    tripBookmarks TripBookmark[]
-    tripLikes     TripLike[]
+    startLocalisationId Int?
+    StartLocalisation   Localisation? @relation(fields: [startLocalisationId], references: [id], onDelete: Cascade)
+
+    tripSteps TripStep[]
+    bookmarks TripBookmark[]
+    likes     TripLike[]
 }
 
 
@@ -28,6 +32,11 @@ model TripStep {
     postId String @db.Uuid()
 
     stepNumber Int
+
+    travelTimeFromPrevious          Int
+    isTravelTimeFromPreviousTrusted Boolean
+    visitDuration                   Int
+    isVisitDurationTrusted          Boolean
 
     Trip Trip @relation(fields: [tripId], references: [id], onDelete: Cascade)
     Post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
@@ -81,4 +90,12 @@ enum TripStartingTime {
 enum TripTransportMode {
     WALK
     CAR
+}
+
+enum WeatherCode {
+    CLEAR
+    CLOUDY
+    RAIN
+    SNOW
+    STORM
 }

@@ -1,42 +1,49 @@
-import { Localisation, Post } from "@prisma/client";
+import { Localisation, Post, WeatherCode } from "@prisma/client";
 
-export type TripSuggestResponse = {
+export type TripSuggest = {
     trips: TripSuggestInfos[];
     weather: Weather;
 }
 
-export type TripSuggestInfos = {
+export type TripInfos = {
+    trips: TripDto[];
+    nextCursor?: number;
+}
+
+export interface TripDto extends TripSuggestInfos {
+    startLocalisation?: Localisation;
+    creationDate: Date;
+    nbLikes: number;
+    nbBookmarks: number;
+    isLiked: boolean;
+    isBookmarked: boolean;
+    userId: number;
+    username: string;
+    avatar: string;
+}
+
+export interface TripSuggestInfos {
     id?: number;
     steps: TripStepDetail[];
     totalDuration: number;
     totalCost: number;
     totalStep: number;
+    weather: WeatherCode;
     difficulty?: number;
 }
 
-export type TripStepDetail = {
+export interface TripStepDetail {
     post: Post;
     localisation: Localisation;
-    travelTimeFromPrevious: TripTime;
-    visitDuration: TripTime;
-}
-
-export type TripTime = {
-    time: number;
-    trusted: boolean;
+    travelTimeFromPrevious: number;
+    isTravelTimeFromPreviousTrusted: boolean;
+    visitDuration: number;
+    isVisitDurationTrusted: boolean;
 }
 
 export interface ScoredPost extends Post {
     score: number;
     Localisation: Localisation;
-}
-
-export enum WeatherCode {
-    CLEAR = 'CLEAR',
-    CLOUDY = 'CLOUDY',
-    RAIN = 'RAIN',
-    STORM = 'STORM',
-    SNOW = 'SNOW'
 }
 
 export type Weather = {

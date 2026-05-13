@@ -76,9 +76,9 @@ private fun Fragment.togglePostBookmark(post: PostDto, isNowBookmarked: Boolean)
         }
     }
     if (isNowBookmarked) {
-        ApiClient.post("bookmark/${post.id}", emptyMap<String, String>(), call)
+        ApiClient.post("bookmark/post/${post.id}", emptyMap<String, String>(), call)
     } else {
-        ApiClient.delete("bookmark/${post.id}", call)
+        ApiClient.delete("bookmark/post/${post.id}", call)
     }
 }
 

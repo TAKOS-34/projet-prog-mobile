@@ -40,7 +40,7 @@ class BookmarksFragment : Fragment() {
         paginator = PostFeedPaginator(
             recyclerView = recyclerView,
             adapter = adapter,
-            baseUrl = { "bookmark" },
+            baseUrl = { "bookmark/post" },
             onUi = { block -> activity?.runOnUiThread(block) },
             onResults = { isEmpty ->
                 tvEmpty.visibility = if (isEmpty) View.VISIBLE else View.GONE

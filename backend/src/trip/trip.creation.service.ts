@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { Localisation, Post, PostType, TripCategory, TripStartingTime, TripTransportMode } from '@prisma/client';
+import { Localisation, Post, PostType, TripCategory, TripStartingTime, TripTransportMode, WeatherCode } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { SuggestTripDto } from './dto/suggestTrip.dto';
 import { LocalisationService } from 'src/localisation/localisation.service';
-import { TripSuggestInfos, ScoredPost, Weather, WeatherCode, TripSuggestResponse, TripStepDetail } from './dto/tripInfos.dto';
+import { TripSuggestInfos, ScoredPost, Weather, TripSuggest, TripStepDetail } from './dto/tripInfos.dto';
 import { UserSession } from 'src/utils/dto/userSession.dto';
 
 interface Point {
@@ -24,13 +24,13 @@ export class TripCreationService {
     private readonly ORS_API_KEY: string = process.env.ORS_API_KEY ?? '';
 
     constructor(
-        private prisma: PrismaService,
-        private loc: LocalisationService
+        private readonly prisma: PrismaService,
+        private readonly loc: LocalisationService
     ) {}
 
 
 
-    async suggestTrips(suggestTrip: SuggestTripDto, user: UserSession): Promise<TripSuggestResponse> {
+    async suggestTrips(suggestTrip: SuggestTripDto, user: UserSession): Promise<TripSuggest> {
         const locCoords: Point = await this.loc.getCoordinates(suggestTrip.localisation);
 
         const locIds: number[] | null = await this.loc.getNearbyLocalisationIds(suggestTrip.localisation, 50);
@@ -40,11 +40,11 @@ export class TripCreationService {
 
         const weather: Weather = await this.weatherAdaptor(locCoords);
 
-        const normalCandidates: ScoredPost[] = this.scoreCandidates(standardizedCandidates, suggestTrip, TripCategory.NORMAL, weather);
-        const businessCandidates: ScoredPost[] = this.scoreCandidates(standardizedCandidates, suggestTrip, TripCategory.BUISNESS, weather);
+        const normalCandidates: ScoredPost[] = this.scoreCandidates(standardizedCandidates, suggestTrip, TripCategory.NORMAL, weather.code);
+        const businessCandidates: ScoredPost[] = this.scoreCandidates(standardizedCandidates, suggestTrip, TripCategory.BUISNESS, weather.code);
 
-        let normalTrip: TripSuggestInfos = this.buildPath(locCoords, suggestTrip, normalCandidates, TripCategory.NORMAL);
-        let businessTrip: TripSuggestInfos = this.buildPath(locCoords, suggestTrip, businessCandidates, TripCategory.BUISNESS);
+        let normalTrip: TripSuggestInfos = this.buildPath(locCoords, suggestTrip, normalCandidates, TripCategory.NORMAL, weather.code);
+        let businessTrip: TripSuggestInfos = this.buildPath(locCoords, suggestTrip, businessCandidates, TripCategory.BUISNESS, weather.code);
 
         [normalTrip, businessTrip] = await Promise.all([
             this.refineWithDirectionsAPI(locCoords, normalTrip, suggestTrip.transportMode),
@@ -53,11 +53,11 @@ export class TripCreationService {
 
         const [normalTripData, businessTripData] = await Promise.all([
             this.prisma.trip.create({
-                data: this.tripBuilder(normalTrip, TripCategory.NORMAL, suggestTrip.transportMode, suggestTrip.startingTime, user.id),
+                data: this.tripBuilder(normalTrip, TripCategory.NORMAL, suggestTrip.transportMode, suggestTrip.startingTime, weather.code, user.id),
                 select: { id: true }
             }),
             this.prisma.trip.create({
-                data: this.tripBuilder(businessTrip, TripCategory.BUISNESS, suggestTrip.transportMode, suggestTrip.startingTime, user.id),
+                data: this.tripBuilder(businessTrip, TripCategory.BUISNESS, suggestTrip.transportMode, suggestTrip.startingTime, weather.code, user.id),
                 select: { id: true }
             })
         ]);
@@ -111,12 +111,12 @@ export class TripCreationService {
 
 
 
-    private scoreCandidates(posts: (Post & { Localisation: Localisation })[], suggestTrip: SuggestTripDto, category: TripCategory, weather: Weather): ScoredPost[] {
+    private scoreCandidates(posts: (Post & { Localisation: Localisation })[], suggestTrip: SuggestTripDto, category: TripCategory, weather: WeatherCode): ScoredPost[] {
         return posts.reduce((acc, post) => {
             let score = 10;
 
             const isOutdoor = this.OUTDOOR_TYPES.includes(post.type);
-            if (isOutdoor && [WeatherCode.RAIN, WeatherCode.STORM, WeatherCode.SNOW].includes(weather.code)) {
+            if (isOutdoor && ([WeatherCode.RAIN, WeatherCode.STORM, WeatherCode.SNOW] as WeatherCode[]).includes(weather)) {
                 return acc;
             }
 
@@ -159,7 +159,7 @@ export class TripCreationService {
 
 
 
-    private buildPath(start: Point, suggestTrip: SuggestTripDto, candidates: ScoredPost[], category: TripCategory): TripSuggestInfos {
+    private buildPath(start: Point, suggestTrip: SuggestTripDto, candidates: ScoredPost[], category: TripCategory, weather: WeatherCode): TripSuggestInfos {
         const selectedPosts: TripStepDetail[] = [];
         let currentDuration = 0;
         let currentCost = 0;
@@ -196,11 +196,10 @@ export class TripCreationService {
             selectedPosts.push({
                 post: cleanPost,
                 localisation: Localisation,
-                travelTimeFromPrevious: { time: travelTimeToBest, trusted: false },
-                visitDuration: {
-                    time: cleanPost.minDuration!,
-                    trusted: isDurationTrusted ?? true
-                }
+                travelTimeFromPrevious: travelTimeToBest,
+                isTravelTimeFromPreviousTrusted: false,
+                visitDuration: cleanPost.minDuration!,
+                isVisitDurationTrusted: isDurationTrusted ?? false
             });
             currentDuration += travelTimeToBest + cleanPost.minDuration!;
             currentCost += cleanPost.minPrice!;
@@ -213,7 +212,8 @@ export class TripCreationService {
             steps: selectedPosts,
             totalDuration: Math.floor(currentDuration),
             totalCost: currentCost,
-            totalStep: selectedPosts.length
+            totalStep: selectedPosts.length,
+            weather
         };
     }
 
@@ -364,11 +364,12 @@ export class TripCreationService {
 
             trip.steps.forEach((step, index) => {
                 const travelMinutes = Math.round(segments[index].duration / 60);
-                step.travelTimeFromPrevious = { time: travelMinutes, trusted: true };
+                step.travelTimeFromPrevious = travelMinutes;
+                step.isTravelTimeFromPreviousTrusted = true;
                 totalTravelTime += travelMinutes;
             });
 
-            const totalVisitTime = trip.steps.reduce((acc, step) => acc + step.visitDuration.time, 0);
+            const totalVisitTime = trip.steps.reduce((acc, step) => acc + step.visitDuration, 0);
             trip.totalDuration = totalTravelTime + totalVisitTime;
 
             return trip;
@@ -379,18 +380,23 @@ export class TripCreationService {
 
 
 
-    private tripBuilder(trip: TripSuggestInfos, category: TripCategory, transportMode: TripTransportMode, startingTime: TripStartingTime, userId: number) {
+    private tripBuilder(trip: TripSuggestInfos, category: TripCategory, transportMode: TripTransportMode, startingTime: TripStartingTime, weather: WeatherCode, userId: number) {
         return {
             budget: trip.totalCost,
             duration: trip.totalDuration,
             category: category,
             startingTime: startingTime,
             transportMode: transportMode,
+            weather,
             userId: userId,
             tripSteps: {
                 create: trip.steps.map((step: any, index: number) => ({
                     postId: step.post.id,
-                    stepNumber: index + 1
+                    stepNumber: index + 1,
+                    travelTimeFromPrevious: step.travelTimeFromPrevious,
+                    isTravelTimeFromPreviousTrusted: step.isTravelTimeFromPreviousTrusted,
+                    visitDuration: step.visitDuration,
+                    isVisitDurationTrusted: step.isVisitDurationTrusted
                 }))
             }
         };
