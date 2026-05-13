@@ -1,5 +1,5 @@
 import { Body, Controller, Post, UseGuards } from '@nestjs/common';
-import { TripService } from './trip.service';
+import { TripCreationService } from './trip.creation.service';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { SuggestTripDto } from './dto/suggestTrip.dto';
 import type { UserSession } from 'src/utils/dto/userSession.dto';
@@ -8,13 +8,13 @@ import { TripSuggestResponse } from './dto/tripInfos.dto';
 
 @Controller('trip')
 export class TripController {
-    constructor(private readonly tripService: TripService) {}
+    constructor(private readonly tripCreationService: TripCreationService) {}
 
 
 
     @UseGuards(AuthGuard)
     @Post('/suggest')
     suggestTrips(@Body() suggestTripDto: SuggestTripDto, @GetUser() user: UserSession): Promise<TripSuggestResponse> {
-        return this.tripService.suggestTrips(suggestTripDto, user);
+        return this.tripCreationService.suggestTrips(suggestTripDto, user);
     }
 }

@@ -7,11 +7,23 @@ export type TripSuggestResponse = {
 
 export type TripSuggestInfos = {
     id?: number;
-    steps: ScoredPost[];
+    steps: TripStepDetail[];
     totalDuration: number;
     totalCost: number;
     totalStep: number;
     difficulty?: number;
+}
+
+export type TripStepDetail = {
+    post: Post;
+    localisation: Localisation;
+    travelTimeFromPrevious: TripTime;
+    visitDuration: TripTime;
+}
+
+export type TripTime = {
+    time: number;
+    trusted: boolean;
 }
 
 export interface ScoredPost extends Post {

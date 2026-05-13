@@ -1,6 +1,6 @@
 import { Type } from "class-transformer";
 import { IsEnum, IsNotEmpty, IsOptional, Max, Min } from "class-validator";
-import { PostType, TripStartingTime } from "@prisma/client";
+import { PostType, TripStartingTime, TripTransportMode } from "@prisma/client";
 
 export class SuggestTripDto {
     @IsNotEmpty()
@@ -19,7 +19,10 @@ export class SuggestTripDto {
     maxDuration!: number;
 
     @IsNotEmpty()
-    startingTime!: TripStartingTime
+    startingTime!: TripStartingTime;
+
+    @IsNotEmpty()
+    transportMode!: TripTransportMode;
 
     @IsOptional()
     @IsEnum(PostType, { each: true })

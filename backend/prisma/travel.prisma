@@ -1,13 +1,14 @@
 model Trip {
-    id           Int       @id @default(autoincrement())
-    creationDate DateTime  @default(now())
-    budget       Int
-    duration     Int
-    category     TripCategory
-    startingTime TripStartingTime
-    difficulty   Int?
-    status       TripStatus   @default(NOT_VALIDATED)
-    expiresAt    DateTime?    @default(dbgenerated("now() + interval '20 minutes'"))
+    id            Int       @id @default(autoincrement())
+    creationDate  DateTime  @default(now())
+    budget        Int
+    duration      Int
+    category      TripCategory
+    startingTime  TripStartingTime
+    transportMode TripTransportMode
+    difficulty    Int?
+    status        TripStatus   @default(NOT_VALIDATED)
+    expiresAt     DateTime?    @default(dbgenerated("now() + interval '20 minutes'"))
 
     nbLikes     Int @default(0)
     nbBookmarks Int @default(0)
@@ -75,4 +76,9 @@ enum TripStartingTime {
     MIDDAY
     AFTERNOON
     EVENING
+}
+
+enum TripTransportMode {
+    WALK
+    CAR
 }

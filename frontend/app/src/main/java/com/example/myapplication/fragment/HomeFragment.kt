@@ -83,6 +83,6 @@ class HomeFragment : Fragment() {
         rvTrips.visibility = View.GONE
         tvTripsEmpty.visibility = View.VISIBLE
         fabNewPost.visibility = View.GONE
-        fabNewTrip.visibility = if (isLogged) View.VISIBLE else View.GONE
+        fabNewTrip.visibility = if (SessionManager.getUserId() != null) View.VISIBLE else View.GONE
     }
 }

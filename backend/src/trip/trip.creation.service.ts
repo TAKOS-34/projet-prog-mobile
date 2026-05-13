@@ -1,21 +1,27 @@
 import { Injectable } from '@nestjs/common';
-import { Localisation, Post, PostType, TripCategory, TripStartingTime } from '@prisma/client';
+import { Localisation, Post, PostType, TripCategory, TripStartingTime, TripTransportMode } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { SuggestTripDto } from './dto/suggestTrip.dto';
 import { LocalisationService } from 'src/localisation/localisation.service';
-import { TripSuggestInfos, ScoredPost, Weather, WeatherCode, TripSuggestResponse } from './dto/tripInfos.dto';
+import { TripSuggestInfos, ScoredPost, Weather, WeatherCode, TripSuggestResponse, TripStepDetail } from './dto/tripInfos.dto';
 import { UserSession } from 'src/utils/dto/userSession.dto';
 
 interface Point {
     long: number;
     lat: number;
 }
+interface Candidate {
+    post: ScoredPost,
+    ratio: number,
+    travelTime: number
+}
 
 
 
 @Injectable()
-export class TripService {
+export class TripCreationService {
     private readonly OUTDOOR_TYPES: PostType[] = [PostType.PANORAMA, PostType.NATURAL_AREA, PostType.COASTAL_WATER];
+    private readonly ORS_API_KEY: string = process.env.ORS_API_KEY ?? '';
 
     constructor(
         private prisma: PrismaService,
@@ -37,16 +43,21 @@ export class TripService {
         const normalCandidates: ScoredPost[] = this.scoreCandidates(standardizedCandidates, suggestTrip, TripCategory.NORMAL, weather);
         const businessCandidates: ScoredPost[] = this.scoreCandidates(standardizedCandidates, suggestTrip, TripCategory.BUISNESS, weather);
 
-        const normalTrip: TripSuggestInfos = this.buildPath(locCoords, suggestTrip, normalCandidates, TripCategory.NORMAL);
-        const businessTrip: TripSuggestInfos = this.buildPath(locCoords, suggestTrip, businessCandidates, TripCategory.BUISNESS);
+        let normalTrip: TripSuggestInfos = this.buildPath(locCoords, suggestTrip, normalCandidates, TripCategory.NORMAL);
+        let businessTrip: TripSuggestInfos = this.buildPath(locCoords, suggestTrip, businessCandidates, TripCategory.BUISNESS);
+
+        [normalTrip, businessTrip] = await Promise.all([
+            this.refineWithDirectionsAPI(locCoords, normalTrip, suggestTrip.transportMode),
+            this.refineWithDirectionsAPI(locCoords, businessTrip, suggestTrip.transportMode)
+        ]);
 
         const [normalTripData, businessTripData] = await Promise.all([
             this.prisma.trip.create({
-                data: this.tripBuilder(normalTrip, TripCategory.NORMAL, suggestTrip.startingTime, user.id),
+                data: this.tripBuilder(normalTrip, TripCategory.NORMAL, suggestTrip.transportMode, suggestTrip.startingTime, user.id),
                 select: { id: true }
             }),
             this.prisma.trip.create({
-                data: this.tripBuilder(businessTrip, TripCategory.BUISNESS, suggestTrip.startingTime, user.id),
+                data: this.tripBuilder(businessTrip, TripCategory.BUISNESS, suggestTrip.transportMode, suggestTrip.startingTime, user.id),
                 select: { id: true }
             })
         ]);
@@ -69,9 +80,12 @@ export class TripService {
     private applyFallbacks(posts: (Post & { Localisation: Localisation })[]): (Post & { Localisation: Localisation })[] {
         return posts.map(post => {
             let minDuration = post.minDuration;
+            let isDurationTrusted = true;
             let minPrice = post.minPrice;
 
             if (!minDuration) {
+                isDurationTrusted = false;
+
                 switch (post.type) {
                     case PostType.PANORAMA: minDuration = 30; break;
                     case PostType.HISTORIC_SITE:
@@ -82,22 +96,22 @@ export class TripService {
                 }
             }
 
-            if (minPrice === null || minPrice === undefined) {
+            if (minPrice === null) {
                 switch (post.type) {
-                    case PostType.GASTRONOMY: minPrice = 2000; break;
-                    case PostType.UNIQUE_STAY: minPrice = 10000; break;
-                    case PostType.NIGHTLIFE: minPrice = 1500; break;
+                    case PostType.GASTRONOMY: minPrice = 20; break;
+                    case PostType.UNIQUE_STAY: minPrice = 100; break;
+                    case PostType.NIGHTLIFE: minPrice = 15; break;
                     default: minPrice = 0;
                 }
             }
 
-            return { ...post, minDuration, minPrice };
+            return { ...post, minDuration, minPrice, isDurationTrusted };
         });
     }
 
 
 
-    private scoreCandidates(posts: (Post & { Localisation: Localisation })[], request: SuggestTripDto, category: TripCategory, weather: Weather): ScoredPost[] {
+    private scoreCandidates(posts: (Post & { Localisation: Localisation })[], suggestTrip: SuggestTripDto, category: TripCategory, weather: Weather): ScoredPost[] {
         return posts.reduce((acc, post) => {
             let score = 10;
 
@@ -106,11 +120,11 @@ export class TripService {
                 return acc;
             }
 
-            if (request.preferredTypes?.includes(post.type)) {
+            if (suggestTrip.preferredTypes?.includes(post.type)) {
                 score += 50;
             }
 
-            const time = request.startingTime;
+            const time = suggestTrip.startingTime;
 
             switch (post.type) {
                 case PostType.GASTRONOMY:
@@ -145,13 +159,13 @@ export class TripService {
 
 
 
-    private buildPath(start: Point, request: SuggestTripDto, candidates: ScoredPost[], category: TripCategory): TripSuggestInfos {
-        const selectedPosts: ScoredPost[] = [];
+    private buildPath(start: Point, suggestTrip: SuggestTripDto, candidates: ScoredPost[], category: TripCategory): TripSuggestInfos {
+        const selectedPosts: TripStepDetail[] = [];
         let currentDuration = 0;
         let currentCost = 0;
         let currentLocation = start;
-
         let unvisited = [...candidates];
+        const SAFE_MAX_DURATION = suggestTrip.maxDuration * 0.90;
 
         while (unvisited.length > 0) {
             const validCandidates: { post: ScoredPost; ratio: number; travelTime: number }[] = [];
@@ -161,11 +175,10 @@ export class TripService {
                 const postCost = post.minPrice!;
                 const postCoords = { lat: Number(post.Localisation.lat), long: Number(post.Localisation.long) };
 
-                const travelTime = this.calculateTravelTime(currentLocation, postCoords);
-                const timeToReturnStart = this.calculateTravelTime(postCoords, start);
+                const travelTime = this.calculateTravelTime(currentLocation, postCoords, suggestTrip.transportMode);
 
-                if (currentDuration + travelTime + postDuration + timeToReturnStart <= request.maxDuration && currentCost + postCost <= request.maxBudget) {
-                    const dynamicScore = this.getDynamicScore(post, currentDuration + travelTime, request.startingTime, category, request.preferredTypes);
+                if (currentDuration + travelTime + postDuration <= SAFE_MAX_DURATION && currentCost + postCost <= suggestTrip.maxBudget) {
+                    const dynamicScore = this.getDynamicScore(post, currentDuration + travelTime, suggestTrip.startingTime, category, suggestTrip.preferredTypes);
                     const ratio = dynamicScore / (travelTime + postDuration);
 
                     validCandidates.push({ post, ratio, travelTime });
@@ -174,30 +187,31 @@ export class TripService {
 
             if (validCandidates.length === 0) break;
 
-            validCandidates.sort((a, b) => b.ratio - a.ratio);
-
-            const RANDOM_POOL_SIZE = 3;
-            const poolSize = Math.min(RANDOM_POOL_SIZE, validCandidates.length);
-            const randomIndex = Math.floor(Math.random() * poolSize);
-            const selected = validCandidates[randomIndex];
-
+            const selected: Candidate = this.selectRandomCandidate(validCandidates);
             const bestNextPost = selected.post;
-            const travelTimeToBest = selected.travelTime;
+            const travelTimeToBest = Math.floor(selected.travelTime);
 
-            selectedPosts.push(bestNextPost);
-            currentDuration += travelTimeToBest + bestNextPost.minDuration!;
-            currentCost += bestNextPost.minPrice!;
-            currentLocation = { 
-                lat: Number(bestNextPost.Localisation.lat), 
-                long: Number(bestNextPost.Localisation.long) 
-            };
+            const { score, Localisation, isDurationTrusted, ...cleanPost } = bestNextPost as any;
 
-            unvisited = unvisited.filter(p => p.id !== bestNextPost.id);
+            selectedPosts.push({
+                post: cleanPost,
+                localisation: Localisation,
+                travelTimeFromPrevious: { time: travelTimeToBest, trusted: false },
+                visitDuration: {
+                    time: cleanPost.minDuration!,
+                    trusted: isDurationTrusted ?? true
+                }
+            });
+            currentDuration += travelTimeToBest + cleanPost.minDuration!;
+            currentCost += cleanPost.minPrice!;
+            currentLocation = { lat: Number(Localisation.lat), long: Number(Localisation.long) };
+
+            unvisited = unvisited.filter(p => p.id !== cleanPost.id);
         }
 
         return {
             steps: selectedPosts,
-            totalDuration: Math.floor(currentDuration + this.calculateTravelTime(currentLocation, start)),
+            totalDuration: Math.floor(currentDuration),
             totalCost: currentCost,
             totalStep: selectedPosts.length
         };
@@ -266,12 +280,20 @@ export class TripService {
 
 
 
-    private calculateTravelTime(from: Point, to: Point): number {
+    private calculateTravelTime(from: Point, to: Point, transportMode: TripTransportMode): number {
         const distanceKm = this.getHaversineDistance(from, to);
-        if (distanceKm < 3) {
-            return (distanceKm / 5) * 60;
-        } else {
-            return (distanceKm / 50) * 60 + 10;
+        const urbanDistanceKm = distanceKm * 1.35;
+
+        switch (transportMode) {
+            case TripTransportMode.CAR: {
+                const drivingTime = (urbanDistanceKm / 25) * 60;
+                const parkingPenalty = urbanDistanceKm < 0.5 ? 5 : 15;
+                
+                return drivingTime + parkingPenalty;
+            }
+            case TripTransportMode.WALK: {
+                return (urbanDistanceKm / 5) * 60
+            }
         }
     }
 
@@ -300,16 +322,74 @@ export class TripService {
 
 
 
-    private tripBuilder(trip: any, category: TripCategory, startingTime: TripStartingTime, userId: number) {
+    private selectRandomCandidate(candidates: Candidate[]): Candidate {
+        candidates.sort((a, b) => b.ratio - a.ratio);
+
+        const RANDOM_POOL_SIZE = 3;
+        const poolSize = Math.min(RANDOM_POOL_SIZE, candidates.length);
+        const randomIndex = Math.floor(Math.random() * poolSize);
+
+        return candidates[randomIndex];
+    }
+
+
+
+    private async refineWithDirectionsAPI(start: Point, trip: TripSuggestInfos, mode: TripTransportMode): Promise<TripSuggestInfos> {
+        if (trip.steps.length === 0) return trip;
+
+        let profile;
+        switch (mode) {
+            case TripTransportMode.WALK: { profile = 'foot-walking'; break; }
+            case TripTransportMode.CAR: { profile = 'driving-car'; break; }
+            default: { profile = 'foot-walking'; break; }
+        }
+
+        const coordinates = [
+            [start.long, start.lat],
+            ...trip.steps.map(step => [step.localisation.long, step.localisation.lat])
+        ];
+
+        try {
+            const response = await fetch(`https://api.openrouteservice.org/v2/directions/${profile}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': this.ORS_API_KEY },
+                body: JSON.stringify({ coordinates, units: 'm' })
+            });
+            const data = await response.json();
+
+            if (!data.routes || data.routes.length === 0) return trip;
+
+            const segments = data.routes[0].segments;
+            let totalTravelTime = 0;
+
+            trip.steps.forEach((step, index) => {
+                const travelMinutes = Math.round(segments[index].duration / 60);
+                step.travelTimeFromPrevious = { time: travelMinutes, trusted: true };
+                totalTravelTime += travelMinutes;
+            });
+
+            const totalVisitTime = trip.steps.reduce((acc, step) => acc + step.visitDuration.time, 0);
+            trip.totalDuration = totalTravelTime + totalVisitTime;
+
+            return trip;
+        } catch (error) {
+            return trip;
+        }
+    }
+
+
+
+    private tripBuilder(trip: TripSuggestInfos, category: TripCategory, transportMode: TripTransportMode, startingTime: TripStartingTime, userId: number) {
         return {
             budget: trip.totalCost,
             duration: trip.totalDuration,
             category: category,
             startingTime: startingTime,
+            transportMode: transportMode,
             userId: userId,
             tripSteps: {
                 create: trip.steps.map((step: any, index: number) => ({
-                    postId: step.id,
+                    postId: step.post.id,
                     stepNumber: index + 1
                 }))
             }
