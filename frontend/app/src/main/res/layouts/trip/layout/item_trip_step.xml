@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <!-- Travel time connector — hidden for first step -->
+    <LinearLayout
+        android:id="@+id/llTravelConnector"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"
+        android:visibility="gone"
+        tools:visibility="visible">
+
+
+        <!-- Chip + horizontal dashes -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginStart="12dp">
+
+            <View
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="1dp"
+                android:background="@color/divider" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingHorizontal="8dp"
+                android:paddingVertical="4dp"
+                android:background="@color/surface_variant">
+
+                <TextView
+                    android:id="@+id/tvTravelTime"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="@style/TextAppearance.TravelApp.LabelMedium"
+                    android:textColor="@color/text_secondary"
+                    tools:text="13 min de trajet" />
+
+                <ImageView
+                    android:id="@+id/ivTravelTrust"
+                    android:layout_width="14dp"
+                    android:layout_height="14dp"
+                    android:layout_marginStart="5dp"
+                    android:src="@drawable/ic_check_small"
+                    android:visibility="gone"
+                    tools:visibility="visible" />
+            </LinearLayout>
+
+            <View
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="1dp"
+                android:background="@color/divider" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- Step content -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp">
+
+        <!-- Vertical line: from bottom of dot to bottom anchor -->
+        <View
+            android:id="@+id/vBottomLine"
+            android:layout_width="2dp"
+            android:layout_height="0dp"
+            android:background="@color/divider"
+            android:layout_marginTop="6dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/vDot"
+            app:layout_constraintBottom_toTopOf="@id/vBottomAnchor"
+            android:layout_marginStart="10dp" />
+
+        <!-- Numbered dot -->
+        <TextView
+            android:id="@+id/vDot"
+            android:layout_width="22dp"
+            android:layout_height="22dp"
+            android:gravity="center"
+            android:textColor="#FFFFFF"
+            android:textSize="10sp"
+            android:textStyle="bold"
+            android:includeFontPadding="false"
+            android:layout_marginTop="4dp"
+            android:background="@drawable/bg_step_dot"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="1" />
+
+        <!-- Post title -->
+        <TextView
+            android:id="@+id/tvStepTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="32dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginTop="4dp"
+            android:textAppearance="@style/TextAppearance.TravelApp.TitleMedium"
+            android:maxLines="2"
+            android:ellipsize="end"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/ivStepImage"
+            tools:text="Cimetière Marin de Paul Valéry" />
+
+        <!-- Location row -->
+        <LinearLayout
+            android:id="@+id/llStepLocation"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginStart="32dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginTop="3dp"
+            app:layout_constraintTop_toBottomOf="@id/tvStepTitle"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/ivStepImage">
+
+            <ImageView
+                android:layout_width="11dp"
+                android:layout_height="11dp"
+                android:src="@drawable/ic_location"
+                app:tint="@color/text_hint" />
+
+            <TextView
+                android:id="@+id/tvStepLocation"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:textAppearance="@style/TextAppearance.TravelApp.LabelMedium"
+                android:maxLines="1"
+                android:ellipsize="end"
+                tools:text="Cimetière marin, Sète" />
+        </LinearLayout>
+
+        <!-- Meta: type + duration + trusted indicator -->
+        <LinearLayout
+            android:id="@+id/llStepMeta"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginStart="32dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginTop="6dp"
+            app:layout_constraintTop_toBottomOf="@id/llStepLocation"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/ivStepImage">
+
+            <TextView
+                android:id="@+id/tvStepType"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingHorizontal="6dp"
+                android:paddingVertical="2dp"
+                android:background="@color/surface_variant"
+                android:textAppearance="@style/TextAppearance.TravelApp.LabelMedium"
+                android:textColor="@color/primary"
+                tools:text="Panorama" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="6dp"
+                android:text="·"
+                android:textColor="@color/text_hint"
+                android:textAppearance="@style/TextAppearance.TravelApp.LabelMedium" />
+
+            <ImageView
+                android:layout_width="11dp"
+                android:layout_height="11dp"
+                android:src="@drawable/ic_clock"
+                app:tint="@color/text_secondary" />
+
+            <TextView
+                android:id="@+id/tvStepVisitDuration"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="3dp"
+                android:textAppearance="@style/TextAppearance.TravelApp.LabelMedium"
+                tools:text="30 min de visite" />
+
+            <ImageView
+                android:id="@+id/ivVisitTrust"
+                android:layout_width="14dp"
+                android:layout_height="14dp"
+                android:layout_marginStart="5dp"
+                android:src="@drawable/ic_check_small"
+                android:visibility="gone"
+                tools:visibility="visible" />
+        </LinearLayout>
+
+        <!-- Thumbnail -->
+        <ImageView
+            android:id="@+id/ivStepImage"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:scaleType="centerCrop"
+            android:background="@color/surface_variant"
+            android:layout_marginTop="4dp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <!-- Bottom spacer: determines item height + feeds vBottomLine -->
+        <Space
+            android:id="@+id/vBottomAnchor"
+            android:layout_width="0dp"
+            android:layout_height="20dp"
+            app:layout_constraintTop_toBottomOf="@id/llStepMeta"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</LinearLayout>

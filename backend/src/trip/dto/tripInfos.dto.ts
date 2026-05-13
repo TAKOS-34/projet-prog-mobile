@@ -33,7 +33,7 @@ export interface TripSuggestInfos {
 }
 
 export interface TripStepDetail {
-    post: Post;
+    post: Post & { image: string };
     localisation: Localisation;
     travelTimeFromPrevious: number;
     isTravelTimeFromPreviousTrusted: boolean;

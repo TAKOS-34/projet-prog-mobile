@@ -18,12 +18,15 @@ import com.example.myapplication.dto.post.LocalisationDto
 import com.example.myapplication.utils.ApiClient
 import com.example.myapplication.utils.PostFeedPaginator
 import com.example.myapplication.utils.buildPostsAdapter
+import com.example.myapplication.utils.showGpsDialog
 import com.google.gson.Gson
 import java.net.URLEncoder
 
 class LocalisationViewerFragment : Fragment() {
 
     private var localisation: LocalisationDto? = null
+    private var argLat: Double = 0.0
+    private var argLong: Double = 0.0
 
     private lateinit var btnFollow: ImageView
     private lateinit var rvPosts: RecyclerView
@@ -36,12 +39,22 @@ class LocalisationViewerFragment : Fragment() {
     ): View? {
         val view = inflater.inflate(R.layout.fragment_localisation_viewer, container, false)
 
+        argLat = (arguments?.getFloat(ARG_LAT, 0f) ?: 0f).toDouble()
+        argLong = (arguments?.getFloat(ARG_LONG, 0f) ?: 0f).toDouble()
+
         view.findViewById<ImageView>(R.id.btnBack).setOnClickListener {
             findNavController().navigateUp()
         }
 
         btnFollow = view.findViewById(R.id.btnFollowLocalisation)
         btnFollow.setOnClickListener { toggleFollow() }
+
+        view.findViewById<ImageView>(R.id.btnShowOnMap).setOnClickListener {
+            val name = localisation?.name ?: arguments?.getString(ARG_LOCALISATION) ?: return@setOnClickListener
+            val lat = if (argLat != 0.0) argLat else localisation?.lat ?: 0.0
+            val long = if (argLong != 0.0) argLong else localisation?.long ?: 0.0
+            showGpsDialog(name, lat, long)
+        }
 
         rvPosts = view.findViewById(R.id.rvLocalisationPosts)
         postsAdapter = buildPostsAdapter(onChanged = { paginator?.reset() })
@@ -136,5 +149,7 @@ class LocalisationViewerFragment : Fragment() {
 
     companion object {
         const val ARG_LOCALISATION = "localisation"
+        const val ARG_LAT = "lat"
+        const val ARG_LONG = "long"
     }
 }

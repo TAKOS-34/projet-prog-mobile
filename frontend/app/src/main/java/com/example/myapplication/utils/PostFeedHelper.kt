@@ -31,7 +31,7 @@ fun Fragment.buildPostsAdapter(onChanged: () -> Unit): PostsAdapter = PostsAdapt
     onReport = { post ->
         findNavController().navigate(R.id.reportFragment, Bundle().apply { putString("postId", post.id) })
     },
-    onLocation = { post -> showGpsDialog(post) },
+    onLocation = { post -> showGpsDialog(post.localisation, post.lat, post.long, post.creationDate) },
     onEdit = { post ->
         val bundle = Bundle().apply { putString(EditPostFragment.ARG_POST, Gson().toJson(post)) }
         findNavController().navigate(R.id.editPostFragment, bundle)
@@ -65,6 +65,36 @@ fun Fragment.buildPostsAdapter(onChanged: () -> Unit): PostsAdapter = PostsAdapt
         togglePostBookmark(post, isNowBookmarked)
     } else null
 )
+
+internal fun Fragment.showGpsDialog(name: String, lat: Double, long: Double, date: String? = null) {
+    val ctx = context ?: return
+    val dialogView = LayoutInflater.from(ctx).inflate(R.layout.dialog_gps_info, null)
+
+    dialogView.findViewById<TextView>(R.id.tvLocationTitle).text = name
+
+    val cvDateBlock = dialogView.findViewById<android.view.View>(R.id.cvDateBlock)
+    if (date != null) {
+        dialogView.findViewById<TextView>(R.id.tvDate).text = DateUtils.formatAbsoluteDate(date)
+    } else {
+        cvDateBlock.visibility = android.view.View.GONE
+    }
+
+    dialogView.findViewById<TextView>(R.id.tvCoordinates).text =
+        "%.4f N\n%.4f E".format(lat, long)
+
+    val dialog = Dialog(ctx, android.R.style.Theme_Translucent_NoTitleBar)
+    dialog.setContentView(dialogView)
+    dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
+
+    dialogView.findViewById<MaterialCardView>(R.id.btnClosePopup).setOnClickListener { dialog.dismiss() }
+    dialogView.findViewById<MaterialButton>(R.id.btnOpenMaps).setOnClickListener {
+        val uri = Uri.parse("geo:$lat,$long?q=$lat,$long($name)")
+        startActivity(Intent(Intent.ACTION_VIEW, uri))
+    }
+    dialogView.findViewById<MaterialButton>(R.id.btnTravelPathRoute).setOnClickListener { dialog.dismiss() }
+
+    dialog.show()
+}
 
 private fun Fragment.togglePostBookmark(post: PostDto, isNowBookmarked: Boolean) {
     val msg = if (isNowBookmarked) R.string.success_bookmarked else R.string.success_unbookmarked
@@ -111,26 +141,4 @@ private fun Fragment.deletePost(post: PostDto, onDeleted: () -> Unit) {
             }
         }
     }
-}
-
-private fun Fragment.showGpsDialog(post: PostDto) {
-    val ctx = context ?: return
-    val dialogView = LayoutInflater.from(ctx).inflate(R.layout.dialog_gps_info, null)
-
-    dialogView.findViewById<TextView>(R.id.tvLocationTitle).text = post.localisation
-    dialogView.findViewById<TextView>(R.id.tvDate).text = DateUtils.formatAbsoluteDate(post.creationDate)
-    dialogView.findViewById<TextView>(R.id.tvCoordinates).text = "%.4f N\n%.4f E".format(post.lat, post.long)
-
-    val dialog = Dialog(ctx, android.R.style.Theme_Translucent_NoTitleBar)
-    dialog.setContentView(dialogView)
-    dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
-
-    dialogView.findViewById<MaterialCardView>(R.id.btnClosePopup).setOnClickListener { dialog.dismiss() }
-    dialogView.findViewById<MaterialButton>(R.id.btnOpenMaps).setOnClickListener {
-        val uri = Uri.parse("geo:${post.lat},${post.long}?q=${post.lat},${post.long}(${post.localisation})")
-        startActivity(Intent(Intent.ACTION_VIEW, uri))
-    }
-    dialogView.findViewById<MaterialButton>(R.id.btnTravelPathRoute).setOnClickListener { dialog.dismiss() }
-
-    dialog.show()
 }

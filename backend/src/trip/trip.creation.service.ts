@@ -5,6 +5,7 @@ import { SuggestTripDto } from './dto/suggestTrip.dto';
 import { LocalisationService } from 'src/localisation/localisation.service';
 import { TripSuggestInfos, ScoredPost, Weather, TripSuggest, TripStepDetail } from './dto/tripInfos.dto';
 import { UserSession } from 'src/utils/dto/userSession.dto';
+import { CdnService } from 'src/cdn/cdn.service';
 
 interface Point {
     long: number;
@@ -25,7 +26,8 @@ export class TripCreationService {
 
     constructor(
         private readonly prisma: PrismaService,
-        private readonly loc: LocalisationService
+        private readonly loc: LocalisationService,
+        private readonly cdn: CdnService
     ) {}
 
 
@@ -70,7 +72,7 @@ export class TripCreationService {
     private async fetchCandidates(locIds: number[] | null): Promise<(Post & { Localisation: Localisation })[]> {
         if (!locIds || locIds.length === 0) return [];
             return this.prisma.post.findMany({
-                where: { localisationId: { in: locIds } },
+                where: { localisationId: { in: locIds }, groupId: null },
                 include: { Localisation: true }
         });
     }
@@ -90,7 +92,7 @@ export class TripCreationService {
                     case PostType.PANORAMA: minDuration = 30; break;
                     case PostType.HISTORIC_SITE:
                     case PostType.ART_CULTURE: minDuration = 120; break;
-                    case PostType.GASTRONOMY: minDuration = 90; break;
+                    case PostType.GASTRONOMY: minDuration = 60; break;
                     case PostType.UNIQUE_STAY: minDuration = 720; break;
                     default: minDuration = 60;
                 }
@@ -194,7 +196,7 @@ export class TripCreationService {
             const { score, Localisation, isDurationTrusted, ...cleanPost } = bestNextPost as any;
 
             selectedPosts.push({
-                post: cleanPost,
+                post: { ...cleanPost, image: this.cdn.getPostUrl(cleanPost.id, cleanPost.imageExt) },
                 localisation: Localisation,
                 travelTimeFromPrevious: travelTimeToBest,
                 isTravelTimeFromPreviousTrusted: false,
@@ -288,9 +290,9 @@ export class TripCreationService {
             case TripTransportMode.CAR: {
                 const drivingTime = (urbanDistanceKm / 25) * 60;
                 const parkingPenalty = urbanDistanceKm < 0.5 ? 5 : 15;
-                
                 return drivingTime + parkingPenalty;
             }
+
             case TripTransportMode.WALK: {
                 return (urbanDistanceKm / 5) * 60
             }
@@ -348,6 +350,7 @@ export class TripCreationService {
             [start.long, start.lat],
             ...trip.steps.map(step => [step.localisation.long, step.localisation.lat])
         ];
+        return trip;
 
         try {
             const response = await fetch(`https://api.openrouteservice.org/v2/directions/${profile}`, {

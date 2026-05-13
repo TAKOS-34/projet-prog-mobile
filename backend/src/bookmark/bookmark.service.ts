@@ -164,7 +164,7 @@ export class BookmarkService {
                 steps: trip.tripSteps.map(step => {
                     const { Localisation, ...postData } = step.Post;
                     return {
-                        post: postData,
+                        post: { ...postData, image: this.cdn.getPostUrl(postData.id, postData.imageExt) },
                         localisation: Localisation,
                         travelTimeFromPrevious: step.travelTimeFromPrevious,
                         isTravelTimeFromPreviousTrusted: step.isTravelTimeFromPreviousTrusted,

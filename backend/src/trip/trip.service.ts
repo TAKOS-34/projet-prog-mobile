@@ -30,8 +30,8 @@ export class TripService {
         });
 
         await this.prisma.trip.update({
-            where: { id: tripId, userId: user.id, startLocalisationId: localisation.id },
-            data: { status: TripStatus.VALIDATED, expiresAt: null }
+            where: { id: tripId, userId: user.id },
+            data: { status: TripStatus.VALIDATED, expiresAt: null, startLocalisationId: localisation.id }
         });
 
         return { status: true, message: 'Trip saved' };
@@ -78,7 +78,7 @@ export class TripService {
                 steps: trip.tripSteps.map(step => {
                     const { Localisation, ...postData } = step.Post;
                     return {
-                        post: postData,
+                        post: { ...postData, image: this.cdn.getPostUrl(postData.id, postData.imageExt) },
                         localisation: Localisation,
                         travelTimeFromPrevious: step.travelTimeFromPrevious,
                         isTravelTimeFromPreviousTrusted: step.isTravelTimeFromPreviousTrusted,
@@ -131,7 +131,7 @@ export class TripService {
                 steps: trip.tripSteps.map(step => {
                     const { Localisation, ...postData } = step.Post;
                     return {
-                        post: postData,
+                        post: { ...postData, image: this.cdn.getPostUrl(postData.id, postData.imageExt) },
                         localisation: Localisation,
                         travelTimeFromPrevious: step.travelTimeFromPrevious,
                         isTravelTimeFromPreviousTrusted: step.isTravelTimeFromPreviousTrusted,
@@ -180,7 +180,7 @@ export class TripService {
             steps: trip.tripSteps.map(step => {
                 const { Localisation, ...postData } = step.Post;
                 return {
-                    post: postData,
+                    post: { ...postData, image: this.cdn.getPostUrl(postData.id, postData.imageExt) },
                     localisation: Localisation,
                     travelTimeFromPrevious: step.travelTimeFromPrevious,
                     isTravelTimeFromPreviousTrusted: step.isTravelTimeFromPreviousTrusted,

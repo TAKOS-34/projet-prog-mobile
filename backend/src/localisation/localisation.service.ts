@@ -16,10 +16,7 @@ export class LocalisationService {
         const [targetLocalisation, popularLocalisations] = await this.prisma.$transaction([
             this.prisma.localisation.findUniqueOrThrow({
                 where: { name: localisation },
-                select: {
-                    id: true,
-                    name: true,
-                    nbUses: true,
+                select: { id: true, name: true, nbUses: true, long: true, lat: true,
                     followers: { where: { followerId: user.id }, select: { followerId: true } }
                 }
             }),
@@ -30,6 +27,8 @@ export class LocalisationService {
         return {
             id: targetLocalisation.id,
             name: targetLocalisation.name,
+            long: targetLocalisation.long,
+            lat: targetLocalisation.lat,
             nbUses: targetLocalisation.nbUses,
             isPopular: popularLocalisations.some(l => l.id === targetLocalisation.id),
             isFollowing: targetLocalisation.followers.length > 0
