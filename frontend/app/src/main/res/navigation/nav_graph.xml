@@ -263,4 +263,14 @@
             app:nullable="true" />
     </fragment>
 
+    <fragment
+        android:id="@+id/tripFeedDetailFragment"
+        android:name="com.example.myapplication.fragment.trip.TripFeedDetailFragment"
+        android:label="@string/trip_detail_title"
+        tools:layout="@layout/fragment_trip_feed_detail">
+        <argument
+            android:name="tripFeedJson"
+            app:argType="string" />
+    </fragment>
+
     </navigation>

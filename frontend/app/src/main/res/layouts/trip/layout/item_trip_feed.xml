@@ -1,0 +1,333 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    style="@style/Widget.TravelApp.Card.Post"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="16dp"
+    android:layout_marginBottom="24dp"
+    app:cardBackgroundColor="@color/surface_variant"
+    app:cardElevation="0dp"
+    app:strokeWidth="2dp"
+    app:strokeColor="@color/primary">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingBottom="14dp">
+
+        <!-- Cover -->
+        <ImageView
+            android:id="@+id/ivTripFeedCover"
+            android:layout_width="match_parent"
+            android:layout_height="180dp"
+            android:scaleType="centerCrop"
+            android:background="@color/surface_variant"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <!-- Category badge top-left -->
+        <TextView
+            android:id="@+id/tvTripFeedCategory"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="12dp"
+            android:paddingHorizontal="10dp"
+            android:paddingVertical="4dp"
+            android:textColor="#FFFFFF"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:includeFontPadding="false"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            tools:text="Normal" />
+
+        <!-- Weather badge top-right -->
+        <TextView
+            android:id="@+id/tvTripFeedWeather"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="12dp"
+            android:background="@drawable/bg_weather_badge"
+            android:paddingHorizontal="10dp"
+            android:paddingVertical="4dp"
+            android:textColor="#FFFFFF"
+            android:textSize="12sp"
+            android:includeFontPadding="false"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            tools:text="☀️ Ensoleillé" />
+
+        <!-- User row -->
+        <LinearLayout
+            android:id="@+id/llTripFeedHeader"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginTop="12dp"
+            app:layout_constraintTop_toBottomOf="@id/ivTripFeedCover"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/ivTripFeedAvatar"
+                android:layout_width="38dp"
+                android:layout_height="38dp"
+                android:scaleType="centerCrop"
+                android:background="@color/surface_variant"
+                app:shapeAppearanceOverlay="@style/Widget.TravelApp.Avatar"
+                tools:src="@tools:sample/avatars" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:layout_marginStart="10dp">
+
+                <TextView
+                    android:id="@+id/tvTripFeedUsername"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="@style/TextAppearance.TravelApp.TitleMedium"
+                    tools:text="takos34" />
+
+                <TextView
+                    android:id="@+id/tvTripFeedDate"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="1dp"
+                    android:textAppearance="@style/TextAppearance.TravelApp.LabelMedium"
+                    android:textColor="@color/text_secondary"
+                    tools:text="il y a 2h" />
+
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Stats row: duration · cost · steps -->
+        <LinearLayout
+            android:id="@+id/llTripFeedStats"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginTop="10dp"
+            app:layout_constraintTop_toBottomOf="@id/llTripFeedHeader"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <ImageView
+                android:layout_width="14dp"
+                android:layout_height="14dp"
+                android:src="@drawable/ic_clock"
+                app:tint="@color/text_secondary" />
+
+            <TextView
+                android:id="@+id/tvTripFeedDuration"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:textAppearance="@style/TextAppearance.TravelApp.BodyMedium"
+                tools:text="4h30" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="8dp"
+                android:text="·"
+                android:textColor="@color/text_hint" />
+
+            <ImageView
+                android:layout_width="14dp"
+                android:layout_height="14dp"
+                android:src="@drawable/ic_ticket"
+                app:tint="@color/text_secondary" />
+
+            <TextView
+                android:id="@+id/tvTripFeedCost"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:textAppearance="@style/TextAppearance.TravelApp.BodyMedium"
+                tools:text="20 €" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="8dp"
+                android:text="·"
+                android:textColor="@color/text_hint" />
+
+            <ImageView
+                android:layout_width="14dp"
+                android:layout_height="14dp"
+                android:src="@drawable/ic_location"
+                app:tint="@color/text_secondary" />
+
+            <TextView
+                android:id="@+id/tvTripFeedSteps"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:textAppearance="@style/TextAppearance.TravelApp.BodyMedium"
+                tools:text="4 étapes" />
+
+        </LinearLayout>
+
+        <!-- Transport + starting time row -->
+        <LinearLayout
+            android:id="@+id/llTripFeedInfo"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginTop="6dp"
+            app:layout_constraintTop_toBottomOf="@id/llTripFeedStats"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <ImageView
+                android:id="@+id/ivTripFeedTransport"
+                android:layout_width="14dp"
+                android:layout_height="14dp"
+                app:tint="@color/text_secondary"
+                tools:src="@drawable/ic_transport_walk" />
+
+            <TextView
+                android:id="@+id/tvTripFeedTransport"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:textAppearance="@style/TextAppearance.TravelApp.LabelMedium"
+                android:textColor="@color/text_secondary"
+                tools:text="Marche" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="8dp"
+                android:text="·"
+                android:textColor="@color/text_hint" />
+
+            <ImageView
+                android:id="@+id/ivTripFeedStartingTime"
+                android:layout_width="14dp"
+                android:layout_height="14dp"
+                app:tint="@color/text_secondary"
+                tools:src="@drawable/ic_time_morning" />
+
+            <TextView
+                android:id="@+id/tvTripFeedStartingTime"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:textAppearance="@style/TextAppearance.TravelApp.LabelMedium"
+                android:textColor="@color/text_secondary"
+                tools:text="Matin" />
+
+        </LinearLayout>
+
+        <!-- Start location (optional) -->
+        <LinearLayout
+            android:id="@+id/llTripFeedStartLocation"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginTop="6dp"
+            android:visibility="gone"
+            app:layout_constraintTop_toBottomOf="@id/llTripFeedInfo"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <ImageView
+                android:layout_width="14dp"
+                android:layout_height="14dp"
+                android:src="@drawable/ic_location"
+                app:tint="@color/primary" />
+
+            <TextView
+                android:id="@+id/tvTripFeedStartLocation"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="4dp"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:textAppearance="@style/TextAppearance.TravelApp.LabelMedium"
+                android:textColor="@color/text_secondary"
+                tools:text="Depuis Sète" />
+
+        </LinearLayout>
+
+        <!-- Route path -->
+        <TextView
+            android:id="@+id/tvTripFeedRoute"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginTop="6dp"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:textAppearance="@style/TextAppearance.TravelApp.LabelMedium"
+            android:textColor="@color/text_hint"
+            app:layout_constraintTop_toBottomOf="@id/llTripFeedStartLocation"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            tools:text="Cimetière marin → Plage → ..." />
+
+        <!-- Like + bookmark -->
+        <LinearLayout
+            android:id="@+id/llTripFeedActions"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginTop="10dp"
+            app:layout_constraintTop_toBottomOf="@id/tvTripFeedRoute"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <ImageView
+                android:id="@+id/btnTripFeedLike"
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:src="@drawable/ic_like"
+                android:clickable="true"
+                android:focusable="true"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@null" />
+
+            <TextView
+                android:id="@+id/tvTripFeedLikeCount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:textAppearance="@style/TextAppearance.TravelApp.BodyMedium"
+                tools:text="12" />
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
+
+            <ImageView
+                android:id="@+id/btnTripFeedBookmark"
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:src="@drawable/ic_bookmark"
+                android:clickable="true"
+                android:focusable="true"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@null" />
+
+        </LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</com.google.android.material.card.MaterialCardView>

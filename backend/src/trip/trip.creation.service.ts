@@ -92,7 +92,7 @@ export class TripCreationService {
                     case PostType.PANORAMA: minDuration = 30; break;
                     case PostType.HISTORIC_SITE:
                     case PostType.ART_CULTURE: minDuration = 120; break;
-                    case PostType.GASTRONOMY: minDuration = 60; break;
+                    case PostType.GASTRONOMY: minDuration = 120; break;
                     case PostType.UNIQUE_STAY: minDuration = 720; break;
                     default: minDuration = 60;
                 }

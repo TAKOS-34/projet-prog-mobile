@@ -44,7 +44,7 @@ export class TripService {
             take: limit + 1,
             skip: cursor ? 1 : 0,
             ...(cursor ? { cursor: { id: cursor } } : {}),
-            where: { userId: user.id },
+            where: { userId: user.id, status: TripStatus.VALIDATED },
             orderBy: { creationDate: 'desc' },
             include: {
                 tripSteps: {
@@ -63,6 +63,9 @@ export class TripService {
                 id: trip.id,
                 startLocalisation: trip.StartLocalisation ?? undefined,
                 creationDate: trip.creationDate,
+                category: trip.category,
+                startingTime: trip.startingTime,
+                transportMode: trip.transportMode,
                 totalDuration: trip.duration,
                 totalCost: trip.budget,
                 totalStep: trip.tripSteps.length,
@@ -98,6 +101,7 @@ export class TripService {
             take: limit + 1,
             skip: cursor ? 1 : 0,
             ...(cursor ? { cursor: { id: cursor } } : {}),
+            where: { status: TripStatus.VALIDATED },
             orderBy: { creationDate: 'desc' },
             include: {
                 tripSteps: {
@@ -116,6 +120,9 @@ export class TripService {
                 id: trip.id,
                 startLocalisation: trip.StartLocalisation ?? undefined,
                 creationDate: trip.creationDate,
+                category: trip.category,
+                startingTime: trip.startingTime,
+                transportMode: trip.transportMode,
                 totalDuration: trip.duration,
                 totalCost: trip.budget,
                 totalStep: trip.tripSteps.length,
@@ -148,7 +155,7 @@ export class TripService {
 
     async getTrip(tripId: number, userId?: number): Promise<TripDto> {
         const trip = await this.prisma.trip.findUniqueOrThrow({
-            where: { id: tripId },
+            where: { id: tripId, status: TripStatus.VALIDATED },
             include: {
                 tripSteps: {
                     orderBy: { stepNumber: 'asc' },
@@ -165,6 +172,9 @@ export class TripService {
             id: trip.id,
             startLocalisation: trip.StartLocalisation ?? undefined,
             creationDate: trip.creationDate,
+            category: trip.category,
+            startingTime: trip.startingTime,
+            transportMode: trip.transportMode,
             totalDuration: trip.duration,
             totalCost: trip.budget,
             totalStep: trip.tripSteps.length,

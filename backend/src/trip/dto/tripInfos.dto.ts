@@ -1,4 +1,4 @@
-import { Localisation, Post, WeatherCode } from "@prisma/client";
+import { Localisation, Post, TripCategory, TripStartingTime, TripTransportMode, WeatherCode } from "@prisma/client";
 
 export type TripSuggest = {
     trips: TripSuggestInfos[];
@@ -13,6 +13,9 @@ export type TripInfos = {
 export interface TripDto extends TripSuggestInfos {
     startLocalisation?: Localisation;
     creationDate: Date;
+    category: TripCategory;
+    startingTime: TripStartingTime;
+    transportMode: TripTransportMode;
     nbLikes: number;
     nbBookmarks: number;
     isLiked: boolean;

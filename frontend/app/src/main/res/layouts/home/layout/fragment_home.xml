@@ -3,61 +3,107 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background">
+    android:background="@color/background"
+        android:layout_marginTop="16dp">
 
-    <com.google.android.material.button.MaterialButtonToggleGroup
-        android:id="@+id/tgFeedTabs"
-        android:layout_width="match_parent"
+    <LinearLayout
+        android:id="@+id/llHomeHeader"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="16dp"
-        android:layout_marginTop="16dp"
-        app:singleSelection="true"
-        app:selectionRequired="true"
+        android:orientation="vertical"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnTabTravelShare"
-            style="@style/Widget.TravelApp.Button.Outlined"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            app:backgroundTint="@android:color/transparent"
-            android:text="@string/home_tab_travelshare" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingHorizontal="16dp">
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnTabTravelPath"
-            style="@style/Widget.TravelApp.Button.Outlined"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            app:backgroundTint="@android:color/transparent"
-            android:text="@string/home_tab_travelpath" />
+            <ImageView
+                android:id="@+id/ivHomeLogo"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:src="@drawable/logo"
+                android:scaleType="fitCenter"
+                android:contentDescription="@null" />
 
-    </com.google.android.material.button.MaterialButtonToggleGroup>
+            <TextView
+                android:id="@+id/tvFeedTitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginHorizontal="12dp"
+                android:text="@string/home_tab_travelshare"
+                android:textAppearance="@style/TextAppearance.TravelApp.HeadlineMedium" />
+
+            <ImageView
+                android:id="@+id/btnToggleFeed"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:src="@drawable/ic_location"
+                android:padding="4dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@null"
+                app:tint="@color/primary" />
+
+        </LinearLayout>
+
+        <com.google.android.material.button.MaterialButtonToggleGroup
+            android:id="@+id/tgTripTabs"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginBottom="8dp"
+            android:visibility="gone"
+            app:singleSelection="true"
+            app:selectionRequired="true">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnTabWorldTrips"
+                style="@style/Widget.TravelApp.Button.Outlined"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                app:backgroundTint="@android:color/transparent"
+                android:text="@string/home_trip_world" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnTabMyTrips"
+                style="@style/Widget.TravelApp.Button.Outlined"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                app:backgroundTint="@android:color/transparent"
+                android:text="@string/home_trip_mine" />
+
+        </com.google.android.material.button.MaterialButtonToggleGroup>
+
+    </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvPosts"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginTop="8dp"
         android:clipToPadding="false"
         android:paddingBottom="80dp"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-        app:layout_constraintTop_toBottomOf="@id/tgFeedTabs"
+        app:layout_constraintTop_toBottomOf="@id/llHomeHeader"
         app:layout_constraintBottom_toBottomOf="parent" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvTrips"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginTop="8dp"
         android:clipToPadding="false"
         android:paddingBottom="80dp"
         android:visibility="gone"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-        app:layout_constraintTop_toBottomOf="@id/tgFeedTabs"
+        app:layout_constraintTop_toBottomOf="@id/llHomeHeader"
         app:layout_constraintBottom_toBottomOf="parent" />
 
     <TextView
@@ -68,7 +114,7 @@
         android:textAppearance="@style/TextAppearance.TravelApp.BodyMedium"
         android:textColor="@color/text_secondary"
         android:visibility="gone"
-        app:layout_constraintTop_toBottomOf="@id/tgFeedTabs"
+        app:layout_constraintTop_toBottomOf="@id/llHomeHeader"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />

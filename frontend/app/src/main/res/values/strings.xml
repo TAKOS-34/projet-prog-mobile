@@ -277,6 +277,8 @@
     <string name="map_post_by">Par %1$s</string>
     <string name="home_tab_travelshare">TravelShare</string>
     <string name="home_tab_travelpath">TravelPath</string>
+    <string name="home_trip_world">Trajets mondiaux</string>
+    <string name="home_trip_mine">Mes trajets</string>
     <string name="trip_form_title">Créer votre voyage</string>
     <string name="trip_form_subtitle">Planifiez votre itinéraire</string>
     <string name="trip_city_hint">Ville de destination</string>
@@ -306,8 +308,8 @@
     <string name="error_trip_confirm">Erreur lors de la confirmation</string>
     <string name="trip_result_n_steps">%1$d étapes</string>
     <string name="trip_result_temperature">%1$.0f°C</string>
-    <string name="trip_step_visit_duration">%1$d min de visite</string>
-    <string name="trip_step_travel_time">%1$d min de trajet</string>
+    <string name="trip_step_visit_duration">%1$s de visite</string>
+    <string name="trip_step_travel_time">%1$s de trajet</string>
     <string name="trip_result_step_number">Étape %1$d</string>
     <string name="weather_clear">Ensoleillé</string>
     <string name="weather_cloudy">Nuageux</string>
@@ -319,7 +321,10 @@
     <string name="trip_total_cost">%1$d €</string>
     <string name="trip_label_normal">Normal</string>
     <string name="trip_label_business">Business</string>
+    <string name="trip_start_position">Votre position</string>
     <string name="trip_format_meteo">%1$s %2$s · %3$s</string>
+    <string name="trip_show_map">Voir la carte</string>
+    <string name="trip_hide_map">Masquer la carte</string>
 
     <plurals name="time_minutes_ago">
         <item quantity="one">Il y a %d minute</item>

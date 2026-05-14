@@ -43,4 +43,18 @@ object DateUtils {
         val date = isoString.parseIsoDate() ?: return isoString
         return SimpleDateFormat("dd/MM/yy,\nHH:mm", Locale.getDefault()).format(date)
     }
+
+    fun formatMinutes(context: Context, totalMinutes: Int): String {
+        return if (totalMinutes < 60) {
+            context.getString(R.string.trip_total_duration_m, totalMinutes)
+        } else {
+            val hours = totalMinutes / 60
+            val minutes = totalMinutes % 60
+            if (minutes == 0) {
+                "${hours}h"
+            } else {
+                context.getString(R.string.trip_total_duration_hm, hours, minutes)
+            }
+        }
+    }
 }

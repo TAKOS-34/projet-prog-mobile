@@ -13,12 +13,14 @@ import com.example.myapplication.R
 import com.example.myapplication.dto.post.PostType
 import com.example.myapplication.dto.trip.TripLocalisationDto
 import com.example.myapplication.dto.trip.TripStepDetailDto
+import com.example.myapplication.utils.DateUtils
 import com.example.myapplication.utils.resolveBackendUrl
 
 class TripStepsAdapter(
     private val steps: List<TripStepDetailDto>,
     private val onPostClick: (postId: String) -> Unit,
-    private val onLocationClick: (name: String, lat: Double, long: Double) -> Unit
+    private val onLocationClick: (name: String, lat: Double, long: Double) -> Unit,
+    private val startLocationName: String? = null
 ) : RecyclerView.Adapter<TripStepsAdapter.StepViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): StepViewHolder {
@@ -33,21 +35,26 @@ class TripStepsAdapter(
 
     override fun getItemCount() = steps.size
 
-    class StepViewHolder(
+    inner class StepViewHolder(
         itemView: View,
         private val onPostClick: (postId: String) -> Unit,
         private val onLocationClick: (name: String, lat: Double, long: Double) -> Unit
     ) : RecyclerView.ViewHolder(itemView) {
 
-        private val llTravelConnector: LinearLayout = itemView.findViewById(R.id.llTravelConnector)
+        private val vStartDot: View = itemView.findViewById(R.id.vStartDot)
+        private val tvStartLocation: TextView = itemView.findViewById(R.id.tvStartLocation)
         private val tvTravelTime: TextView = itemView.findViewById(R.id.tvTravelTime)
         private val ivTravelTrust: ImageView = itemView.findViewById(R.id.ivTravelTrust)
+        private val ivConnector: ImageView = itemView.findViewById(R.id.ivConnector)
         private val vDot: TextView = itemView.findViewById(R.id.vDot)
         private val vBottomLine: View = itemView.findViewById(R.id.vBottomLine)
         private val ivImage: ImageView = itemView.findViewById(R.id.ivStepImage)
         private val tvTitle: TextView = itemView.findViewById(R.id.tvStepTitle)
         private val tvLocation: TextView = itemView.findViewById(R.id.tvStepLocation)
         private val tvType: TextView = itemView.findViewById(R.id.tvStepType)
+        private val tvPriceSeparator: TextView = itemView.findViewById(R.id.tvPriceSeparator)
+        private val ivPriceIcon: ImageView = itemView.findViewById(R.id.ivPriceIcon)
+        private val tvPrice: TextView = itemView.findViewById(R.id.tvStepPrice)
         private val tvVisit: TextView = itemView.findViewById(R.id.tvStepVisitDuration)
         private val ivVisitTrust: ImageView = itemView.findViewById(R.id.ivVisitTrust)
 
@@ -55,19 +62,40 @@ class TripStepsAdapter(
             val ctx = itemView.context
 
             if (position == 0) {
-                llTravelConnector.visibility = View.GONE
+                vStartDot.visibility = View.VISIBLE
+                tvStartLocation.visibility = View.VISIBLE
+                tvStartLocation.text = startLocationName ?: ctx.getString(R.string.trip_start_position)
             } else {
-                llTravelConnector.visibility = View.VISIBLE
-                tvTravelTime.text = ctx.getString(R.string.trip_step_travel_time, step.travelTimeFromPrevious)
-                ivTravelTrust.visibility = if (step.isTravelTimeFromPreviousTrusted) View.VISIBLE else View.GONE
+                vStartDot.visibility = View.GONE
+                tvStartLocation.visibility = View.GONE
             }
+
+            tvTravelTime.text = ctx.getString(R.string.trip_step_travel_time, DateUtils.formatMinutes(ctx, step.travelTimeFromPrevious))
+            ivTravelTrust.visibility = if (step.isTravelTimeFromPreviousTrusted) View.VISIBLE else View.GONE
 
             vDot.text = (position + 1).toString()
             vBottomLine.visibility = if (isLast) View.INVISIBLE else View.VISIBLE
 
             tvTitle.text = step.post.title
             tvLocation.text = step.localisation.name
-            tvVisit.text = ctx.getString(R.string.trip_step_visit_duration, step.visitDuration)
+
+            // Price binding
+            if (step.post.minPrice != null && step.post.maxPrice != null) {
+                tvPriceSeparator.visibility = View.VISIBLE
+                ivPriceIcon.visibility = View.VISIBLE
+                tvPrice.visibility = View.VISIBLE
+                if (step.post.minPrice == 0 && step.post.maxPrice == 0) {
+                    tvPrice.text = ctx.getString(R.string.price_free)
+                } else {
+                    tvPrice.text = ctx.getString(R.string.price_range_format, step.post.minPrice, step.post.maxPrice)
+                }
+            } else {
+                tvPriceSeparator.visibility = View.GONE
+                ivPriceIcon.visibility = View.GONE
+                tvPrice.visibility = View.GONE
+            }
+
+            tvVisit.text = ctx.getString(R.string.trip_step_visit_duration, DateUtils.formatMinutes(ctx, step.visitDuration))
             ivVisitTrust.visibility = if (step.isVisitDurationTrusted) View.VISIBLE else View.GONE
 
             val postType = PostType.entries.firstOrNull { it.name == step.post.type }
