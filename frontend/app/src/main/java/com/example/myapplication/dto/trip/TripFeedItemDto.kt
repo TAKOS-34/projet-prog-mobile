@@ -16,6 +16,7 @@ data class TripFeedItemDto(
     val nbBookmarks: Int,
     val isLiked: Boolean,
     val isBookmarked: Boolean,
+    val isYours: Boolean,
     val userId: Int,
     val username: String,
     val avatar: String,

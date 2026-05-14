@@ -158,6 +158,8 @@ export class AuthService {
                         avatar: true,
                         nbPosts: true,
                         nbGroups: true,
+                        nbFollowers: true,
+                        nbFollowing: true,
                         isEmailVerified: true
                     }
                 }

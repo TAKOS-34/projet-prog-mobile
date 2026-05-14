@@ -5,4 +5,6 @@ export type UserProfile = {
     avatar: string;
     nbGroups: number;
     nbPosts: number;
+    nbFollowers: number;
+    nbFollowing: number;
 }

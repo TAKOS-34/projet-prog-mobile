@@ -13,12 +13,11 @@ import com.example.myapplication.R
 import com.example.myapplication.adapter.PostsAdapter
 import com.example.myapplication.adapter.TripFeedAdapter
 import com.example.myapplication.dto.trip.TripFeedItemDto
-import com.example.myapplication.utils.ApiClient
 import com.example.myapplication.utils.PostFeedPaginator
 import com.example.myapplication.utils.TripFeedPaginator
 import com.example.myapplication.utils.buildPostsAdapter
+import com.example.myapplication.utils.buildTripFeedAdapter
 import com.google.android.material.button.MaterialButtonToggleGroup
-import com.google.gson.Gson
 
 class BookmarksFragment : Fragment() {
 
@@ -35,7 +34,6 @@ class BookmarksFragment : Fragment() {
     private lateinit var tgTabs: MaterialButtonToggleGroup
 
     private var currentTab = Tab.POSTS
-    private val gson = Gson()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -77,15 +75,13 @@ class BookmarksFragment : Fragment() {
     }
 
     private fun setupTripsTab() {
-        tripsAdapter = TripFeedAdapter(
-            onLike = { trip, liked -> toggleLike(trip, liked) },
-            onBookmark = { trip, bookmarked -> toggleBookmark(trip, bookmarked) },
-            onClick = { trip -> openTripDetail(trip) }
-        )
+        tripsAdapter = buildTripFeedAdapter { trip ->
+            tripsAdapter.submitList(tripsAdapter.currentList.filter { it.id != trip.id })
+        }
         tripsPaginator = TripFeedPaginator(
             recyclerView = recyclerView,
             adapter = tripsAdapter,
-            url = "bookmark/trip",
+            url = { "bookmark/trip" },
             onUi = { block -> activity?.runOnUiThread(block) },
             onResults = { isEmpty -> updateEmptyState(isEmpty) }
         )
@@ -109,20 +105,4 @@ class BookmarksFragment : Fragment() {
         recyclerView.visibility = if (isEmpty) View.GONE else View.VISIBLE
     }
 
-    private fun openTripDetail(trip: TripFeedItemDto) {
-        val bundle = Bundle().apply { putString("tripFeedJson", gson.toJson(trip)) }
-        findNavController().navigate(R.id.tripFeedDetailFragment, bundle)
-    }
-
-    private fun toggleLike(trip: TripFeedItemDto, liked: Boolean) {
-        val endpoint = "like/trip/${trip.id}"
-        if (liked) ApiClient.post(endpoint, emptyMap<String, Any>()) { _, _, _ -> }
-        else ApiClient.delete(endpoint) { _, _, _ -> }
-    }
-
-    private fun toggleBookmark(trip: TripFeedItemDto, bookmarked: Boolean) {
-        val endpoint = "bookmark/trip/${trip.id}"
-        if (bookmarked) ApiClient.post(endpoint, emptyMap<String, Any>()) { _, _, _ -> }
-        else ApiClient.delete(endpoint) { _, _, _ -> }
-    }
 }

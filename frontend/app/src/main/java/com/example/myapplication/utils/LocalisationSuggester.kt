@@ -9,7 +9,7 @@ import org.json.JSONObject
 import java.io.IOException
 import java.net.URLEncoder
 
-data class LocalisationSuggestion(val name: String, val label: String)
+data class LocalisationSuggestion(val name: String, val label: String, val lat: Double = 0.0, val long: Double = 0.0)
 
 object LocalisationSuggester {
     private val client = OkHttpClient()
@@ -24,8 +24,8 @@ object LocalisationSuggester {
             }
 
             override fun onResponse(call: Call, response: Response) {
-                val body = response.body?.string().orEmpty()
-                onResult(parseSuggestions(body))
+                val responseBody = response.body?.string().orEmpty()
+                onResult(parseSuggestions(responseBody))
             }
         })
     }
@@ -37,14 +37,18 @@ object LocalisationSuggester {
             val results = mutableListOf<LocalisationSuggestion>()
             val seen = HashSet<String>()
             for (i in 0 until features.length()) {
-                val props = features.getJSONObject(i).optJSONObject("properties") ?: continue
+                val feature = features.getJSONObject(i)
+                val props = feature.optJSONObject("properties") ?: continue
                 val name = props.optString("name", "").trim()
                 if (name.isBlank()) continue
                 val parts = mutableListOf(name)
                 val city = props.optString("city", "").trim()
                 if (city.isNotBlank() && city != name) parts += city
                 val label = parts.joinToString(", ")
-                if (seen.add(label)) results += LocalisationSuggestion(name, label)
+                val coords = feature.optJSONObject("geometry")?.optJSONArray("coordinates")
+                val lon = coords?.optDouble(0) ?: 0.0
+                val lat = coords?.optDouble(1) ?: 0.0
+                if (seen.add(label)) results += LocalisationSuggestion(name, label, lat, lon)
             }
             results
         } catch (e: Exception) {

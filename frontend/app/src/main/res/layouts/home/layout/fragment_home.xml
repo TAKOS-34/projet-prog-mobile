@@ -65,20 +65,18 @@
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnTabWorldTrips"
-                style="@style/Widget.TravelApp.Button.Outlined"
+                style="@style/Widget.TravelApp.Button.Toggle"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                app:backgroundTint="@android:color/transparent"
                 android:text="@string/home_trip_world" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnTabMyTrips"
-                style="@style/Widget.TravelApp.Button.Outlined"
+                style="@style/Widget.TravelApp.Button.Toggle"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                app:backgroundTint="@android:color/transparent"
                 android:text="@string/home_trip_mine" />
 
         </com.google.android.material.button.MaterialButtonToggleGroup>

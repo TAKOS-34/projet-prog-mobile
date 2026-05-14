@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
 import { TripCreationService } from './trip.creation.service';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { SuggestTripDto } from './dto/suggestTrip.dto';
@@ -43,10 +43,24 @@ export class TripController {
 
 
 
+    @UseGuards(AuthGuard)
+    @Delete(':tripId')
+    deleteTrip(@Param('tripId') tripId: number, @GetUser() user: UserSession): Promise<ResponseMessage> {
+        return this.tripService.deleteTrip(tripId, user);
+    }
+
+
+
     @UseGuards(AuthOptionalGuard)
     @Get()
-    getTrips(@GetUser() user?: UserSession, @Query('limit') limit: number = 20, @Query('cursor') cursor?: number): Promise<TripInfos> {
-        return this.tripService.getTrips(limit, cursor, user?.id);
+    getTrips(
+        @Query('limit') limit: number = 20,
+        @Query('cursor') cursor?: number,
+        @Query('loc') loc?: string,
+        @Query('dist') dist?: number,
+        @GetUser() user?: UserSession
+    ): Promise<TripInfos> {
+        return this.tripService.getTrips(limit, cursor, loc, dist, user?.id);
     }
 
 

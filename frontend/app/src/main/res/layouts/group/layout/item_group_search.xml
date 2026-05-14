@@ -67,7 +67,6 @@
             android:insetBottom="0dp"
             android:text="@string/groups_join"
             app:layout_constraintTop_toTopOf="@id/llGroupTitle"
-            app:layout_constraintBottom_toBottomOf="@id/llGroupTitle"
             app:layout_constraintEnd_toEndOf="parent" />
 
         <LinearLayout

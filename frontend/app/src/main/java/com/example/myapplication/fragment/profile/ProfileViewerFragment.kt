@@ -29,10 +29,13 @@ class ProfileViewerFragment : Fragment() {
 
     private var userId: Int = 0
     private var profile: UserPublicProfileDto? = null
+    private var followerCount = 0
 
     private lateinit var nsv: NestedScrollView
     private lateinit var btnFollow: ImageView
     private lateinit var tvSelfBadge: TextView
+    private lateinit var tvNbFollowers: TextView
+    private lateinit var tvNbFollowing: TextView
     private lateinit var rvPosts: RecyclerView
     private lateinit var postsAdapter: PostsAdapter
     private var paginator: PostFeedPaginator? = null
@@ -58,6 +61,8 @@ class ProfileViewerFragment : Fragment() {
 
         btnFollow = view.findViewById(R.id.btnFollow)
         tvSelfBadge = view.findViewById(R.id.tvSelfBadge)
+        tvNbFollowers = view.findViewById(R.id.tvNbFollowers)
+        tvNbFollowing = view.findViewById(R.id.tvNbFollowing)
         btnFollow.setOnClickListener { toggleFollow() }
 
         rvPosts = view.findViewById(R.id.rvUserPosts)
@@ -88,6 +93,9 @@ class ProfileViewerFragment : Fragment() {
         view.findViewById<TextView>(R.id.tvProfileName).text = p.username
         view.findViewById<TextView>(R.id.tvNbPosts).text = p.nbPosts.toString()
         view.findViewById<TextView>(R.id.tvNbGroups).text = p.nbGroups.toString()
+        followerCount = p.nbFollowers
+        tvNbFollowers.text = followerCount.toString()
+        tvNbFollowing.text = p.nbFollowing.toString()
 
         val memberPrefix = getString(R.string.profile_member_since)
         view.findViewById<TextView>(R.id.tvMemberSince).text = "$memberPrefix ${p.creationDate.toShortDate()}"
@@ -149,6 +157,8 @@ class ProfileViewerFragment : Fragment() {
                 if (error == null) {
                     profile = current.copy(isFollowing = target)
                     applyFollowState(target)
+                    followerCount += if (target) 1 else -1
+                    tvNbFollowers.text = followerCount.toString()
                     val msg = if (target) R.string.success_followed else R.string.success_unfollowed
                     Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
                 } else {

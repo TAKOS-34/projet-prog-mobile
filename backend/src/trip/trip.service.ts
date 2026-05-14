@@ -75,6 +75,7 @@ export class TripService {
                 nbBookmarks: trip.nbBookmarks ?? 0,
                 isLiked: trip.likes?.length > 0,
                 isBookmarked: trip.bookmarks?.length > 0,
+                isYours: user.id === trip.User.id,
                 userId: trip.User.id,
                 username: trip.User.username,
                 avatar: this.cdn.getAvatarUrl(trip.User.avatar),
@@ -96,12 +97,32 @@ export class TripService {
 
 
 
-    async getTrips(limit: number, cursor?: number, userId?: number): Promise<TripInfos> {
+    async deleteTrip(tripId: number, user: UserSession): Promise<ResponseMessage> {
+        await this.prisma.trip.delete({
+            where: { id: tripId, userId: user.id }
+        });
+
+        return { status: true, message: 'Trip deleted' };
+    }
+
+
+
+    async getTrips(limit: number, cursor?: number, loc?: string, dist?: number, userId?: number): Promise<TripInfos> {
+        const cleanLocalisation: string | null = loc ? loc.toLowerCase().trim() : null;
+        let localisationIds: number[] | null = null;
+        if (cleanLocalisation && dist) {
+            localisationIds = await this.loc.getNearbyLocalisationIds(cleanLocalisation, dist);
+            if (!localisationIds || localisationIds.length === 0) return { trips: [], nextCursor: undefined };
+        }
+
         const trips = await this.prisma.trip.findMany({
             take: limit + 1,
             skip: cursor ? 1 : 0,
             ...(cursor ? { cursor: { id: cursor } } : {}),
-            where: { status: TripStatus.VALIDATED },
+            where: {
+                status: TripStatus.VALIDATED,
+                ...(localisationIds ? { startLocalisationId: { in: localisationIds } } : cleanLocalisation ? { StartLocalisation: { name: cleanLocalisation } } : {})
+            },
             orderBy: { creationDate: 'desc' },
             include: {
                 tripSteps: {
@@ -132,6 +153,7 @@ export class TripService {
                 nbBookmarks: trip.nbBookmarks ?? 0,
                 isLiked: trip.likes?.length > 0,
                 isBookmarked: trip.bookmarks?.length > 0,
+                isYours: userId ? userId === trip.User.id : false,
                 userId: trip.User.id,
                 username: trip.User.username,
                 avatar: this.cdn.getAvatarUrl(trip.User.avatar),
@@ -184,6 +206,7 @@ export class TripService {
             nbBookmarks: trip.nbBookmarks ?? 0,
             isLiked: trip.likes?.length > 0,
             isBookmarked: trip.bookmarks?.length > 0,
+            isYours: userId ? userId === trip.User.id : false,
             userId: trip.User.id,
             username: trip.User.username,
             avatar: this.cdn.getAvatarUrl(trip.User.avatar),

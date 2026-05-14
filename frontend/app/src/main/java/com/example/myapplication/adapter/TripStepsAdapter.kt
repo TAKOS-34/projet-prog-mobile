@@ -14,13 +14,16 @@ import com.example.myapplication.dto.post.PostType
 import com.example.myapplication.dto.trip.TripLocalisationDto
 import com.example.myapplication.dto.trip.TripStepDetailDto
 import com.example.myapplication.utils.DateUtils
+import com.example.myapplication.utils.LocalisationFormat
 import com.example.myapplication.utils.resolveBackendUrl
 
 class TripStepsAdapter(
     private val steps: List<TripStepDetailDto>,
     private val onPostClick: (postId: String) -> Unit,
     private val onLocationClick: (name: String, lat: Double, long: Double) -> Unit,
-    private val startLocationName: String? = null
+    private val startLocationName: String? = null,
+    private val startLocationLat: Double = 0.0,
+    private val startLocationLong: Double = 0.0
 ) : RecyclerView.Adapter<TripStepsAdapter.StepViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): StepViewHolder {
@@ -64,7 +67,14 @@ class TripStepsAdapter(
             if (position == 0) {
                 vStartDot.visibility = View.VISIBLE
                 tvStartLocation.visibility = View.VISIBLE
-                tvStartLocation.text = startLocationName ?: ctx.getString(R.string.trip_start_position)
+                tvStartLocation.text = startLocationName?.let { LocalisationFormat.display(it) } ?: ctx.getString(R.string.trip_start_position)
+                if (startLocationName != null && (startLocationLat != 0.0 || startLocationLong != 0.0)) {
+                    tvStartLocation.setOnClickListener {
+                        onLocationClick(startLocationName, startLocationLat, startLocationLong)
+                    }
+                } else {
+                    tvStartLocation.setOnClickListener(null)
+                }
             } else {
                 vStartDot.visibility = View.GONE
                 tvStartLocation.visibility = View.GONE
@@ -77,7 +87,7 @@ class TripStepsAdapter(
             vBottomLine.visibility = if (isLast) View.INVISIBLE else View.VISIBLE
 
             tvTitle.text = step.post.title
-            tvLocation.text = step.localisation.name
+            tvLocation.text = LocalisationFormat.display(step.localisation.name)
 
             // Price binding
             if (step.post.minPrice != null && step.post.maxPrice != null) {

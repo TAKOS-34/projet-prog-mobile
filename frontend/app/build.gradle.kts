@@ -59,6 +59,7 @@ android {
                 "src/main/res/layouts/common",
                 "src/main/res/layouts/group",
                 "src/main/res/layouts/trip",
+                "src/main/res/layouts/search",
                 "src/main/res"
             )
         }

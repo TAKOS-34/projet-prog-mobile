@@ -104,74 +104,118 @@
             style="@style/Widget.TravelApp.Card"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="24dp"
+            android:layout_marginHorizontal="12dp"
             android:layout_marginTop="24dp"
             app:layout_constraintTop_toBottomOf="@id/tvMemberSince">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical">
+                android:orientation="horizontal"
+                android:paddingVertical="8dp">
 
                 <LinearLayout
-                    android:layout_width="match_parent"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:paddingVertical="12dp">
-
-                    <LinearLayout
-                        android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:orientation="vertical">
+                    <TextView
+                        android:id="@+id/tvNbPosts"
+                        style="@style/Widget.TravelApp.TextView.StatNumber"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:gravity="center"
-                        android:orientation="vertical">
-                        <TextView
-                            android:id="@+id/tvNbPosts"
-                            style="@style/Widget.TravelApp.TextView.StatNumber"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            tools:text="1" />
-                        <TextView
-                            style="@style/Widget.TravelApp.TextView.StatLabel"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/profile_stat_posts" />
-                    </LinearLayout>
-
-                    <View
-                        android:layout_width="1dp"
-                        android:layout_height="match_parent"
-                        android:background="@color/divider"
-                        android:layout_marginVertical="8dp" />
-
-                    <LinearLayout
-                        android:layout_width="0dp"
+                        android:textSize="16sp"
+                        tools:text="1" />
+                    <TextView
+                        style="@style/Widget.TravelApp.TextView.StatLabel"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:gravity="center"
-                        android:orientation="vertical">
-                        <TextView
-                            android:id="@+id/tvNbGroups"
-                            style="@style/Widget.TravelApp.TextView.StatNumber"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            tools:text="0" />
-                        <TextView
-                            style="@style/Widget.TravelApp.TextView.StatLabel"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/profile_stat_groups" />
-                    </LinearLayout>
+                        android:textSize="9sp"
+                        android:text="@string/profile_stat_posts" />
                 </LinearLayout>
 
-                <TextView
-                    android:layout_width="match_parent"
+                <View
+                    android:layout_width="1dp"
+                    android:layout_height="match_parent"
+                    android:background="@color/divider"
+                    android:layout_marginVertical="8dp" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_weight="1"
                     android:gravity="center"
-                    android:paddingVertical="8dp"
-                    android:text="@string/profile_posts_separator"
-                    android:textAppearance="@style/TextAppearance.TravelApp.LabelMedium"
-                    android:textColor="@color/text_hint" />
+                    android:orientation="vertical">
+                    <TextView
+                        android:id="@+id/tvNbGroups"
+                        style="@style/Widget.TravelApp.TextView.StatNumber"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="16sp"
+                        tools:text="0" />
+                    <TextView
+                        style="@style/Widget.TravelApp.TextView.StatLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="9sp"
+                        android:text="@string/profile_stat_groups" />
+                </LinearLayout>
+
+                <View
+                    android:layout_width="1dp"
+                    android:layout_height="match_parent"
+                    android:background="@color/divider"
+                    android:layout_marginVertical="8dp" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:orientation="vertical">
+                    <TextView
+                        android:id="@+id/tvNbFollowers"
+                        style="@style/Widget.TravelApp.TextView.StatNumber"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="16sp"
+                        tools:text="128" />
+                    <TextView
+                        style="@style/Widget.TravelApp.TextView.StatLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="9sp"
+                        android:text="@string/profile_stat_followers" />
+                </LinearLayout>
+
+                <View
+                    android:layout_width="1dp"
+                    android:layout_height="match_parent"
+                    android:background="@color/divider"
+                    android:layout_marginVertical="8dp" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:orientation="vertical">
+                    <TextView
+                        android:id="@+id/tvNbFollowing"
+                        style="@style/Widget.TravelApp.TextView.StatNumber"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="16sp"
+                        tools:text="42" />
+                    <TextView
+                        style="@style/Widget.TravelApp.TextView.StatLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="9sp"
+                        android:text="@string/profile_stat_following" />
+                </LinearLayout>
+
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 

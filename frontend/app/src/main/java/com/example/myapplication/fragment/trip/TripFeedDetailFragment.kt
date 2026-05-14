@@ -20,6 +20,8 @@ import com.example.myapplication.dto.trip.TripFeedItemDto
 import com.example.myapplication.fragment.post.LocalisationViewerFragment
 import com.example.myapplication.utils.ApiClient
 import com.example.myapplication.utils.DateUtils
+import com.example.myapplication.utils.exportTripToPdf
+import com.example.myapplication.utils.LocalisationFormat
 import com.example.myapplication.utils.resolveBackendUrl
 import com.example.myapplication.utils.SessionManager
 import com.example.myapplication.utils.toTripDuration
@@ -72,7 +74,7 @@ class TripFeedDetailFragment : Fragment() {
         bindMeta(view, trip)
         bindMap(view, trip)
         bindSteps(view, trip)
-        bindActions(view)
+        bindActions(view, trip)
 
         return view
     }
@@ -123,7 +125,7 @@ class TripFeedDetailFragment : Fragment() {
             mapView.overlays.add(Marker(mapView).apply {
                 position = GeoPoint(loc.lat, loc.long)
                 setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
-                title = loc.name
+                title = "${getString(R.string.trip_starting_point)} : ${LocalisationFormat.display(loc.name)}"
                 icon = ContextCompat.getDrawable(ctx, R.drawable.ic_location)
             })
         }
@@ -132,7 +134,7 @@ class TripFeedDetailFragment : Fragment() {
             mapView.overlays.add(Marker(mapView).apply {
                 position = GeoPoint(step.localisation.lat, step.localisation.long)
                 setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
-                title = "${i + 1}. ${step.post.title}"
+                title = "${i + 1}. ${LocalisationFormat.display(step.localisation.name)}"
                 icon = ContextCompat.getDrawable(ctx, R.drawable.ic_location)
             })
         }
@@ -212,10 +214,13 @@ class TripFeedDetailFragment : Fragment() {
         )
     }
 
-    private fun bindActions(view: View) {
+    private fun bindActions(view: View, trip: TripFeedItemDto) {
         btnLike = view.findViewById(R.id.btnFeedDetailLike)
         tvLikeCount = view.findViewById(R.id.tvFeedDetailLikeCount)
         btnBookmark = view.findViewById(R.id.btnFeedDetailBookmark)
+
+        view.findViewById<com.google.android.material.button.MaterialButton>(R.id.btnExportPdf)
+            .setOnClickListener { exportTripToPdf(trip) }
 
         applyLikeState()
         applyBookmarkState()
@@ -225,12 +230,9 @@ class TripFeedDetailFragment : Fragment() {
         btnLike.setOnClickListener {
             if (!isLogged) return@setOnClickListener
             val newLiked = !isLiked
-            val endpoint = if (newLiked) "like/trip/$tripId" else "like/trip/$tripId"
-            if (newLiked) {
-                ApiClient.post(endpoint, emptyMap<String, Any>()) { _, _, _ -> }
-            } else {
-                ApiClient.delete(endpoint) { _, _, _ -> }
-            }
+            val endpoint = "like/trip/$tripId"
+            if (newLiked) ApiClient.post(endpoint, emptyMap<String, Any>()) { _, _, _ -> }
+            else ApiClient.delete(endpoint) { _, _, _ -> }
             isLiked = newLiked
             likeCount += if (isLiked) 1 else -1
             applyLikeState()
@@ -266,4 +268,5 @@ class TripFeedDetailFragment : Fragment() {
             ContextCompat.getColor(ctx, if (isBookmarked) R.color.primary else R.color.text_secondary)
         )
     }
+
 }

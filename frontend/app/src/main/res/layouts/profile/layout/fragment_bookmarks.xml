@@ -18,7 +18,7 @@
         android:id="@+id/tvBookmarksTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="4dp"
         android:text="@string/bookmarks_title"
         android:textAppearance="@style/TextAppearance.TravelApp.HeadlineLarge"
         app:layout_constraintTop_toBottomOf="@id/btnBack"
@@ -37,20 +37,18 @@
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnBookmarkPosts"
-            style="@style/Widget.TravelApp.Button.Outlined"
+            style="@style/Widget.TravelApp.Button.Toggle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            app:backgroundTint="@android:color/transparent"
             android:text="@string/home_tab_travelshare" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnBookmarkTrips"
-            style="@style/Widget.TravelApp.Button.Outlined"
+            style="@style/Widget.TravelApp.Button.Toggle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            app:backgroundTint="@android:color/transparent"
             android:text="@string/home_tab_travelpath" />
 
     </com.google.android.material.button.MaterialButtonToggleGroup>

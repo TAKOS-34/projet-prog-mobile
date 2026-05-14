@@ -10,8 +10,10 @@ model User {
     emailVerificationToken String?   @unique
     avatar                 String?   @unique
 
-    nbPosts  Int @default(0)
-    nbGroups Int @default(0)
+    nbPosts     Int @default(0)
+    nbGroups    Int @default(0)
+    nbFollowers Int @default(0)
+    nbFollowing Int @default(0)
 
     userTokens     UserToken[]
     FcmTokens      FcmToken[]

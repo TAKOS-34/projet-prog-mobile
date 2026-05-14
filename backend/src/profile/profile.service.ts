@@ -35,7 +35,9 @@ export class ProfileService {
             creationDate: user.creationDate,
             avatar: this.cdn.getAvatarUrl(user.avatar),
             nbGroups: user.nbGroups,
-            nbPosts: user.nbPosts
+            nbPosts: user.nbPosts,
+            nbFollowers: user.nbFollowers,
+            nbFollowing: user.nbFollowing
         };
     }
 
@@ -49,6 +51,8 @@ export class ProfileService {
                 avatar: true,
                 nbGroups: true,
                 nbPosts: true,
+                nbFollowers: true,
+                nbFollowing: true,
                 ...(user ? { userFollowers: { where: { followerId: user.id }, select: { followerId: true }, take: 1 } } : {})
             }
         });
@@ -60,6 +64,8 @@ export class ProfileService {
             avatar: this.cdn.getAvatarUrl(targetUser.avatar),
             nbGroups: targetUser.nbGroups,
             nbPosts: targetUser.nbPosts,
+            nbFollowers: targetUser.nbFollowers,
+            nbFollowing: targetUser.nbFollowing,
             isFollowing: user ? targetUser.userFollowers.length > 0 : false
         };
     }

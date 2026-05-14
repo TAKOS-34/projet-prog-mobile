@@ -20,6 +20,7 @@ export interface TripDto extends TripSuggestInfos {
     nbBookmarks: number;
     isLiked: boolean;
     isBookmarked: boolean;
+    isYours: boolean;
     userId: number;
     username: string;
     avatar: string;

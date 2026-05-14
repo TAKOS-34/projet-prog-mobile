@@ -7,5 +7,7 @@ data class UserPublicProfileDto(
     val avatar: String,
     val nbGroups: Int,
     val nbPosts: Int,
+    val nbFollowers: Int,
+    val nbFollowing: Int,
     val isFollowing: Boolean
 )

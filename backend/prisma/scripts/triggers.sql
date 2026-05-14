@@ -38,6 +38,24 @@ CREATE TRIGGER tr_post_count AFTER INSERT OR DELETE ON "Post" FOR EACH ROW EXECU
 
 
 
+CREATE OR REPLACE FUNCTION update_user_follow_counts() RETURNS TRIGGER AS $$
+BEGIN
+    IF (TG_OP = 'INSERT') THEN
+        UPDATE "User" SET "nbFollowers" = "nbFollowers" + 1 WHERE id = NEW."followingId";
+        UPDATE "User" SET "nbFollowing" = "nbFollowing" + 1 WHERE id = NEW."followerId";
+    ELSIF (TG_OP = 'DELETE') THEN
+        UPDATE "User" SET "nbFollowers" = "nbFollowers" - 1 WHERE id = OLD."followingId";
+        UPDATE "User" SET "nbFollowing" = "nbFollowing" - 1 WHERE id = OLD."followerId";
+    END IF;
+    RETURN NULL;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS tr_user_follow_counts ON "UserFollow";
+CREATE TRIGGER tr_user_follow_counts AFTER INSERT OR DELETE ON "UserFollow" FOR EACH ROW EXECUTE FUNCTION update_user_follow_counts();
+
+
+
 CREATE OR REPLACE FUNCTION update_post_like_count() RETURNS TRIGGER AS $$
 BEGIN
     IF (TG_OP = 'INSERT') THEN

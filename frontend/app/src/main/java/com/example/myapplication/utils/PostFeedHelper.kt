@@ -2,17 +2,26 @@ package com.example.myapplication.utils
 
 import android.app.Dialog
 import android.content.Intent
+import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.MotionEvent
+import android.view.ScaleGestureDetector
+import android.view.VelocityTracker
 import android.view.ViewGroup
+import android.widget.FrameLayout
+import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import coil.load
 import com.example.myapplication.R
 import com.example.myapplication.adapter.PostsAdapter
+import com.example.myapplication.utils.LocalisationFormat
 import com.example.myapplication.dto.post.PostDto
+import com.example.myapplication.dto.trip.TripFeedItemDto
 import com.example.myapplication.fragment.post.EditPostFragment
 import com.example.myapplication.fragment.post.LocalisationViewerFragment
 import com.example.myapplication.fragment.post.PostViewerFragment
@@ -45,6 +54,8 @@ fun Fragment.buildPostsAdapter(onChanged: () -> Unit): PostsAdapter = PostsAdapt
         if (findNavController().currentDestination?.id != R.id.postViewerFragment) {
             val bundle = Bundle().apply { putString(PostViewerFragment.ARG_POST_ID, post.id) }
             findNavController().navigate(R.id.postViewerFragment, bundle)
+        } else {
+            showFullscreenImage(post.image)
         }
     },
     onGroupClick = { post ->
@@ -66,11 +77,90 @@ fun Fragment.buildPostsAdapter(onChanged: () -> Unit): PostsAdapter = PostsAdapt
     } else null
 )
 
+private fun Fragment.showFullscreenImage(imageUrl: String) {
+    val ctx = context ?: return
+    val metrics = ctx.resources.displayMetrics
+    val dp = metrics.density
+    val dialog = Dialog(ctx, android.R.style.Theme_Black_NoTitleBar_Fullscreen)
+
+    val root = FrameLayout(ctx).apply { setBackgroundColor(Color.BLACK) }
+
+    val iv = ImageView(ctx).apply {
+        layoutParams = FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
+        scaleType = ImageView.ScaleType.FIT_CENTER
+    }
+    iv.load(imageUrl.resolveBackendUrl()) { crossfade(true) }
+    root.addView(iv)
+
+    var currentScale = 1f
+    var startRawY = 0f
+    var isDragging = false
+    val velocityTracker = VelocityTracker.obtain()
+
+    val scaleDetector = ScaleGestureDetector(ctx, object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
+        override fun onScale(detector: ScaleGestureDetector): Boolean {
+            currentScale = (currentScale * detector.scaleFactor).coerceIn(0.5f, 5f)
+            iv.scaleX = currentScale
+            iv.scaleY = currentScale
+            return true
+        }
+    })
+
+    iv.setOnTouchListener { _, event ->
+        scaleDetector.onTouchEvent(event)
+        velocityTracker.addMovement(event)
+
+        when (event.actionMasked) {
+            MotionEvent.ACTION_DOWN -> {
+                startRawY = event.rawY
+                isDragging = false
+            }
+            MotionEvent.ACTION_MOVE -> {
+                if (!scaleDetector.isInProgress && currentScale <= 1.05f) {
+                    val dy = event.rawY - startRawY
+                    if (!isDragging && dy > 10 * dp) isDragging = true
+                    if (isDragging && dy >= 0f) {
+                        iv.translationY = dy
+                        val alpha = (1f - (dy / (400 * dp)).coerceIn(0f, 1f))
+                        root.setBackgroundColor(Color.argb((alpha * 255).toInt(), 0, 0, 0))
+                    }
+                }
+            }
+            MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                velocityTracker.computeCurrentVelocity(1000)
+                val vy = velocityTracker.yVelocity
+                val dy = iv.translationY
+                velocityTracker.clear()
+                when {
+                    dy > 150 * dp || vy > 1500 -> {
+                        iv.animate()
+                            .translationY(metrics.heightPixels.toFloat())
+                            .alpha(0f)
+                            .setDuration(250)
+                            .withEndAction { dialog.dismiss() }
+                            .start()
+                    }
+                    !isDragging && !scaleDetector.isInProgress -> dialog.dismiss()
+                    else -> {
+                        iv.animate().translationY(0f).alpha(1f).setDuration(200).start()
+                        root.setBackgroundColor(Color.BLACK)
+                    }
+                }
+                isDragging = false
+            }
+        }
+        true
+    }
+
+    dialog.setContentView(root)
+    dialog.show()
+}
+
 internal fun Fragment.showGpsDialog(name: String, lat: Double, long: Double, date: String? = null) {
     val ctx = context ?: return
     val dialogView = LayoutInflater.from(ctx).inflate(R.layout.dialog_gps_info, null)
 
-    dialogView.findViewById<TextView>(R.id.tvLocationTitle).text = name
+    dialogView.findViewById<TextView>(R.id.tvLocationTitle).text = LocalisationFormat.display(name)
 
     val cvDateBlock = dialogView.findViewById<android.view.View>(R.id.cvDateBlock)
     if (date != null) {
@@ -86,12 +176,16 @@ internal fun Fragment.showGpsDialog(name: String, lat: Double, long: Double, dat
     dialog.setContentView(dialogView)
     dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
 
-    dialogView.findViewById<MaterialCardView>(R.id.btnClosePopup).setOnClickListener { dialog.dismiss() }
+    dialogView.findViewById<android.widget.ImageButton>(R.id.btnClosePopup).setOnClickListener { dialog.dismiss() }
     dialogView.findViewById<MaterialButton>(R.id.btnOpenMaps).setOnClickListener {
         val uri = Uri.parse("geo:$lat,$long?q=$lat,$long($name)")
         startActivity(Intent(Intent.ACTION_VIEW, uri))
     }
-    dialogView.findViewById<MaterialButton>(R.id.btnTravelPathRoute).setOnClickListener { dialog.dismiss() }
+    dialogView.findViewById<MaterialButton>(R.id.btnTravelPathRoute).setOnClickListener {
+        dialog.dismiss()
+        val bundle = Bundle().apply { putString("prefillCity", name) }
+        findNavController().navigate(R.id.createTripFragment, bundle)
+    }
 
     dialog.show()
 }
@@ -141,4 +235,25 @@ private fun Fragment.deletePost(post: PostDto, onDeleted: () -> Unit) {
             }
         }
     }
+}
+
+internal fun Fragment.confirmDeleteTrip(trip: TripFeedItemDto, onDeleted: () -> Unit) {
+    val ctx = context ?: return
+    MaterialAlertDialogBuilder(ctx)
+        .setTitle(R.string.trip_delete_confirm_title)
+        .setMessage(R.string.post_delete_confirm_message)
+        .setNegativeButton(R.string.cancel, null)
+        .setPositiveButton(R.string.btn_delete_post) { _, _ ->
+            ApiClient.delete("trip/${trip.id}") { _, _, error ->
+                activity?.runOnUiThread {
+                    if (error == null) {
+                        Toast.makeText(context, R.string.success_trip_deleted, Toast.LENGTH_SHORT).show()
+                        onDeleted()
+                    } else {
+                        Toast.makeText(context, R.string.error_post_delete, Toast.LENGTH_LONG).show()
+                    }
+                }
+            }
+        }
+        .show()
 }

@@ -168,7 +168,7 @@
     <org.osmdroid.views.MapView
         android:id="@+id/mvTripRoute"
         android:layout_width="match_parent"
-        android:layout_height="200dp"
+        android:layout_height="540dp"
         android:visibility="gone"
         app:layout_constraintTop_toBottomOf="@id/llMapToggle"
         app:layout_constraintStart_toStartOf="parent"
@@ -193,9 +193,9 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:paddingHorizontal="24dp"
-        android:paddingTop="12dp"
-        android:paddingBottom="32dp"
+        android:paddingHorizontal="20dp"
+        android:paddingTop="10dp"
+        android:paddingBottom="16dp"
         android:background="@color/background"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -216,13 +216,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="6dp"
+            android:layout_marginEnd="12dp"
             android:textAppearance="@style/TextAppearance.TravelApp.TitleMedium"
             tools:text="12" />
-
-        <View
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:layout_weight="1" />
 
         <ImageView
             android:id="@+id/btnFeedDetailBookmark"
@@ -233,6 +229,24 @@
             android:focusable="true"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="@null" />
+
+        <View
+            android:layout_width="1dp"
+            android:layout_height="22dp"
+            android:layout_marginHorizontal="16dp"
+            android:background="@color/divider" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnExportPdf"
+            style="@style/Widget.TravelApp.Button.Outlined"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/trip_export_pdf"
+            app:icon="@drawable/ic_pdf"
+            app:iconSize="24sp"
+            app:iconGravity="textStart" />
+
 
     </LinearLayout>
 

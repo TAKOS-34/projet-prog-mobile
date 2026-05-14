@@ -39,9 +39,12 @@ class PostViewerFragment : Fragment() {
         adapter = buildPostsAdapter(onChanged = { findNavController().navigateUp() })
         view.findViewById<RecyclerView>(R.id.rvPostViewer).adapter = adapter
 
-        fetchPost()
-
         return view
+    }
+
+    override fun onResume() {
+        super.onResume()
+        fetchPost()
     }
 
     private fun fetchPost() {

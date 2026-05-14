@@ -153,6 +153,22 @@
         <item name="android:stateListAnimator">@null</item>
     </style>
 
+    <style name="Widget.TravelApp.Button.Toggle" parent="Widget.MaterialComponents.Button.OutlinedButton">
+        <item name="backgroundTint">@color/btn_toggle_background</item>
+        <item name="android:textColor">@color/btn_toggle_text</item>
+        <item name="strokeColor">@color/primary</item>
+        <item name="shapeAppearance">@style/ShapeAppearance.TravelApp.Pill</item>
+        <item name="android:paddingStart">24dp</item>
+        <item name="android:paddingEnd">24dp</item>
+        <item name="android:paddingTop">14dp</item>
+        <item name="android:paddingBottom">14dp</item>
+        <item name="android:minHeight">52dp</item>
+        <item name="android:textAppearance">@style/TextAppearance.TravelApp.TitleMedium</item>
+        <item name="rippleColor">@color/ripple_primary</item>
+        <item name="elevation">0dp</item>
+        <item name="android:stateListAnimator">@null</item>
+    </style>
+
     <style name="Widget.TravelApp.Button.Outlined" parent="Widget.MaterialComponents.Button.OutlinedButton">
         <item name="strokeColor">@color/primary</item>
         <item name="android:textColor">@color/primary</item>

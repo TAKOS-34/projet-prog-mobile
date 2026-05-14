@@ -5,5 +5,7 @@ export type UserPublicProfile = {
     avatar: string;
     nbGroups: number;
     nbPosts: number;
+    nbFollowers: number;
+    nbFollowing: number;
     isFollowing: boolean;
 }

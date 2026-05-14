@@ -6,5 +6,7 @@ data class ProfileResponseDto(
     val creationDate: String,
     val avatar: String,
     val nbGroups: Int,
-    val nbPosts: Int
+    val nbPosts: Int,
+    val nbFollowers: Int,
+    val nbFollowing: Int
 )

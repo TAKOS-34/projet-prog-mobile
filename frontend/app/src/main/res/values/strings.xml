@@ -46,6 +46,8 @@
     <string name="profile_update_already_taken">Email ou nom d\'utilisateur déjà pris</string>
     <string name="profile_stat_posts">POSTS</string>
     <string name="profile_stat_groups">GROUPES</string>
+    <string name="profile_stat_followers">ABONNÉS</string>
+    <string name="profile_stat_following">ABONNEMENTS</string>
     <string name="create_post_title">Créer un post</string>
     <string name="create_post_subtitle">Partagez votre aventure</string>
     <string name="label_post_title">TITRE <font color="#FF0000">*</font></string>
@@ -182,6 +184,8 @@
     <string name="post_delete_confirm_message">Cette action est irréversible.</string>
     <string name="success_post_deleted">Post supprimé</string>
     <string name="error_post_delete">Échec de la suppression</string>
+    <string name="trip_delete_confirm_title">Supprimer le parcours ?</string>
+    <string name="success_trip_deleted">Parcours supprimé</string>
     <string name="edit_post_title">Modifier le post</string>
     <string name="edit_post_subtitle">Mettez à jour votre publication.</string>
     <string name="success_post_updated">Post mis à jour !</string>
@@ -272,7 +276,8 @@
     <string name="menu">MENU</string>
     <string name="notifications">NOTIFICATIONS</string>
     <string name="profile">PROFIL</string>
-    <string name="search_tab_search">Recherche</string>
+    <string name="search_tab_search_post">TravelShare</string>
+    <string name="search_tab_search_trip">TravelPath</string>
     <string name="search_tab_map">Carte</string>
     <string name="map_post_by">Par %1$s</string>
     <string name="home_tab_travelshare">TravelShare</string>
@@ -311,6 +316,7 @@
     <string name="trip_step_visit_duration">%1$s de visite</string>
     <string name="trip_step_travel_time">%1$s de trajet</string>
     <string name="trip_result_step_number">Étape %1$d</string>
+    <string name="trip_starting_point">Point de départ</string>
     <string name="weather_clear">Ensoleillé</string>
     <string name="weather_cloudy">Nuageux</string>
     <string name="weather_rain">Pluie</string>
@@ -325,6 +331,17 @@
     <string name="trip_format_meteo">%1$s %2$s · %3$s</string>
     <string name="trip_show_map">Voir la carte</string>
     <string name="trip_hide_map">Masquer la carte</string>
+    <string name="trip_export_pdf">Exporter en PDF</string>
+    <string name="pdf_exported_on">Exporté le %1$s</string>
+    <string name="pdf_label_weather">Météo</string>
+    <string name="pdf_label_duration">Durée totale</string>
+    <string name="pdf_label_budget">Budget</string>
+    <string name="pdf_label_transport">Transport</string>
+    <string name="pdf_label_departure">Départ</string>
+    <string name="pdf_footer_generated">Généré avec TravelPath</string>
+    <string name="pdf_footer_details">%1$s · %2$d étapes · %3$d €</string>
+    <string name="pdf_travel_arrow">→ %1$s de trajet</string>
+    <string name="trip_regenerate_timer">Patientez encore %1$ds avant de régénérer</string>
 
     <plurals name="time_minutes_ago">
         <item quantity="one">Il y a %d minute</item>

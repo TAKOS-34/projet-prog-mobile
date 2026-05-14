@@ -13,7 +13,6 @@
             android:orientation="vertical"
             app:layout_constraintGuide_begin="11dp" />
 
-    <!-- START POINT (position 0 only) -->
     <View
         android:id="@+id/vStartDot"
         android:layout_width="10dp"
@@ -28,7 +27,7 @@
         android:id="@+id/tvStartLocation"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
+        android:layout_marginStart="24dp"
         android:textAppearance="@style/TextAppearance.TravelApp.LabelMedium"
         android:textColor="@color/text_secondary"
         app:layout_constraintBottom_toBottomOf="@id/vStartDot"
@@ -37,7 +36,6 @@
         app:layout_constraintTop_toTopOf="@id/vStartDot"
         tools:text="Paris" />
 
-    <!-- CONNECTOR (always visible, snaps to top when vStartDot is GONE) -->
     <ImageView
         android:id="@+id/ivConnector"
         android:layout_width="2dp"
@@ -53,7 +51,7 @@
         android:id="@+id/tvTravelTime"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
+        android:layout_marginStart="24dp"
         android:textAppearance="@style/TextAppearance.TravelApp.LabelMedium"
         android:textColor="@color/text_hint"
         app:layout_constraintBottom_toBottomOf="@id/ivConnector"
@@ -74,7 +72,6 @@
         app:tint="@color/success"
         tools:visibility="visible" />
 
-    <!-- DESTINATION POINT -->
     <TextView
         android:id="@+id/vDot"
         android:layout_width="22dp"

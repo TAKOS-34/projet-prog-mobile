@@ -155,6 +155,8 @@ class ProfileFragment : Fragment() {
                         view.findViewById<TextView>(R.id.tvProfileBio).text = profile.email
                         view.findViewById<TextView>(R.id.tvNbPosts).text = profile.nbPosts.toString()
                         view.findViewById<TextView>(R.id.tvNbGroups).text = profile.nbGroups.toString()
+                        view.findViewById<TextView>(R.id.tvNbFollowers).text = profile.nbFollowers.toString()
+                        view.findViewById<TextView>(R.id.tvNbFollowing).text = profile.nbFollowing.toString()
 
                         val memberSincePrefix = getString(R.string.profile_member_since)
                         view.findViewById<TextView>(R.id.tvMemberSince).text = "$memberSincePrefix ${profile.creationDate.toShortDate()}"

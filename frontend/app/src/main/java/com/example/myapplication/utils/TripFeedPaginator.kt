@@ -10,7 +10,7 @@ import com.google.gson.Gson
 class TripFeedPaginator(
     private val recyclerView: RecyclerView,
     private val adapter: TripFeedAdapter,
-    private val url: String,
+    private val url: () -> String,
     private val onUi: (() -> Unit) -> Unit,
     private val onResults: (isEmpty: Boolean) -> Unit = {}
 ) {
@@ -49,13 +49,16 @@ class TripFeedPaginator(
         loadNext()
     }
 
+    fun tryLoadMore() = loadNext()
+
     private fun loadNext() {
         if (isLoading || !hasMore) return
         isLoading = true
 
-        val cursorPart = nextCursor?.let { "?cursor=$it" } ?: ""
+        val u = url()
+        val cursorPart = nextCursor?.let { if (u.contains('?')) "&cursor=$it" else "?cursor=$it" } ?: ""
 
-        ApiClient.get("$url$cursorPart") { body, _, error ->
+        ApiClient.get("$u$cursorPart") { body, _, error ->
             onUi {
                 isLoading = false
                 if (error == null && body != null) {

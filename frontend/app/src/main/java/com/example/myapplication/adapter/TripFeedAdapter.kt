@@ -20,6 +20,7 @@ import com.example.myapplication.dto.trip.TransportMode
 import com.example.myapplication.dto.trip.TripFeedItemDto
 import com.example.myapplication.utils.DateUtils
 import com.example.myapplication.utils.resolveBackendUrl
+import com.example.myapplication.utils.LocalisationFormat
 import com.example.myapplication.utils.toTripDuration
 import com.example.myapplication.utils.toWeatherEmoji
 import com.example.myapplication.utils.toWeatherLabel
@@ -27,12 +28,14 @@ import com.example.myapplication.utils.toWeatherLabel
 class TripFeedAdapter(
     private val onLike: (TripFeedItemDto, Boolean) -> Unit,
     private val onBookmark: (TripFeedItemDto, Boolean) -> Unit,
-    private val onClick: (TripFeedItemDto) -> Unit
+    private val onClick: (TripFeedItemDto) -> Unit,
+    private val onStartLocationClick: ((name: String, lat: Double, long: Double) -> Unit)? = null,
+    private val onDelete: ((TripFeedItemDto) -> Unit)? = null
 ) : ListAdapter<TripFeedItemDto, TripFeedAdapter.ViewHolder>(DIFF) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.item_trip_feed, parent, false)
-        return ViewHolder(view, onLike, onBookmark, onClick)
+        return ViewHolder(view, onLike, onBookmark, onClick, onStartLocationClick, onDelete)
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
@@ -43,7 +46,9 @@ class TripFeedAdapter(
         itemView: View,
         private val onLike: (TripFeedItemDto, Boolean) -> Unit,
         private val onBookmark: (TripFeedItemDto, Boolean) -> Unit,
-        private val onClick: (TripFeedItemDto) -> Unit
+        private val onClick: (TripFeedItemDto) -> Unit,
+        private val onStartLocationClick: ((name: String, lat: Double, long: Double) -> Unit)? = null,
+        private val onDelete: ((TripFeedItemDto) -> Unit)? = null
     ) : RecyclerView.ViewHolder(itemView) {
 
         private val ivCover: ImageView = itemView.findViewById(R.id.ivTripFeedCover)
@@ -62,6 +67,7 @@ class TripFeedAdapter(
         private val llStartLocation: LinearLayout = itemView.findViewById(R.id.llTripFeedStartLocation)
         private val tvStartLocation: TextView = itemView.findViewById(R.id.tvTripFeedStartLocation)
         private val tvRoute: TextView = itemView.findViewById(R.id.tvTripFeedRoute)
+        private val btnDelete: ImageView = itemView.findViewById(R.id.btnDelete)
         private val btnLike: ImageView = itemView.findViewById(R.id.btnTripFeedLike)
         private val tvLikeCount: TextView = itemView.findViewById(R.id.tvTripFeedLikeCount)
         private val btnBookmark: ImageView = itemView.findViewById(R.id.btnTripFeedBookmark)
@@ -77,6 +83,19 @@ class TripFeedAdapter(
             isLiked = trip.isLiked
             likeCount = trip.nbLikes
             isBookmarkedLocal = trip.isBookmarked
+
+            val deleteVisible = trip.isYours && onDelete != null
+            if (deleteVisible) {
+                btnDelete.visibility = View.VISIBLE
+                btnDelete.setOnClickListener { onDelete!!.invoke(trip) }
+            } else {
+                btnDelete.visibility = View.GONE
+            }
+
+            (tvWeather.layoutParams as? androidx.constraintlayout.widget.ConstraintLayout.LayoutParams)?.let {
+                it.marginEnd = ((if (deleteVisible) 48 else 12) * dp).toInt()
+                tvWeather.layoutParams = it
+            }
 
             trip.steps.firstOrNull()?.post?.image?.let { url ->
                 ivCover.load(url.resolveBackendUrl()) { crossfade(true) }
@@ -119,12 +138,16 @@ class TripFeedAdapter(
             val startLoc = trip.startLocalisation
             if (startLoc != null) {
                 llStartLocation.visibility = View.VISIBLE
-                tvStartLocation.text = startLoc.name
+                tvStartLocation.text = LocalisationFormat.display(startLoc.name)
+                llStartLocation.setOnClickListener {
+                    onStartLocationClick?.invoke(startLoc.name, startLoc.lat, startLoc.long)
+                }
             } else {
                 llStartLocation.visibility = View.GONE
+                llStartLocation.setOnClickListener(null)
             }
 
-            tvRoute.text = trip.steps.joinToString(" → ") { it.localisation.name }
+            tvRoute.text = trip.steps.joinToString(" → ") { LocalisationFormat.display(it.localisation.name) }
 
             applyLikeState()
             applyBookmarkState()

@@ -48,6 +48,8 @@ class CreateTripFragment : Fragment() {
     private var selectedStartingTime: StartingTime? = null
     private var selectedTransportMode: TransportMode? = null
     private var ignoreNextCityChange = false
+    private var selectedCityLat = 0.0
+    private var selectedCityLong = 0.0
     private val handler = Handler(Looper.getMainLooper())
     private var locRunnable: Runnable? = null
 
@@ -78,6 +80,11 @@ class CreateTripFragment : Fragment() {
         tvBudgetLabel.text = getString(R.string.trip_budget_label)
         tvTimeLabel.text = getString(R.string.trip_time_label)
 
+        arguments?.getString("prefillCity")?.let { city ->
+            ignoreNextCityChange = true
+            etCity.setText(city)
+        }
+
         setupCitySuggestions()
         setupPostTypeChips()
         setupSliders()
@@ -97,6 +104,8 @@ class CreateTripFragment : Fragment() {
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 locRunnable?.let { handler.removeCallbacks(it) }
                 if (ignoreNextCityChange) { ignoreNextCityChange = false; return }
+                selectedCityLat = 0.0
+                selectedCityLong = 0.0
                 val q = s?.toString()?.trim().orEmpty()
                 if (q.length < 2) { cgCitySuggestions.removeAllViews(); return }
                 locRunnable = Runnable {
@@ -109,6 +118,8 @@ class CreateTripFragment : Fragment() {
                                     isClickable = true
                                     setOnClickListener {
                                         ignoreNextCityChange = true
+                                        selectedCityLat = suggestion.lat
+                                        selectedCityLong = suggestion.long
                                         etCity.setText(suggestion.label)
                                         etCity.setSelection(etCity.text?.length ?: 0)
                                         cgCitySuggestions.removeAllViews()
@@ -291,6 +302,9 @@ class CreateTripFragment : Fragment() {
                     val bundle = Bundle().apply {
                         putString("tripsJson", body)
                         putString("localisation", localisation)
+                        putString("requestJson", com.google.gson.Gson().toJson(dto))
+                        putDouble("startLat", selectedCityLat)
+                        putDouble("startLong", selectedCityLong)
                     }
                     findNavController().navigate(R.id.action_createTrip_to_tripResult, bundle)
                 }

@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:background="@color/background"
     android:paddingTop="24dp"
-    android:paddingBottom="40dp">
+    android:paddingBottom="16dp">
 
     <ImageView
         android:id="@+id/btnBack"
@@ -91,6 +91,55 @@
             tools:text="20 €" />
     </LinearLayout>
 
+    <LinearLayout
+        android:id="@+id/llMapToggle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="20dp"
+        android:paddingVertical="10dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:background="?attr/selectableItemBackground"
+        app:layout_constraintTop_toBottomOf="@id/llDetailMeta"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <ImageView
+            android:layout_width="14dp"
+            android:layout_height="14dp"
+            android:src="@drawable/ic_location"
+            app:tint="@color/primary" />
+
+        <TextView
+            android:id="@+id/tvMapToggle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="8dp"
+            android:textAppearance="@style/TextAppearance.TravelApp.LabelMedium"
+            android:textColor="@color/primary"
+            android:text="@string/trip_show_map" />
+
+        <ImageView
+            android:id="@+id/ivMapToggleChevron"
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:src="@drawable/ic_chevron_down"
+            app:tint="@color/primary" />
+
+    </LinearLayout>
+
+    <org.osmdroid.views.MapView
+        android:id="@+id/mvTripRoute"
+        android:layout_width="match_parent"
+        android:layout_height="540dp"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/llMapToggle"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvSteps"
         android:layout_width="match_parent"
@@ -98,31 +147,30 @@
         android:paddingTop="12dp"
         android:paddingBottom="16dp"
         android:clipToPadding="false"
-        app:layout_constraintTop_toBottomOf="@id/llDetailMeta"
+        app:layout_constraintTop_toBottomOf="@id/mvTripRoute"
         app:layout_constraintBottom_toTopOf="@id/llBottomBar"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         tools:listitem="@layout/item_trip_step" />
 
     <LinearLayout
-        android:id="@+id/llBottomBar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:paddingHorizontal="20dp"
-        android:paddingTop="12dp"
-        android:paddingBottom="24dp"
-        android:background="@color/background"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnValidate"
-            style="@style/Widget.TravelApp.Button.Primary"
+            android:id="@+id/llBottomBar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/btn_validate_trip" />
+            android:orientation="vertical"
+            android:paddingHorizontal="20dp"
+            android:paddingTop="12dp"
+            android:background="@color/background"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+        <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnValidate"
+                style="@style/Widget.TravelApp.Button.Primary"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/btn_validate_trip" />
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

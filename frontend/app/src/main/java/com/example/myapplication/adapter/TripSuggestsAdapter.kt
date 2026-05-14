@@ -17,6 +17,7 @@ import com.example.myapplication.dto.trip.TripSuggestInfosDto
 import com.example.myapplication.dto.trip.WeatherDto
 import com.example.myapplication.utils.toTripDuration
 import com.example.myapplication.utils.toWeatherEmoji
+import com.example.myapplication.utils.LocalisationFormat
 import com.example.myapplication.utils.toWeatherLabel
 
 class TripSuggestsAdapter(
@@ -62,7 +63,7 @@ class TripSuggestsAdapter(
             tvSteps.text = ctx.getString(R.string.trip_result_n_steps, trip.totalStep)
             tvWeather.text = "${weather.code.toWeatherEmoji()} ${ctx.getString(R.string.trip_result_temperature, weather.temperature)}"
 
-            tvFirstLocation.text = trip.steps.joinToString("  →  ") { it.localisation.name }
+            tvFirstLocation.text = trip.steps.joinToString("  →  ") { LocalisationFormat.display(it.localisation.name) }
 
             val firstStep = trip.steps.firstOrNull()
             if (firstStep != null) {

@@ -14,6 +14,15 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
+    <ImageView
+        android:id="@+id/btnRefresh"
+        style="@style/Widget.TravelApp.Icon.Back"
+        android:layout_marginEnd="8dp"
+        android:layout_marginTop="16dp"
+        android:src="@drawable/ic_refresh"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
     <TextView
         android:id="@+id/tvResultTitle"
         android:layout_width="0dp"

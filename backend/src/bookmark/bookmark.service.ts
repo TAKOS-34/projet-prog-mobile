@@ -161,6 +161,7 @@ export class BookmarkService {
                 nbBookmarks: trip.nbBookmarks ?? 0,
                 isLiked: trip.likes?.length > 0,
                 isBookmarked: trip.bookmarks?.length > 0,
+                isYours: user.id === trip.User.id,
                 userId: trip.User.id,
                 username: trip.User.username,
                 avatar: this.cdn.getAvatarUrl(trip.User.avatar),
