@@ -48,7 +48,7 @@ export class LocalisationService {
 
 
     async getNearbyLocalisationIds(locName: string, dist: number): Promise<number[] | null> {
-        let lat: number, lng: number;
+        let lat: number, long: number;
 
         const refLoc = await this.prisma.localisation.findFirst({
             where: { name: locName },
@@ -57,11 +57,11 @@ export class LocalisationService {
 
         if (refLoc) {
             lat = Number(refLoc.lat);
-            lng = Number(refLoc.long);
+            long = Number(refLoc.long);
         } else {
             const coords = await this.getCoordinates(locName);
             lat = coords.lat;
-            lng = coords.long;
+            long = coords.long;
         }
 
         const latDelta = dist / 111;
@@ -70,10 +70,10 @@ export class LocalisationService {
         const nearby = await this.prisma.$queryRaw<{ id: number }[]>`
             SELECT id FROM "Localisation"
             WHERE lat BETWEEN ${lat - latDelta} AND ${lat + latDelta}
-                AND long BETWEEN ${lng - lngDelta} AND ${lng + lngDelta}
+                AND long BETWEEN ${long - lngDelta} AND ${long + lngDelta}
                 AND (6371 * acos(
                     cos(radians(${lat})) * cos(radians(lat)) *
-                    cos(radians(long) - radians(${lng})) +
+                    cos(radians(long) - radians(${long})) +
                     sin(radians(${lat})) * sin(radians(lat))
                 )) <= ${dist}
             `;

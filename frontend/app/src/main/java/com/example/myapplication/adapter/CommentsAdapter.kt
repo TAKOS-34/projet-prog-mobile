@@ -67,6 +67,7 @@ class CommentsAdapter(
         private val llEditContainer: LinearLayout = itemView.findViewById(R.id.llEditContainer)
         private val etEdit: EditText = itemView.findViewById(R.id.etEditComment)
         private val btnSave: TextView = itemView.findViewById(R.id.btnSaveEdit)
+        private val btnCancelEdit: TextView = itemView.findViewById(R.id.btnCancelEdit)
 
         fun bind(comment: CommentDto, isExpanded: Boolean) {
             val context = itemView.context
@@ -120,19 +121,29 @@ class CommentsAdapter(
                 btnDelete.visibility = View.VISIBLE
                 btnEdit.setOnClickListener {
                     tvContent.visibility = View.GONE
+                    btnReply.visibility = View.GONE
+                    tvShowReplies.visibility = View.GONE
                     llEditContainer.visibility = View.VISIBLE
                     etEdit.setText(comment.content)
                 }
                 btnDelete.setOnClickListener { onDelete(comment) }
+
+                fun closeEdit() {
+                    tvContent.visibility = View.VISIBLE
+                    llEditContainer.visibility = View.GONE
+                    btnReply.visibility = View.VISIBLE
+                    tvShowReplies.visibility = if (comment.nbReplies > 0) View.VISIBLE else View.GONE
+                }
+
                 btnSave.setOnClickListener {
                     val newContent = etEdit.text.toString().trim()
                     if (newContent.isNotEmpty() && newContent != comment.content) {
                         onEditSave(comment, newContent)
                     } else {
-                        tvContent.visibility = View.VISIBLE
-                        llEditContainer.visibility = View.GONE
+                        closeEdit()
                     }
                 }
+                btnCancelEdit.setOnClickListener { closeEdit() }
             } else {
                 btnEdit.visibility = View.GONE
                 btnDelete.visibility = View.GONE

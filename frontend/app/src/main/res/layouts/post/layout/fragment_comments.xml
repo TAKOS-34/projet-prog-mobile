@@ -106,6 +106,7 @@
             android:padding="8dp"
             android:src="@android:drawable/ic_menu_send"
             android:background="?attr/selectableItemBackgroundBorderless"
+            android:alpha="0.35"
             app:tint="@color/primary" />
 
     </LinearLayout>

@@ -2,10 +2,12 @@ package com.example.myapplication.utils
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.os.Handler
+import android.os.Looper
 import android.print.PrintAttributes
 import android.print.PrintManager
+import android.webkit.JavascriptInterface
 import android.webkit.WebView
-import android.webkit.WebViewClient
 import androidx.fragment.app.Fragment
 import com.example.myapplication.R
 import com.example.myapplication.dto.post.PostType
@@ -16,27 +18,38 @@ import com.example.myapplication.dto.trip.TripStepDetailDto
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import kotlin.math.cos
+import kotlin.math.ln
+import kotlin.math.PI
+import kotlin.math.roundToInt
+import kotlin.math.tan
 
 @SuppressLint("SetJavaScriptEnabled")
 fun Fragment.exportTripToPdf(trip: TripFeedItemDto) {
     val ctx = requireContext()
     val html = buildTripHtml(ctx, trip)
+    val jobName = "TravelPath – ${trip.username}"
 
     val webView = WebView(ctx)
-    webView.webViewClient = object : WebViewClient() {
-        override fun onPageFinished(view: WebView, url: String) {
-            val printManager = ctx.getSystemService(Context.PRINT_SERVICE) as PrintManager
-            val jobName = "TravelPath – ${trip.username}"
-            val printAdapter = webView.createPrintDocumentAdapter(jobName)
-            val attrs = PrintAttributes.Builder()
-                .setMediaSize(PrintAttributes.MediaSize.ISO_A4)
-                .setResolution(PrintAttributes.Resolution("pdf", "pdf", 300, 300))
-                .setMinMargins(PrintAttributes.Margins.NO_MARGINS)
-                .build()
-            printManager.print(jobName, printAdapter, attrs)
+    webView.settings.javaScriptEnabled = true
+
+    webView.addJavascriptInterface(object : Any() {
+        @JavascriptInterface
+        fun onMapReady() {
+            Handler(Looper.getMainLooper()).post {
+                val printManager = ctx.getSystemService(Context.PRINT_SERVICE) as PrintManager
+                val printAdapter = webView.createPrintDocumentAdapter(jobName)
+                val attrs = PrintAttributes.Builder()
+                    .setMediaSize(PrintAttributes.MediaSize.ISO_A4)
+                    .setResolution(PrintAttributes.Resolution("pdf", "pdf", 300, 300))
+                    .setMinMargins(PrintAttributes.Margins.NO_MARGINS)
+                    .build()
+                printManager.print(jobName, printAdapter, attrs)
+            }
         }
-    }
-    webView.loadDataWithBaseURL(null, html, "text/html", "UTF-8", null)
+    }, "Android")
+
+    webView.loadDataWithBaseURL("https://tile.openstreetmap.org", html, "text/html", "UTF-8", null)
 }
 
 private fun buildTripHtml(ctx: Context, trip: TripFeedItemDto): String {
@@ -149,6 +162,8 @@ private fun buildTripHtml(ctx: Context, trip: TripFeedItemDto): String {
 
   $startLocHtml
 
+  ${buildStaticMapSection(ctx, trip, primary, divider)}
+
   <div class="section-title">$stepsCount</div>
 
   $stepsHtml
@@ -161,6 +176,96 @@ private fun buildTripHtml(ctx: Context, trip: TripFeedItemDto): String {
 </div>
 </body>
 </html>"""
+}
+
+private fun buildStaticMapSection(ctx: Context, trip: TripFeedItemDto, primary: String, divider: String): String {
+    data class MapPoint(val lat: Double, val lon: Double, val label: String)
+
+    val points = mutableListOf<MapPoint>()
+    trip.startLocalisation?.let { points.add(MapPoint(it.lat, it.long, "D")) }
+    trip.steps.forEachIndexed { i, step ->
+        points.add(MapPoint(step.localisation.lat, step.localisation.long, "${i + 1}"))
+    }
+    if (points.isEmpty()) return ""
+
+    val imgW = 700
+    val imgH = 300
+
+    fun tileX(lon: Double, z: Int) = (lon + 180.0) / 360.0 * (1 shl z)
+    fun tileY(lat: Double, z: Int): Double {
+        val r = lat * PI / 180.0
+        return (1.0 - ln(tan(r) + 1.0 / cos(r)) / PI) / 2.0 * (1 shl z)
+    }
+
+    val minLat = points.minOf { it.lat }
+    val maxLat = points.maxOf { it.lat }
+    val minLon = points.minOf { it.lon }
+    val maxLon = points.maxOf { it.lon }
+    val centerLat = (minLat + maxLat) / 2.0
+    val centerLon = (minLon + maxLon) / 2.0
+
+    var zoom = 15
+    while (zoom > 2) {
+        val pxW = (tileX(maxLon, zoom) - tileX(minLon, zoom)) * 256
+        val pxH = (tileY(minLat, zoom) - tileY(maxLat, zoom)) * 256
+        if (pxW <= imgW - 100 && pxH <= imgH - 100) break
+        zoom--
+    }
+
+    val cTX = tileX(centerLon, zoom)
+    val cTY = tileY(centerLat, zoom)
+    fun px(lon: Double) = (imgW / 2.0 + (tileX(lon, zoom) - cTX) * 256).roundToInt()
+    fun py(lat: Double) = (imgH / 2.0 + (tileY(lat, zoom) - cTY) * 256).roundToInt()
+
+    val tileCount = 1 shl zoom
+    val floorCTX = cTX.toInt()
+    val floorCTY = cTY.toInt()
+    val tilesHtml = buildString {
+        for (ty in (floorCTY - 1)..(floorCTY + 1)) {
+            if (ty < 0 || ty >= tileCount) continue
+            for (tx in (floorCTX - 2)..(floorCTX + 2)) {
+                val wrappedTX = ((tx % tileCount) + tileCount) % tileCount
+                val leftPx = ((tx - cTX) * 256 + imgW / 2.0).roundToInt()
+                val topPx = ((ty - cTY) * 256 + imgH / 2.0).roundToInt()
+                append("""<img class="maptile" src="https://tile.openstreetmap.org/$zoom/$wrappedTX/$ty.png" style="position:absolute;left:${leftPx}px;top:${topPx}px;width:256px;height:256px;"/>""")
+            }
+        }
+    }
+
+    val polylineSvg = if (points.size >= 2) {
+        val pts = points.joinToString(" ") { "${px(it.lon)},${py(it.lat)}" }
+        """<polyline points="$pts" fill="none" stroke="$primary" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="0.85"/>"""
+    } else ""
+
+    val markersSvg = buildString {
+        points.forEach { pt ->
+            val x = px(pt.lon)
+            val y = py(pt.lat)
+            append("""<circle cx="$x" cy="$y" r="11" fill="$primary" stroke="white" stroke-width="2.5"/>""")
+            append("""<text x="$x" y="$y" text-anchor="middle" dominant-baseline="central" fill="white" font-size="9" font-weight="bold" font-family="Helvetica,sans-serif">${pt.label}</text>""")
+        }
+    }
+
+    return """<div style="margin-bottom:28px;">
+      <div class="section-title">${ctx.getString(R.string.pdf_map_section)}</div>
+      <div style="position:relative;width:${imgW}px;height:${imgH}px;overflow:hidden;border-radius:12px;border:1px solid $divider;">
+        $tilesHtml
+        <svg viewBox="0 0 $imgW $imgH" style="position:absolute;top:0;left:0;width:${imgW}px;height:${imgH}px;" xmlns="http://www.w3.org/2000/svg">
+          $polylineSvg
+          $markersSvg
+        </svg>
+      </div>
+    </div>
+    <script>
+    (function() {
+      var imgs = document.querySelectorAll('.maptile');
+      if (!imgs.length) { if (window.Android) Android.onMapReady(); return; }
+      var done = 0, total = imgs.length;
+      function check() { if (++done >= total && window.Android) Android.onMapReady(); }
+      imgs.forEach(function(img) { img.onload = img.onerror = check; });
+      setTimeout(function() { if (window.Android) Android.onMapReady(); }, 10000);
+    })();
+    </script>"""
 }
 
 private fun buildStepHtml(

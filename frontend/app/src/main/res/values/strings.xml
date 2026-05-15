@@ -292,6 +292,7 @@
     <string name="trip_types_label">Types de lieux</string>
     <string name="trip_budget_label">Budget maximum</string>
     <string name="trip_time_label">Durée maximale</string>
+    <string name="trip_generating">Génération du parcours en cours…</string>
     <string name="trip_submit">Générer des itinéraires</string>
     <string name="trip_empty">Aucuns voyages pour l\'instant</string>
     <string name="trip_budget_format">%1$d €</string>
@@ -341,7 +342,9 @@
     <string name="pdf_footer_generated">Généré avec TravelPath</string>
     <string name="pdf_footer_details">%1$s · %2$d étapes · %3$d €</string>
     <string name="pdf_travel_arrow">→ %1$s de trajet</string>
+    <string name="pdf_map_section">Carte du parcours</string>
     <string name="trip_regenerate_timer">Patientez encore %1$ds avant de régénérer</string>
+    <string name="enregistrer">Enregistrer</string>
 
     <plurals name="time_minutes_ago">
         <item quantity="one">Il y a %d minute</item>

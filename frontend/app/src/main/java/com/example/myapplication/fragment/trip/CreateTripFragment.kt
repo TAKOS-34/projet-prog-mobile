@@ -1,5 +1,6 @@
 package com.example.myapplication.fragment.trip
 
+import android.app.AlertDialog
 import android.content.res.ColorStateList
 import android.os.Bundle
 import android.os.Handler
@@ -11,6 +12,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.content.ContextCompat
@@ -294,8 +296,20 @@ class CreateTripFragment : Fragment() {
             preferredTypes = selectedTypes.map { it.name }
         )
 
+        val ctx = requireContext()
+        val progress = ProgressBar(ctx)
+        val dp16 = (16 * resources.displayMetrics.density).toInt()
+        progress.setPadding(dp16, dp16, dp16, dp16)
+        val loadingDialog = AlertDialog.Builder(ctx)
+            .setTitle(R.string.trip_generating)
+            .setView(progress)
+            .setCancelable(false)
+            .create()
+        loadingDialog.show()
+
         ApiClient.post("trip/suggest", dto) { body, code, error ->
             activity?.runOnUiThread {
+                loadingDialog.dismiss()
                 if (error != null || body == null) {
                     Toast.makeText(context, error ?: getString(R.string.error_network), Toast.LENGTH_LONG).show()
                 } else {
