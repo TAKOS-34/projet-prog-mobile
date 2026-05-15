@@ -6,5 +6,6 @@ data class SuggestTripRequestDto(
     val maxDuration: Int,
     val startingTime: String,
     val transportMode: String,
+    val isRegenerated: Boolean,
     val preferredTypes: List<String>
 )

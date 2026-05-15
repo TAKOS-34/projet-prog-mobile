@@ -196,7 +196,7 @@ export class TripCreationService {
 
             if (validCandidates.length === 0) break;
 
-            const selected: Candidate = this.selectRandomCandidate(validCandidates);
+            const selected: Candidate = this.selectRandomCandidate(validCandidates, suggestTrip.isRegenerated);
             const bestNextPost = selected.post;
             const travelTimeToBest = Math.floor(selected.travelTime);
 
@@ -331,10 +331,10 @@ export class TripCreationService {
 
 
 
-    private selectRandomCandidate(candidates: Candidate[]): Candidate {
+    private selectRandomCandidate(candidates: Candidate[], isRegenerated: boolean): Candidate {
         candidates.sort((a, b) => b.ratio - a.ratio);
 
-        const RANDOM_POOL_SIZE = 3;
+        const RANDOM_POOL_SIZE = isRegenerated ? 3 : 1;
         const poolSize = Math.min(RANDOM_POOL_SIZE, candidates.length);
         const randomIndex = Math.floor(Math.random() * poolSize);
 

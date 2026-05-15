@@ -76,7 +76,7 @@ class TripSuggestsResultFragment : Fragment() {
         btnRefresh.isEnabled = false
         btnRefresh.alpha = 0.4f
 
-        ApiClient.post("trip/suggest", dto) { body, _, error ->
+        ApiClient.post("trip/suggest", dto.copy(isRegenerated = true)) { body, _, error ->
             activity?.runOnUiThread {
                 btnRefresh.isEnabled = true
                 btnRefresh.alpha = 1f

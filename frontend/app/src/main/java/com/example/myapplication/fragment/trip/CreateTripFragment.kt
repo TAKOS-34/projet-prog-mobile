@@ -293,6 +293,7 @@ class CreateTripFragment : Fragment() {
             maxDuration = sliderTime.value.toInt() * 60,
             startingTime = selectedStartingTime!!.name,
             transportMode = selectedTransportMode!!.name,
+            isRegenerated = false,
             preferredTypes = selectedTypes.map { it.name }
         )
 
