@@ -64,19 +64,14 @@ export class LocalisationService {
             long = coords.long;
         }
 
-        const latDelta = dist / 111;
-        const lngDelta = dist / (111 * Math.cos((lat * Math.PI) / 180));
-
         const nearby = await this.prisma.$queryRaw<{ id: number }[]>`
             SELECT id FROM "Localisation"
-            WHERE lat BETWEEN ${lat - latDelta} AND ${lat + latDelta}
-                AND long BETWEEN ${long - lngDelta} AND ${long + lngDelta}
-                AND (6371 * acos(
-                    cos(radians(${lat})) * cos(radians(lat)) *
-                    cos(radians(long) - radians(${long})) +
-                    sin(radians(${lat})) * sin(radians(lat))
-                )) <= ${dist}
-            `;
+            WHERE ST_DWithin(
+                ST_MakePoint(long, lat)::geography, 
+                ST_MakePoint(${long}, ${lat})::geography, 
+                ${dist} * 1000
+            )
+        `;
 
         return nearby.map(r => r.id);
     }

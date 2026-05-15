@@ -42,29 +42,36 @@ export class TripCreationService {
 
         const weather: Weather = await this.weatherAdaptor(locCoords);
 
-        const normalCandidates: ScoredPost[] = this.scoreCandidates(standardizedCandidates, suggestTrip, TripCategory.NORMAL, weather.code);
-        const businessCandidates: ScoredPost[] = this.scoreCandidates(standardizedCandidates, suggestTrip, TripCategory.BUISNESS, weather.code);
+        const categories = [TripCategory.NORMAL, TripCategory.BUISNESS];
 
-        let normalTrip: TripSuggestInfos = this.buildPath(locCoords, suggestTrip, normalCandidates, TripCategory.NORMAL, weather.code);
-        let businessTrip: TripSuggestInfos = this.buildPath(locCoords, suggestTrip, businessCandidates, TripCategory.BUISNESS, weather.code);
+        const candidatesByCategory = categories.map(category => 
+            this.scoreCandidates(standardizedCandidates, suggestTrip, category, weather.code)
+        );
 
-        [normalTrip, businessTrip] = await Promise.all([
-            this.refineWithDirectionsAPI(locCoords, normalTrip, suggestTrip.transportMode),
-            this.refineWithDirectionsAPI(locCoords, businessTrip, suggestTrip.transportMode)
-        ]);
+        let tripsByCategory = categories.map((category, index) =>
+            this.buildPath(locCoords, suggestTrip, candidatesByCategory[index], category, weather.code)
+        );
 
-        const [normalTripData, businessTripData] = await Promise.all([
-            this.prisma.trip.create({
-                data: this.tripBuilder(normalTrip, TripCategory.NORMAL, suggestTrip.transportMode, suggestTrip.startingTime, weather.code, user.id),
-                select: { id: true }
-            }),
-            this.prisma.trip.create({
-                data: this.tripBuilder(businessTrip, TripCategory.BUISNESS, suggestTrip.transportMode, suggestTrip.startingTime, weather.code, user.id),
-                select: { id: true }
-            })
-        ]);
+        if (process.env.NODE_ENV === 'prod') {
+            tripsByCategory = await Promise.all(
+                tripsByCategory.map(trip =>
+                    this.refineWithDirectionsAPI(locCoords, trip, suggestTrip.transportMode)
+                )
+            );
+        }
 
-        return { trips: [ { ...normalTrip, id: normalTripData.id }, { ...businessTrip, id: businessTripData.id } ], weather };
+        const tripDataByCategory = await Promise.all(
+            categories.map((category, index) =>
+                this.prisma.trip.create({
+                    data: this.tripBuilder(tripsByCategory[index], category, suggestTrip.transportMode, suggestTrip.startingTime, weather.code, user.id),
+                    select: { id: true }
+                })
+            )
+        );
+
+        const trips = tripsByCategory.map((trip, index) => ({ ...trip, id: tripDataByCategory[index].id }));
+
+        return { trips, weather };
     }
 
 
@@ -350,7 +357,6 @@ export class TripCreationService {
             [start.long, start.lat],
             ...trip.steps.map(step => [step.localisation.long, step.localisation.lat])
         ];
-        return trip;
 
         try {
             const response = await fetch(`https://api.openrouteservice.org/v2/directions/${profile}`, {
