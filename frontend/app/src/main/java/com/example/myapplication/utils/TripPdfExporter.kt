@@ -1,6 +1,7 @@
 package com.example.myapplication.utils
 
 import android.annotation.SuppressLint
+import android.app.AlertDialog
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
@@ -8,6 +9,7 @@ import android.print.PrintAttributes
 import android.print.PrintManager
 import android.webkit.JavascriptInterface
 import android.webkit.WebView
+import android.widget.ProgressBar
 import androidx.fragment.app.Fragment
 import com.example.myapplication.R
 import com.example.myapplication.dto.post.PostType
@@ -30,6 +32,15 @@ fun Fragment.exportTripToPdf(trip: TripFeedItemDto) {
     val html = buildTripHtml(ctx, trip)
     val jobName = "TravelPath – ${trip.username}"
 
+    val dp16 = (16 * ctx.resources.displayMetrics.density).toInt()
+    val progress = ProgressBar(ctx).apply { setPadding(dp16, dp16, dp16, dp16) }
+    val loadingDialog = AlertDialog.Builder(ctx)
+        .setTitle(R.string.trip_generating)
+        .setView(progress)
+        .setCancelable(false)
+        .create()
+    loadingDialog.show()
+
     val webView = WebView(ctx)
     webView.settings.javaScriptEnabled = true
 
@@ -37,6 +48,7 @@ fun Fragment.exportTripToPdf(trip: TripFeedItemDto) {
         @JavascriptInterface
         fun onMapReady() {
             Handler(Looper.getMainLooper()).post {
+                loadingDialog.dismiss()
                 val printManager = ctx.getSystemService(Context.PRINT_SERVICE) as PrintManager
                 val printAdapter = webView.createPrintDocumentAdapter(jobName)
                 val attrs = PrintAttributes.Builder()

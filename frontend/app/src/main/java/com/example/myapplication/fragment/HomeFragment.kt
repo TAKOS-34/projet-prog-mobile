@@ -46,7 +46,7 @@ class HomeFragment : Fragment() {
     private lateinit var fabNewTrip: View
 
     private var feedMode = FeedMode.TRAVEL_SHARE
-    private var tripTab = TripTab.MINE
+    private var tripTab = TripTab.WORLD
     private val gson = Gson()
 
     override fun onCreateView(

@@ -21,6 +21,7 @@ import com.example.myapplication.dto.trip.TripFeedItemDto
 import com.example.myapplication.utils.DateUtils
 import com.example.myapplication.utils.resolveBackendUrl
 import com.example.myapplication.utils.LocalisationFormat
+import com.example.myapplication.utils.SessionManager
 import com.example.myapplication.utils.toTripDuration
 import com.example.myapplication.utils.toWeatherEmoji
 import com.example.myapplication.utils.toWeatherLabel
@@ -149,8 +150,18 @@ class TripFeedAdapter(
 
             tvRoute.text = trip.steps.joinToString(" → ") { LocalisationFormat.display(it.localisation.name) }
 
-            applyLikeState()
-            applyBookmarkState()
+            val isLogged = SessionManager.getUserId() != null
+            if (!isLogged) {
+                btnLike.visibility = View.GONE
+                tvLikeCount.visibility = View.GONE
+                btnBookmark.visibility = View.GONE
+            } else {
+                btnLike.visibility = View.VISIBLE
+                tvLikeCount.visibility = View.VISIBLE
+                btnBookmark.visibility = View.VISIBLE
+                applyLikeState()
+                applyBookmarkState()
+            }
 
             btnLike.setOnClickListener {
                 isLiked = !isLiked

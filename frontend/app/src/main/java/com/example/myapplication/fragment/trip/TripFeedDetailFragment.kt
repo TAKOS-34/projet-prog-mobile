@@ -222,10 +222,16 @@ class TripFeedDetailFragment : Fragment() {
         view.findViewById<com.google.android.material.button.MaterialButton>(R.id.btnExportPdf)
             .setOnClickListener { exportTripToPdf(trip) }
 
-        applyLikeState()
-        applyBookmarkState()
-
         val isLogged = SessionManager.getUserId() != null
+
+        if (!isLogged) {
+            btnLike.visibility = View.GONE
+            tvLikeCount.visibility = View.GONE
+            btnBookmark.visibility = View.GONE
+        } else {
+            applyLikeState()
+            applyBookmarkState()
+        }
 
         btnLike.setOnClickListener {
             if (!isLogged) return@setOnClickListener

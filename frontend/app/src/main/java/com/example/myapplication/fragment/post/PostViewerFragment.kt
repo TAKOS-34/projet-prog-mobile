@@ -13,6 +13,7 @@ import com.example.myapplication.R
 import com.example.myapplication.adapter.PostsAdapter
 import com.example.myapplication.dto.post.PostDto
 import com.example.myapplication.utils.ApiClient
+import com.example.myapplication.utils.SessionManager
 import com.example.myapplication.utils.buildPostsAdapter
 import com.google.gson.Gson
 
@@ -27,6 +28,11 @@ class PostViewerFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_post_viewer, container, false)
+
+        if (SessionManager.getUserId() == null) {
+            findNavController().navigateUp()
+            return view
+        }
 
         postId = arguments?.getString(ARG_POST_ID)
 
