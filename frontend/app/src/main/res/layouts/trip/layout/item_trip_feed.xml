@@ -188,6 +188,23 @@
                 android:textAppearance="@style/TextAppearance.TravelApp.BodyMedium"
                 tools:text="4 étapes" />
 
+            <TextView
+                android:id="@+id/tvTripFeedDistanceSep"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="8dp"
+                android:text="·"
+                android:textColor="@color/text_hint"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/tvTripFeedDistance"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="@style/TextAppearance.TravelApp.BodyMedium"
+                android:visibility="gone"
+                tools:text="2.3 km" />
+
         </LinearLayout>
 
         <!-- Transport + starting time row -->
@@ -329,6 +346,18 @@
                 android:layout_width="0dp"
                 android:layout_height="0dp"
                 android:layout_weight="1" />
+
+            <ImageView
+                android:id="@+id/btnTripFeedShare"
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:layout_marginEnd="16dp"
+                android:src="@drawable/ic_share"
+                android:clickable="true"
+                android:focusable="true"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@null"
+                app:tint="@color/text_secondary" />
 
             <ImageView
                 android:id="@+id/btnTripFeedBookmark"

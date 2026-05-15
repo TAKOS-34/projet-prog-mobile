@@ -80,7 +80,8 @@ class TripStepsAdapter(
                 tvStartLocation.visibility = View.GONE
             }
 
-            tvTravelTime.text = ctx.getString(R.string.trip_step_travel_time, DateUtils.formatMinutes(ctx, step.travelTimeFromPrevious))
+            val distStr = step.travelDistanceFromPrevious?.let { " · ${DateUtils.formatDistance(it)}" } ?: ""
+            tvTravelTime.text = ctx.getString(R.string.trip_step_travel_time, DateUtils.formatMinutes(ctx, step.travelTimeFromPrevious)) + distStr
             ivTravelTrust.visibility = if (step.isTravelTimeFromPreviousTrusted) View.VISIBLE else View.GONE
 
             vDot.text = (position + 1).toString()

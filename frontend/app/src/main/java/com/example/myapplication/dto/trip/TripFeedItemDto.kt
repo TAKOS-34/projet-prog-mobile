@@ -10,6 +10,7 @@ data class TripFeedItemDto(
     val totalDuration: Int,
     val totalCost: Int,
     val totalStep: Int,
+    val totalDistance: Int?,
     val weather: String,
     val difficulty: Int?,
     val nbLikes: Int,

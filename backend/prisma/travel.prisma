@@ -3,6 +3,7 @@ model Trip {
     creationDate  DateTime  @default(now())
     budget        Int
     duration      Int
+    totalDistance Int?
     category      TripCategory
     startingTime  TripStartingTime
     transportMode TripTransportMode
@@ -34,6 +35,7 @@ model TripStep {
     stepNumber Int
 
     travelTimeFromPrevious          Int
+    travelDistanceFromPrevious      Int?
     isTravelTimeFromPreviousTrusted Boolean
     visitDuration                   Int
     isVisitDurationTrusted          Boolean

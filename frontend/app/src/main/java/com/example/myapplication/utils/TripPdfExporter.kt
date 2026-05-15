@@ -170,6 +170,10 @@ private fun buildTripHtml(ctx: Context, trip: TripFeedItemDto): String {
       <div class="label">${ctx.getString(R.string.pdf_label_transport)}</div>
       <div class="value">$transportMode</div>
     </div>
+    ${trip.totalDistance?.let { """<div class="meta-card">
+      <div class="label">Distance</div>
+      <div class="value">${DateUtils.formatDistance(it)}</div>
+    </div>""" } ?: ""}
   </div>
 
   $startLocHtml
@@ -310,7 +314,8 @@ private fun buildStepHtml(
 
     val travelHtml = if (hasNext && step.travelTimeFromPrevious > 0) {
         val travelTime = DateUtils.formatMinutes(ctx, step.travelTimeFromPrevious)
-        val travelLabel = ctx.getString(R.string.pdf_travel_arrow, travelTime)
+        val distStr = step.travelDistanceFromPrevious?.let { " · ${DateUtils.formatDistance(it)}" } ?: ""
+        val travelLabel = ctx.getString(R.string.pdf_travel_arrow, travelTime) + distStr
         """<div class="travel-connector">
             <div class="travel-time">$travelLabel</div>
            </div>"""

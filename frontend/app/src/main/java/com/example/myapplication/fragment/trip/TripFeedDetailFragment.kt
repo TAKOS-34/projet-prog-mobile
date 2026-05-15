@@ -59,22 +59,17 @@ class TripFeedDetailFragment : Fragment() {
     ): View? {
         val view = inflater.inflate(R.layout.fragment_trip_feed_detail, container, false)
 
-        val tripJson = arguments?.getString("tripFeedJson") ?: return view
-        val trip = gson.fromJson(tripJson, TripFeedItemDto::class.java)
-
-        tripId = trip.id
-        isLiked = trip.isLiked
-        likeCount = trip.nbLikes
-        isBookmarked = trip.isBookmarked
-
         view.findViewById<ImageView>(R.id.btnBack)
             .setOnClickListener { findNavController().navigateUp() }
 
-        bindHeader(view, trip)
-        bindMeta(view, trip)
-        bindMap(view, trip)
-        bindSteps(view, trip)
-        bindActions(view, trip)
+        val tripJson = arguments?.getString("tripFeedJson")
+        if (tripJson != null) {
+            val trip = gson.fromJson(tripJson, TripFeedItemDto::class.java)
+            bindTrip(view, trip)
+        } else {
+            val id = arguments?.getInt("tripId") ?: 0
+            if (id > 0) fetchAndBind(view, id)
+        }
 
         return view
     }
@@ -172,6 +167,35 @@ class TripFeedDetailFragment : Fragment() {
         mapView.invalidate()
     }
 
+    private fun bindTrip(view: View, trip: TripFeedItemDto) {
+        tripId = trip.id
+        isLiked = trip.isLiked
+        likeCount = trip.nbLikes
+        isBookmarked = trip.isBookmarked
+        bindHeader(view, trip)
+        bindMeta(view, trip)
+        bindMap(view, trip)
+        bindSteps(view, trip)
+        bindActions(view, trip)
+    }
+
+    private fun fetchAndBind(view: View, id: Int) {
+        ApiClient.get("trip/$id") { body, _, error ->
+            activity?.runOnUiThread {
+                if (error == null && body != null) {
+                    try {
+                        val trip = gson.fromJson(body, TripFeedItemDto::class.java)
+                        bindTrip(view, trip)
+                    } catch (e: Exception) {
+                        findNavController().navigateUp()
+                    }
+                } else {
+                    findNavController().navigateUp()
+                }
+            }
+        }
+    }
+
     private fun bindHeader(view: View, trip: TripFeedItemDto) {
         val ctx = requireContext()
         view.findViewById<ImageView>(R.id.ivFeedDetailAvatar).load(trip.avatar.resolveBackendUrl()) {
@@ -191,6 +215,16 @@ class TripFeedDetailFragment : Fragment() {
             trip.totalDuration.toTripDuration(ctx)
         view.findViewById<TextView>(R.id.tvFeedDetailCost).text =
             ctx.getString(R.string.trip_total_cost, trip.totalCost)
+        val dist = trip.totalDistance
+        view.findViewById<TextView>(R.id.tvFeedDetailDistanceSep).visibility =
+            if (dist != null) View.VISIBLE else View.GONE
+        val tvDist = view.findViewById<TextView>(R.id.tvFeedDetailDistance)
+        if (dist != null) {
+            tvDist.visibility = View.VISIBLE
+            tvDist.text = DateUtils.formatDistance(dist)
+        } else {
+            tvDist.visibility = View.GONE
+        }
     }
 
     private fun bindSteps(view: View, trip: TripFeedItemDto) {

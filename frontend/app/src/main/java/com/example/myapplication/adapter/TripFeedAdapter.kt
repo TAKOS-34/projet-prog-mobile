@@ -1,5 +1,8 @@
 package com.example.myapplication.adapter
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import android.view.LayoutInflater
@@ -8,6 +11,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
@@ -69,8 +73,11 @@ class TripFeedAdapter(
         private val tvStartLocation: TextView = itemView.findViewById(R.id.tvTripFeedStartLocation)
         private val tvRoute: TextView = itemView.findViewById(R.id.tvTripFeedRoute)
         private val btnDelete: ImageView = itemView.findViewById(R.id.btnDelete)
+        private val tvDistanceSep: TextView = itemView.findViewById(R.id.tvTripFeedDistanceSep)
+        private val tvDistance: TextView = itemView.findViewById(R.id.tvTripFeedDistance)
         private val btnLike: ImageView = itemView.findViewById(R.id.btnTripFeedLike)
         private val tvLikeCount: TextView = itemView.findViewById(R.id.tvTripFeedLikeCount)
+        private val btnShare: ImageView = itemView.findViewById(R.id.btnTripFeedShare)
         private val btnBookmark: ImageView = itemView.findViewById(R.id.btnTripFeedBookmark)
 
         private var isLiked = false
@@ -150,6 +157,16 @@ class TripFeedAdapter(
 
             tvRoute.text = trip.steps.joinToString(" → ") { LocalisationFormat.display(it.localisation.name) }
 
+            val dist = trip.totalDistance
+            if (dist != null) {
+                tvDistanceSep.visibility = View.VISIBLE
+                tvDistance.visibility = View.VISIBLE
+                tvDistance.text = DateUtils.formatDistance(dist)
+            } else {
+                tvDistanceSep.visibility = View.GONE
+                tvDistance.visibility = View.GONE
+            }
+
             val isLogged = SessionManager.getUserId() != null
             if (!isLogged) {
                 btnLike.visibility = View.GONE
@@ -174,6 +191,14 @@ class TripFeedAdapter(
                 isBookmarkedLocal = !isBookmarkedLocal
                 applyBookmarkState()
                 onBookmark(trip, isBookmarkedLocal)
+            }
+
+            btnShare.setOnClickListener {
+                val ctx = itemView.context
+                val link = "travelpath://trip/${trip.id}"
+                val clipboard = ctx.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                clipboard.setPrimaryClip(ClipData.newPlainText("TravelPath", link))
+                Toast.makeText(ctx, ctx.getString(R.string.trip_link_copied), Toast.LENGTH_SHORT).show()
             }
 
             itemView.setOnClickListener { onClick(trip) }

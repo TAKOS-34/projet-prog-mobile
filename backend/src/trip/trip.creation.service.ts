@@ -206,6 +206,7 @@ export class TripCreationService {
                 post: { ...cleanPost, image: this.cdn.getPostUrl(cleanPost.id, cleanPost.imageExt) },
                 localisation: Localisation,
                 travelTimeFromPrevious: travelTimeToBest,
+                travelDistanceFromPrevious: null,
                 isTravelTimeFromPreviousTrusted: false,
                 visitDuration: cleanPost.minDuration!,
                 isVisitDurationTrusted: isDurationTrusted ?? false
@@ -222,6 +223,7 @@ export class TripCreationService {
             totalDuration: Math.floor(currentDuration),
             totalCost: currentCost,
             totalStep: selectedPosts.length,
+            totalDistance: null,
             weather
         };
     }
@@ -370,16 +372,24 @@ export class TripCreationService {
 
             const segments = data.routes[0].segments;
             let totalTravelTime = 0;
+            let totalDistanceMeters = 0;
 
             trip.steps.forEach((step, index) => {
-                const travelMinutes = Math.round(segments[index].duration / 60);
+                const segment = segments[index];
+                const travelMinutes = Math.round(segment.duration / 60);
+                const distanceMeters = Math.round(segment.distance);
+
                 step.travelTimeFromPrevious = travelMinutes;
+                step.travelDistanceFromPrevious = distanceMeters;
                 step.isTravelTimeFromPreviousTrusted = true;
+
                 totalTravelTime += travelMinutes;
+                totalDistanceMeters += distanceMeters;
             });
 
             const totalVisitTime = trip.steps.reduce((acc, step) => acc + step.visitDuration, 0);
             trip.totalDuration = totalTravelTime + totalVisitTime;
+            trip.totalDistance = totalDistanceMeters;
 
             return trip;
         } catch (error) {
@@ -394,6 +404,7 @@ export class TripCreationService {
             budget: trip.totalCost,
             duration: trip.totalDuration,
             category: category,
+            totalDistance: trip.totalDistance,
             startingTime: startingTime,
             transportMode: transportMode,
             weather,
@@ -403,6 +414,7 @@ export class TripCreationService {
                     postId: step.post.id,
                     stepNumber: index + 1,
                     travelTimeFromPrevious: step.travelTimeFromPrevious,
+                    travelDistanceFromPrevious: step.travelDistanceFromPrevious,
                     isTravelTimeFromPreviousTrusted: step.isTravelTimeFromPreviousTrusted,
                     visitDuration: step.visitDuration,
                     isVisitDurationTrusted: step.isVisitDurationTrusted

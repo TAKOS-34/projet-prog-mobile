@@ -49,6 +49,25 @@ class MainActivity : AppCompatActivity() {
         navController.addOnDestinationChangedListener { _, destination, _ ->
             bottomNav.menu.findItem(destination.id)?.isChecked = true
         }
+
+        handleTripDeepLink(intent, navController)
+    }
+
+    override fun onNewIntent(intent: android.content.Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        val navHostFragment = supportFragmentManager
+            .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
+        handleTripDeepLink(intent, navHostFragment.navController)
+    }
+
+    private fun handleTripDeepLink(intent: android.content.Intent?, navController: androidx.navigation.NavController) {
+        val uri = intent?.data ?: return
+        if (uri.scheme == "travelpath" && uri.host == "trip") {
+            val tripId = uri.pathSegments.firstOrNull()?.toIntOrNull() ?: return
+            val bundle = android.os.Bundle().apply { putInt("tripId", tripId) }
+            navController.navigate(R.id.tripFeedDetailFragment, bundle)
+        }
     }
 
     override fun onResume() {

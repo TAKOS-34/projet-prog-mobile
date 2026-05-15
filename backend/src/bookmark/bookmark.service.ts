@@ -155,6 +155,7 @@ export class BookmarkService {
                 totalDuration: trip.duration,
                 totalCost: trip.budget,
                 totalStep: trip.tripSteps.length,
+                totalDistance: trip.totalDistance ?? null,
                 weather: trip.weather,
                 difficulty: trip.difficulty ?? undefined,
                 nbLikes: trip.nbLikes ?? 0,
@@ -171,6 +172,7 @@ export class BookmarkService {
                         post: { ...postData, image: this.cdn.getPostUrl(postData.id, postData.imageExt) },
                         localisation: Localisation,
                         travelTimeFromPrevious: step.travelTimeFromPrevious,
+                        travelDistanceFromPrevious: step.travelDistanceFromPrevious ?? null,
                         isTravelTimeFromPreviousTrusted: step.isTravelTimeFromPreviousTrusted,
                         visitDuration: step.visitDuration,
                         isVisitDurationTrusted: step.isVisitDurationTrusted

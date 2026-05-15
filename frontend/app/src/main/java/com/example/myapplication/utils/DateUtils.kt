@@ -44,6 +44,10 @@ object DateUtils {
         return SimpleDateFormat("dd/MM/yy,\nHH:mm", Locale.getDefault()).format(date)
     }
 
+    fun formatDistance(meters: Int): String {
+        return if (meters < 1000) "${meters} m" else "${"%.1f".format(meters / 1000.0)} km"
+    }
+
     fun formatMinutes(context: Context, totalMinutes: Int): String {
         return if (totalMinutes < 60) {
             context.getString(R.string.trip_total_duration_m, totalMinutes)

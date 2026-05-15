@@ -280,6 +280,7 @@
     <string name="search_tab_search_trip">TravelPath</string>
     <string name="search_tab_map">Carte</string>
     <string name="map_post_by">Par %1$s</string>
+    <string name="trip_link_copied">Lien copié !</string>
     <string name="home_tab_travelshare">TravelShare</string>
     <string name="home_tab_travelpath">TravelPath</string>
     <string name="home_trip_world">Trajets mondiaux</string>

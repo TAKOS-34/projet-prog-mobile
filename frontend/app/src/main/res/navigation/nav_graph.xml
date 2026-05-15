@@ -270,7 +270,14 @@
         tools:layout="@layout/fragment_trip_feed_detail">
         <argument
             android:name="tripFeedJson"
-            app:argType="string" />
+            app:argType="string"
+            android:defaultValue="@null"
+            app:nullable="true" />
+        <argument
+            android:name="tripId"
+            app:argType="integer"
+            android:defaultValue="0" />
+        <deepLink app:uri="travelpath://trip/{tripId}" />
     </fragment>
 
     </navigation>

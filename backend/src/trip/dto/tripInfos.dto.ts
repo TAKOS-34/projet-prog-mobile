@@ -32,6 +32,7 @@ export interface TripSuggestInfos {
     totalDuration: number;
     totalCost: number;
     totalStep: number;
+    totalDistance: number | null;
     weather: WeatherCode;
     difficulty?: number;
 }
@@ -40,6 +41,7 @@ export interface TripStepDetail {
     post: Post & { image: string };
     localisation: Localisation;
     travelTimeFromPrevious: number;
+    travelDistanceFromPrevious: number | null;
     isTravelTimeFromPreviousTrusted: boolean;
     visitDuration: number;
     isVisitDurationTrusted: boolean;

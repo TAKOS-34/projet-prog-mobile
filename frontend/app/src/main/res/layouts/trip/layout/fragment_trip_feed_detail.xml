@@ -123,6 +123,23 @@
             android:textAppearance="@style/TextAppearance.TravelApp.BodyMedium"
             tools:text="20 €" />
 
+        <TextView
+            android:id="@+id/tvFeedDetailDistanceSep"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="8dp"
+            android:text="·"
+            android:textColor="@color/text_hint"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/tvFeedDetailDistance"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/TextAppearance.TravelApp.BodyMedium"
+            android:visibility="gone"
+            tools:text="2.3 km" />
+
     </LinearLayout>
 
     <LinearLayout
