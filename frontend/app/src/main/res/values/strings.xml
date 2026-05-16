@@ -285,6 +285,8 @@
     <string name="home_tab_travelpath">TravelPath</string>
     <string name="home_trip_world">Trajets mondiaux</string>
     <string name="home_trip_mine">Mes trajets</string>
+    <string name="home_post_for_you">Pour toi</string>
+    <string name="home_post_popular">Populaire</string>
     <string name="trip_form_title">Créer votre voyage</string>
     <string name="trip_form_subtitle">Planifiez votre itinéraire</string>
     <string name="trip_city_hint">Ville de destination</string>

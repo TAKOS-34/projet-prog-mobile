@@ -26,9 +26,13 @@ class HomeFragment : Fragment() {
 
     private enum class FeedMode { TRAVEL_SHARE, TRAVEL_PATH }
     private enum class TripTab { WORLD, MINE }
+    private enum class PostTab { FOR_YOU, POPULAR }
 
-    private lateinit var postsAdapter: PostsAdapter
-    private lateinit var postPaginator: PostFeedPaginator
+    private lateinit var forYouPostAdapter: PostsAdapter
+    private lateinit var forYouPostPaginator: PostFeedPaginator
+
+    private lateinit var popularPostAdapter: PostsAdapter
+    private lateinit var popularPostPaginator: PostFeedPaginator
 
     private lateinit var worldTripAdapter: TripFeedAdapter
     private lateinit var worldTripPaginator: TripFeedPaginator
@@ -42,11 +46,13 @@ class HomeFragment : Fragment() {
     private lateinit var tvFeedTitle: TextView
     private lateinit var btnToggleFeed: ImageView
     private lateinit var tgTripTabs: MaterialButtonToggleGroup
+    private lateinit var tgPostTabs: MaterialButtonToggleGroup
     private lateinit var fabNewPost: View
     private lateinit var fabNewTrip: View
 
     private var feedMode = FeedMode.TRAVEL_SHARE
     private var tripTab = TripTab.WORLD
+    private var postTab = PostTab.FOR_YOU
     private val gson = Gson()
 
     override fun onCreateView(
@@ -61,12 +67,13 @@ class HomeFragment : Fragment() {
         tvFeedTitle = view.findViewById(R.id.tvFeedTitle)
         btnToggleFeed = view.findViewById(R.id.btnToggleFeed)
         tgTripTabs = view.findViewById(R.id.tgTripTabs)
+        tgPostTabs = view.findViewById(R.id.tgPostTabs)
         fabNewPost = view.findViewById(R.id.fabNewPost)
         fabNewTrip = view.findViewById(R.id.fabNewTrip)
 
         val isLogged = SessionManager.getUserId() != null
 
-        if (!::postsAdapter.isInitialized) {
+        if (!::forYouPostAdapter.isInitialized) {
             setupPostsFeed()
             setupTripFeeds(isLogged)
         } else {
@@ -74,6 +81,7 @@ class HomeFragment : Fragment() {
         }
 
         setupToggleButton(isLogged)
+        setupPostTabs()
         setupTripTabs(isLogged)
         applyFeedMode(isLogged)
 
@@ -81,8 +89,8 @@ class HomeFragment : Fragment() {
     }
 
     private fun rebindViews(isLogged: Boolean) {
-        rvPosts.adapter = postsAdapter
-        postPaginator.reattach(rvPosts)
+        forYouPostPaginator.reattach(rvPosts)
+        popularPostPaginator.reattach(rvPosts)
 
         fabNewPost.visibility = if (isLogged) View.VISIBLE else View.GONE
         fabNewPost.setOnClickListener { findNavController().navigate(R.id.createPostFragment) }
@@ -93,16 +101,21 @@ class HomeFragment : Fragment() {
     }
 
     private fun setupPostsFeed() {
-        postsAdapter = buildPostsAdapter(onChanged = { postPaginator.reset() })
-        rvPosts.adapter = postsAdapter
-
-        postPaginator = PostFeedPaginator(
+        forYouPostAdapter = buildPostsAdapter(onChanged = { forYouPostPaginator.reset() })
+        forYouPostPaginator = PostFeedPaginator(
             recyclerView = rvPosts,
-            adapter = postsAdapter,
+            adapter = forYouPostAdapter,
             baseUrl = { "post" },
             onUi = { block -> activity?.runOnUiThread(block) }
         )
-        postPaginator.reset()
+
+        popularPostAdapter = buildPostsAdapter(onChanged = { popularPostPaginator.reset() })
+        popularPostPaginator = PostFeedPaginator(
+            recyclerView = rvPosts,
+            adapter = popularPostAdapter,
+            baseUrl = { "post?order=like" },
+            onUi = { block -> activity?.runOnUiThread(block) }
+        )
     }
 
     private fun setupTripFeeds(isLogged: Boolean) {
@@ -142,6 +155,14 @@ class HomeFragment : Fragment() {
         }
     }
 
+    private fun setupPostTabs() {
+        tgPostTabs.addOnButtonCheckedListener { _, checkedId, isChecked ->
+            if (!isChecked) return@addOnButtonCheckedListener
+            postTab = if (checkedId == R.id.btnTabForYou) PostTab.FOR_YOU else PostTab.POPULAR
+            activatePostTab()
+        }
+    }
+
     private fun setupTripTabs(isLogged: Boolean) {
         if (!isLogged) {
             tgTripTabs.findViewById<View>(R.id.btnTabMyTrips).visibility = View.GONE
@@ -161,13 +182,16 @@ class HomeFragment : Fragment() {
                 btnToggleFeed.setImageResource(R.drawable.ic_location)
                 btnToggleFeed.imageTintList = ContextCompat.getColorStateList(requireContext(), R.color.primary)
 
-                rvPosts.visibility = View.VISIBLE
                 rvTrips.visibility = View.GONE
                 tvTripsEmpty.visibility = View.GONE
                 tgTripTabs.visibility = View.GONE
+                tgPostTabs.visibility = View.VISIBLE
 
                 fabNewPost.visibility = if (isLogged) View.VISIBLE else View.GONE
                 fabNewTrip.visibility = View.GONE
+
+                tgPostTabs.check(if (postTab == PostTab.FOR_YOU) R.id.btnTabForYou else R.id.btnTabPopular)
+                activatePostTab()
             }
             FeedMode.TRAVEL_PATH -> {
                 tvFeedTitle.text = getString(R.string.home_tab_travelpath)
@@ -175,6 +199,7 @@ class HomeFragment : Fragment() {
                 btnToggleFeed.imageTintList = ContextCompat.getColorStateList(requireContext(), R.color.primary)
 
                 rvPosts.visibility = View.GONE
+                tgPostTabs.visibility = View.GONE
                 tgTripTabs.visibility = View.VISIBLE
 
                 fabNewPost.visibility = View.GONE
@@ -182,6 +207,20 @@ class HomeFragment : Fragment() {
 
                 tgTripTabs.check(if (tripTab == TripTab.WORLD) R.id.btnTabWorldTrips else R.id.btnTabMyTrips)
                 activateTripTab()
+            }
+        }
+    }
+
+    private fun activatePostTab() {
+        rvPosts.visibility = View.VISIBLE
+        when (postTab) {
+            PostTab.FOR_YOU -> {
+                rvPosts.adapter = forYouPostAdapter
+                if (forYouPostAdapter.itemCount == 0) forYouPostPaginator.reset()
+            }
+            PostTab.POPULAR -> {
+                rvPosts.adapter = popularPostAdapter
+                if (popularPostAdapter.itemCount == 0) popularPostPaginator.reset()
             }
         }
     }

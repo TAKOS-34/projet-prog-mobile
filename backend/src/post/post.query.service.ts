@@ -17,7 +17,7 @@ export class PostQueryService {
 
 
 
-    async getPosts(limit: number, cursor?: string, userId?: number, anonymousToken?: string, q?: string, tag?: string[], type?: PostType, loc?: string, dist?: number): Promise<PostsInfos> {
+    async getPosts(limit: number, cursor?: string, userId?: number, anonymousToken?: string, q?: string, tag?: string[], type?: PostType, loc?: string, dist?: number, order?: string): Promise<PostsInfos> {
         const realUser = userId ? { userId } : anonymousToken ? { anonymousUserId: anonymousToken } : null;
 
         const cleanLocalisation: string | null = loc ? loc.toLowerCase().trim() : null;
@@ -40,9 +40,10 @@ export class PostQueryService {
                             { title: { contains: q, mode: 'insensitive' } },
                             { description: { contains: q, mode: 'insensitive' } },
                             { User: { username: { contains: q, mode: 'insensitive' } } },
-                            { Group: { name: { contains: q, mode: 'insensitive' } } }
+                            { Group: { name: { contains: q, mode: 'insensitive' } } },
                         ]
                     } : {},
+                    type ? { type: type } : {},
                     tags && tags.length > 0 ? {
                         AND: tags.map(tagName => ({ 
                             postTags: { some: { tag: { name: tagName } } } 
@@ -62,7 +63,7 @@ export class PostQueryService {
                     }
                 ]
             },
-            orderBy: [{ creationDate: 'desc' }, { id: 'desc' }],
+            orderBy: order === 'like' ? [{ nbLikes: 'desc' }, { id: 'desc' }] : [{ creationDate: 'desc' }, { id: 'desc' }],
             include: {
                 Localisation: { select: { id: true, name: true, long: true, lat: true } },
                 Group: { select: { id: true, name: true, avatar: true, members: userId ? { where: { userId }, select: { userId: true } } : false } },

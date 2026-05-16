@@ -35,10 +35,11 @@ export class PostController {
         @Query('type') type?: PostType,
         @Query('loc') loc?: string,
         @Query('dist') dist?: number,
+        @Query('order') order?: string,
         @GetUser() user?: UserSession,
         @GetAnonymous() anonymous?: string
     ): Promise<PostsInfos> {
-        return this.postQueryService.getPosts(limit, cursor, user?.id, anonymous, q, tag, type, loc, dist);
+        return this.postQueryService.getPosts(limit, cursor, user?.id, anonymous, q, tag, type, loc, dist, order);
     }
 
     @UseGuards(GroupProtectGuard, AuthOptionalGuard)

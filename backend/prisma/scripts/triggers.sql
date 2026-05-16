@@ -67,8 +67,8 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-DROP TRIGGER IF EXISTS tr_post_like_count ON "Like";
-CREATE TRIGGER tr_post_like_count AFTER INSERT OR DELETE ON "Like" FOR EACH ROW EXECUTE FUNCTION update_post_like_count();
+DROP TRIGGER IF EXISTS tr_post_like_count ON "PostLike";
+CREATE TRIGGER tr_post_like_count AFTER INSERT OR DELETE ON "PostLike" FOR EACH ROW EXECUTE FUNCTION update_post_like_count();
 
 
 
