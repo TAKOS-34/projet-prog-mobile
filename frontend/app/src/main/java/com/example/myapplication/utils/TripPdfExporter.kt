@@ -121,11 +121,11 @@ private fun buildTripHtml(ctx: Context, trip: TripFeedItemDto): String {
 
   .section-title { font-size:13px; font-weight:700; color:$textSecondary; letter-spacing:0.8px; text-transform:uppercase; margin-bottom:16px; }
 
-  .step { display:flex; gap:16px; margin-bottom:0; position:relative; }
+  .step { display:flex; gap:16px; margin-bottom:0; position:relative; page-break-inside:avoid; break-inside:avoid; }
   .step-left { display:flex; flex-direction:column; align-items:center; width:32px; flex-shrink:0; }
   .step-number { width:32px; height:32px; border-radius:50%; background:$primary; color:#fff; font-size:13px; font-weight:800; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
   .step-line { width:2px; background:$divider; flex:1; margin-top:4px; min-height:20px; }
-  .step-body { flex:1; background:$surface; border-radius:12px; padding:14px 16px; margin-bottom:12px; border:1px solid $divider; }
+  .step-body { flex:1; background:$surface; border-radius:12px; padding:14px 16px; margin-bottom:12px; border:1px solid $divider; page-break-inside:avoid; break-inside:avoid; }
   .step-title { font-size:15px; font-weight:700; color:$textPrimary; margin-bottom:4px; }
   .step-location { font-size:12px; color:$primary; font-weight:600; margin-bottom:8px; }
   .step-tags { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px; }

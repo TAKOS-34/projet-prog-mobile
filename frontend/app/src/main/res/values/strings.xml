@@ -349,6 +349,7 @@
     <string name="pdf_map_section">Carte du parcours</string>
     <string name="trip_regenerate_timer">Patientez encore %1$ds avant de régénérer</string>
     <string name="enregistrer">Enregistrer</string>
+    <string name="my_location">Ma position</string>
 
     <plurals name="time_minutes_ago">
         <item quantity="one">Il y a %d minute</item>

@@ -4,6 +4,9 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.PackageManager
+import android.graphics.Color
+import android.graphics.PorterDuff
+import android.graphics.drawable.GradientDrawable
 import android.location.Geocoder
 import android.location.Location
 import android.location.LocationManager
@@ -35,6 +38,7 @@ import com.example.myapplication.dto.post.PostDto
 import com.example.myapplication.dto.post.PostType
 import com.example.myapplication.dto.post.PostsResponseDto
 import com.example.myapplication.dto.trip.TripFeedItemDto
+import com.example.myapplication.dto.trip.TripFeedResponseDto
 import com.example.myapplication.utils.ApiClient
 import com.example.myapplication.utils.LocalisationFormat
 import com.example.myapplication.utils.LocalisationSuggester
@@ -45,6 +49,7 @@ import com.example.myapplication.utils.TripFeedPaginator
 import com.example.myapplication.utils.buildPostsAdapter
 import com.example.myapplication.utils.buildTripFeedAdapter
 import com.example.myapplication.utils.resolveBackendUrl
+import com.example.myapplication.utils.toTripDuration
 import com.google.gson.Gson
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.button.MaterialButton
@@ -110,8 +115,10 @@ class SearchFragment : Fragment() {
     private var savedMapCenter: GeoPoint? = null
     private var savedMapZoom: Double = 12.0
     private val postMarkers = mutableListOf<Marker>()
+    private val tripMarkers = mutableListOf<Marker>()
     private var userMarker: Marker? = null
     private var isLoadingMapPosts = false
+    private var isLoadingMapTrips = false
 
     private val handler = Handler(Looper.getMainLooper())
     private var suggestRunnable: Runnable? = null
@@ -140,6 +147,7 @@ class SearchFragment : Fragment() {
         mapView = view.findViewById(R.id.mapView)
         mapInitialized = false
         postMarkers.clear()
+        tripMarkers.clear()
         userMarker = null
 
         recyclerView = view.findViewById(R.id.rvSearchResults)
@@ -299,7 +307,7 @@ class SearchFragment : Fragment() {
                     userMarker = Marker(mapView).apply {
                         position = userPos
                         setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
-                        title = "Ma position"
+                        title = getString(R.string.my_location)
                         icon = ContextCompat.getDrawable(ctx, R.drawable.ic_location)
                     }
                     mapView.overlays.add(userMarker)
@@ -318,11 +326,15 @@ class SearchFragment : Fragment() {
         }, 700))
 
         loadPostsForCurrentView()
+        loadTripsForCurrentView()
     }
 
     private fun scheduleMapLoad() {
         handler.removeCallbacksAndMessages("map")
-        handler.postDelayed({ loadPostsForCurrentView() }, 700)
+        handler.postDelayed({
+            loadPostsForCurrentView()
+            loadTripsForCurrentView()
+        }, 700)
     }
 
     private fun loadPostsForCurrentView() {
@@ -355,6 +367,90 @@ class SearchFragment : Fragment() {
     private fun clearPostMarkers() {
         postMarkers.forEach { mapView.overlays.remove(it) }
         postMarkers.clear()
+    }
+
+    private fun clearTripMarkers() {
+        tripMarkers.forEach { mapView.overlays.remove(it) }
+        tripMarkers.clear()
+    }
+
+    private fun loadTripsForCurrentView() {
+        if (isLoadingMapTrips) return
+        isLoadingMapTrips = true
+        val center = mapView.mapCenter
+        val zoom = mapView.zoomLevelDouble
+        val radiusKm = zoomToRadiusKm(zoom)
+        val lat = center.latitude
+        val lng = center.longitude
+        ApiClient.get("trip?lat=$lat&long=$lng&dist=$radiusKm") { body, _, _ ->
+            isLoadingMapTrips = false
+            body?.let { json ->
+                try {
+                    val response = Gson().fromJson(json, TripFeedResponseDto::class.java)
+                    activity?.runOnUiThread {
+                        clearTripMarkers()
+                        addTripMarkers(response.trips)
+                    }
+                } catch (e: Exception) { e.printStackTrace() }
+            }
+        }
+    }
+
+    private fun addTripMarkers(trips: List<TripFeedItemDto>) {
+        val ctx = context ?: return
+        trips.forEach { trip ->
+            val loc = trip.startLocalisation ?: return@forEach
+            if (loc.lat == 0.0 && loc.long == 0.0) return@forEach
+            val marker = Marker(mapView).apply {
+                position = GeoPoint(loc.lat, loc.long)
+                setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+                title = trip.steps.joinToString(" → ") { it.localisation.name }
+                icon = ContextCompat.getDrawable(ctx, R.drawable.ic_location)?.mutate()?.apply {
+                    setColorFilter(Color.parseColor("#FF8C00"), PorterDuff.Mode.SRC_IN)
+                }
+                setOnMarkerClickListener { _, _ ->
+                    showTripBottomSheet(trip)
+                    true
+                }
+            }
+            tripMarkers.add(marker)
+            mapView.overlays.add(marker)
+        }
+        mapView.invalidate()
+    }
+
+    private fun showTripBottomSheet(trip: TripFeedItemDto) {
+        val ctx = context ?: return
+        val dialog = BottomSheetDialog(ctx)
+        val sheetView = LayoutInflater.from(ctx).inflate(R.layout.bottom_sheet_map_trip, null)
+        val dp = ctx.resources.displayMetrics.density
+
+        val isNormal = trip.category == "NORMAL"
+        val tvCategory = sheetView.findViewById<TextView>(R.id.tvMapTripCategory)
+        tvCategory.text = if (isNormal) getString(R.string.trip_label_normal) else getString(R.string.trip_label_business)
+        tvCategory.background = GradientDrawable().apply {
+            setColor(if (isNormal) ContextCompat.getColor(ctx, R.color.secondary) else Color.parseColor("#C8860A"))
+            cornerRadius = 6f * dp
+        }
+
+        trip.steps.firstOrNull()?.post?.image?.let { url ->
+            sheetView.findViewById<ShapeableImageView>(R.id.ivMapTripImage).load(url.resolveBackendUrl()) { crossfade(true) }
+        }
+
+        sheetView.findViewById<TextView>(R.id.tvMapTripRoute).text =
+            trip.steps.joinToString(" → ") { LocalisationFormat.display(it.localisation.name) }
+        sheetView.findViewById<TextView>(R.id.tvMapTripDuration).text = trip.totalDuration.toTripDuration(ctx)
+        sheetView.findViewById<TextView>(R.id.tvMapTripCost).text = getString(R.string.trip_total_cost, trip.totalCost)
+        sheetView.findViewById<TextView>(R.id.tvMapTripSteps).text = getString(R.string.trip_result_n_steps, trip.totalStep)
+
+        sheetView.setOnClickListener {
+            dialog.dismiss()
+            val bundle = Bundle().apply { putString("tripFeedJson", Gson().toJson(trip)) }
+            findNavController().navigate(R.id.tripFeedDetailFragment, bundle)
+        }
+
+        dialog.setContentView(sheetView)
+        dialog.show()
     }
 
     private fun zoomToRadiusKm(zoom: Double): Int {
