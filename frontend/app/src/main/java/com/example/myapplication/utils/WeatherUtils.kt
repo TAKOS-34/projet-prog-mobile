@@ -21,9 +21,10 @@ fun String.toWeatherEmoji(): String = when (this) {
     else -> "🌡️"
 }
 
-fun Int.toTripDuration(context: Context): String {
-    val h = this / 60
-    val m = this % 60
+fun Number.toTripDuration(context: Context): String {
+    val total = this.toInt()
+    val h = total / 60
+    val m = total % 60
     return if (h > 0) context.getString(R.string.trip_total_duration_hm, h, m)
     else context.getString(R.string.trip_total_duration_m, m)
 }

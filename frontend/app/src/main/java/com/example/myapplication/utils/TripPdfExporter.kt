@@ -305,8 +305,9 @@ private fun buildStepHtml(
 ): String {
     val postType = PostType.fromApiValue(step.post.type)
     val typeLabel = postType?.let { ctx.getString(it.labelRes) } ?: step.post.type
-    val visitDuration = DateUtils.formatMinutes(ctx, step.visitDuration)
-    val visitLabel = ctx.getString(R.string.trip_step_visit_duration, visitDuration)
+    val visitLabel = if (step.visitDuration != null && step.visitDuration > 0)
+        ctx.getString(R.string.trip_step_visit_duration, DateUtils.formatMinutes(ctx, step.visitDuration.toInt()))
+    else null
 
     val priceHtml = if (step.post.minPrice != null && step.post.maxPrice != null) {
         if (step.post.minPrice == 0 && step.post.maxPrice == 0)
@@ -321,7 +322,7 @@ private fun buildStepHtml(
     }
 
     val travelHtml = if (hasNext && step.travelTimeFromPrevious > 0) {
-        val travelTime = DateUtils.formatMinutes(ctx, step.travelTimeFromPrevious)
+        val travelTime = DateUtils.formatMinutes(ctx, step.travelTimeFromPrevious.toInt())
         val distStr = step.travelDistanceFromPrevious?.let { " · ${DateUtils.formatDistance(it)}" } ?: ""
         val travelLabel = ctx.getString(R.string.pdf_travel_arrow, travelTime) + distStr
         """<div class="travel-connector">
@@ -340,9 +341,7 @@ private fun buildStepHtml(
           <div class="step-title">${step.post.title.escapeHtml()}</div>
           <div class="step-location">📍 ${LocalisationFormat.display(step.localisation.name).escapeHtml()}</div>
           <div class="step-tags">$tagsHtml</div>
-          <div class="step-details">
-            <div class="step-detail">$visitLabel</div>
-          </div>
+          ${if (visitLabel != null) """<div class="step-details"><div class="step-detail">$visitLabel</div></div>""" else ""}
         </div>
         $travelHtml
       </div>

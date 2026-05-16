@@ -193,6 +193,7 @@
             android:textColor="@color/text_hint" />
 
         <ImageView
+            android:id="@+id/ivStepClockIcon"
             android:layout_width="12dp"
             android:layout_height="12dp"
             android:src="@drawable/ic_clock"

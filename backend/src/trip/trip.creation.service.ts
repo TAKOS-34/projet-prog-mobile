@@ -17,7 +17,7 @@ interface Candidate {
     travelTime: number
 }
 type PreStandardizedCandidate = Post & { Localisation: Localisation };
-type StandardizedPost = PreStandardizedCandidate & { minDuration: number; minPrice: number; isDurationTrusted: boolean };
+type StandardizedPost = PreStandardizedCandidate & { effectiveDuration: number; effectivePrice: number; isDurationTrusted: boolean };
 
 
 
@@ -28,6 +28,9 @@ export class TripCreationService {
     private readonly BASE_SCORE = 10;
     private readonly HOUR_BONUS_SCORE = 100;
     private readonly HOUR_MALUS_SCORE = 50;
+    private readonly NIGHTLIFE_PEAK_BONUS = 120;
+    private readonly NIGHTLIFE_EVENING_BONUS = 60;
+    private readonly PANORAMA_GOLDEN_HOUR_BONUS = 40;
     private readonly TYPE_BONUS_SCORE = 70;
     private readonly NORMAL_BONUS_SCORE = 30;
     private readonly BUISNESS_BONUS_SCORE = 120;
@@ -56,7 +59,7 @@ export class TripCreationService {
 
         let tripsByCategory = categories.map((category) =>
             this.buildPath(locCoords, suggestTrip, weatherFiltered, category, weather.code)
-        );
+        ).map(trip => this.twoOptReorder(locCoords, trip, suggestTrip.transportMode));
 
         if (process.env.NODE_ENV === 'prod') {
             tripsByCategory = await Promise.all(
@@ -94,33 +97,40 @@ export class TripCreationService {
 
     private applyFallbacks(posts: PreStandardizedCandidate[]): StandardizedPost[] {
         return posts.map(post => {
-            let minDuration = post.minDuration;
+            let resolvedMinDuration: number;
             let isDurationTrusted = true;
-            let minPrice = post.minPrice;
+            let resolvedMinPrice: number;
 
-            if (minDuration === null) {
+            if (post.minDuration === null) {
                 isDurationTrusted = false;
 
                 switch (post.type) {
-                    case PostType.PANORAMA: minDuration = 30; break;
+                    case PostType.PANORAMA: resolvedMinDuration = 30; break;
                     case PostType.HISTORIC_SITE:
-                    case PostType.ART_CULTURE: minDuration = 120; break;
-                    case PostType.GASTRONOMY: minDuration = 120; break;
-                    case PostType.UNIQUE_STAY: minDuration = 720; break;
-                    default: minDuration = 60;
+                    case PostType.ART_CULTURE: resolvedMinDuration = 120; break;
+                    case PostType.GASTRONOMY: resolvedMinDuration = 120; break;
+                    case PostType.UNIQUE_STAY: resolvedMinDuration = 720; break;
+                    default: resolvedMinDuration = 60;
                 }
+            } else {
+                resolvedMinDuration = post.minDuration;
             }
 
-            if (minPrice === null) {
+            if (post.minPrice === null) {
                 switch (post.type) {
-                    case PostType.GASTRONOMY: minPrice = 20; break;
-                    case PostType.UNIQUE_STAY: minPrice = 100; break;
-                    case PostType.NIGHTLIFE: minPrice = 15; break;
-                    default: minPrice = 0;
+                    case PostType.GASTRONOMY: resolvedMinPrice = 20; break;
+                    case PostType.UNIQUE_STAY: resolvedMinPrice = 100; break;
+                    case PostType.NIGHTLIFE: resolvedMinPrice = 15; break;
+                    default: resolvedMinPrice = 0;
                 }
+            } else {
+                resolvedMinPrice = post.minPrice;
             }
 
-            return { ...post, minDuration, minPrice, isDurationTrusted };
+            const effectiveDuration = (resolvedMinDuration + (post.maxDuration ?? resolvedMinDuration)) / 2;
+            const effectivePrice = (resolvedMinPrice + (post.maxPrice ?? resolvedMinPrice)) / 2;
+
+            return { ...post, effectiveDuration, effectivePrice, isDurationTrusted };
         });
     }
 
@@ -149,14 +159,14 @@ export class TripCreationService {
             const validCandidates: Candidate[] = [];
 
             for (const post of unvisited) {
-                const postDuration = post.minDuration;
-                const postCost = post.minPrice;
+                const postDuration = post.effectiveDuration;
+                const postCost = post.effectivePrice;
                 const postCoords = { lat: Number(post.Localisation.lat), long: Number(post.Localisation.long) };
 
                 const travelTime = this.calculateTravelTime(currentLocation, postCoords, suggestTrip.transportMode);
 
                 if (currentDuration + travelTime + postDuration <= SAFE_MAX_DURATION && currentCost + postCost <= suggestTrip.maxBudget) {
-                    const elapsedMinutes: number = (currentDuration + travelTime) + postDuration / 2;
+                    const elapsedMinutes: number = currentDuration + travelTime;
                     const dynamicScore = this.getDynamicScore(post, elapsedMinutes, suggestTrip.startingTime, category, suggestTrip.preferredTypes);
                     const ratio = dynamicScore / (travelTime + postDuration);
 
@@ -168,7 +178,7 @@ export class TripCreationService {
 
             const selected: Candidate = this.selectRandomCandidate(validCandidates, suggestTrip.isRegenerated);
             const bestNextPost = selected.post;
-            const travelTimeToBest = Math.floor(selected.travelTime);
+            const travelTimeToBest = selected.travelTime;
 
             const { Localisation, isDurationTrusted, ...cleanPost } = bestNextPost;
 
@@ -177,11 +187,11 @@ export class TripCreationService {
                 localisation: Localisation,
                 travelTimeFromPrevious: travelTimeToBest,
                 isTravelTimeFromPreviousTrusted: false,
-                visitDuration: cleanPost.minDuration,
+                visitDuration: cleanPost.effectiveDuration,
                 isVisitDurationTrusted: isDurationTrusted ?? false
             });
-            currentDuration += travelTimeToBest + cleanPost.minDuration;
-            currentCost += (cleanPost.minPrice + (cleanPost.maxPrice ?? 0)) / 2;
+            currentDuration += travelTimeToBest + cleanPost.effectiveDuration;
+            currentCost += cleanPost.effectivePrice;
             currentLocation = { lat: Number(Localisation.lat), long: Number(Localisation.long) };
 
             unvisited = unvisited.filter(p => p.id !== cleanPost.id);
@@ -201,7 +211,7 @@ export class TripCreationService {
     private getDynamicScore(post: StandardizedPost, currentElapsedMinutes: number, startingTime: TripStartingTime, category: TripCategory, preferredTypes?: PostType[]): number {
         let score = this.BASE_SCORE;
 
-        const simulatedHour = this.getScoringHour(post.type, post.minDuration, startingTime, currentElapsedMinutes);
+        const simulatedHour = this.getScoringHour(post.type, post.effectiveDuration, startingTime, currentElapsedMinutes);
 
         if (preferredTypes?.includes(post.type)) score += this.TYPE_BONUS_SCORE;
 
@@ -214,28 +224,28 @@ export class TripCreationService {
             }
 
             case PostType.NIGHTLIFE: {
-                if (simulatedHour >= 22) score += this.HOUR_BONUS_SCORE;
-                else if (simulatedHour >= 18) score += this.HOUR_BONUS_SCORE;
+                if (simulatedHour >= 22) score += this.NIGHTLIFE_PEAK_BONUS;
+                else if (simulatedHour >= 18) score += this.NIGHTLIFE_EVENING_BONUS;
                 else score -= this.HOUR_MALUS_SCORE;
                 break;
             }
 
             case PostType.PANORAMA: {
-                if ((simulatedHour >= 7 && simulatedHour <= 9) || simulatedHour >= 17 && simulatedHour <= 19) score += this.HOUR_BONUS_SCORE;
+                if ((simulatedHour >= 7 && simulatedHour <= 9) || (simulatedHour >= 17 && simulatedHour <= 19)) score += this.PANORAMA_GOLDEN_HOUR_BONUS;
                 break;
             }
         }
 
         if (category === TripCategory.BUISNESS && (post.type === PostType.UNIQUE_STAY || post.type === PostType.GASTRONOMY)) score += this.BUISNESS_BONUS_SCORE;
-        if (category === TripCategory.NORMAL && post.minPrice === 0 && post.maxPrice === 0) score += this.NORMAL_BONUS_SCORE;
+        if (category === TripCategory.NORMAL && post.effectivePrice === 0) score += this.NORMAL_BONUS_SCORE;
 
         return score;
     }
 
 
 
-    private getScoringHour(postType: PostType, postDuration: number, startingTime: TripStartingTime, arrivalElapsedMinutes: number): number {
-        const offset = postType === PostType.GASTRONOMY ? postDuration / 2 : 0;
+    private getScoringHour(postType: PostType, effectiveDuration: number, startingTime: TripStartingTime, arrivalElapsedMinutes: number): number {
+        const offset = postType === PostType.GASTRONOMY ? effectiveDuration / 2 : 0;
         return this.getSimulatedHour(startingTime, arrivalElapsedMinutes + offset);
     }
 
@@ -283,10 +293,10 @@ export class TripCreationService {
             case TripTransportMode.CAR: {
                 const drivingTime = (urbanDistanceKm / 25) * 60;
                 const parkingPenalty = urbanDistanceKm < 0.5 ? 5 : 15;
-                return drivingTime + parkingPenalty;
+                return Math.round(drivingTime + parkingPenalty);
             }
 
-            case TripTransportMode.WALK: return (urbanDistanceKm / 5) * 60;
+            case TripTransportMode.WALK: return Math.round((urbanDistanceKm / 5) * 60);
 
             default: throw new BadRequestException('Undefined transport mode');
         }
@@ -325,6 +335,53 @@ export class TripCreationService {
         const randomIndex = Math.floor(Math.random() * poolSize);
 
         return candidates[randomIndex];
+    }
+
+
+
+    private twoOptReorder(start: Point, trip: TripSuggestInfos, mode: TripTransportMode): TripSuggestInfos {
+        if (trip.steps.length <= 2) return trip;
+
+        const TIME_SENSITIVE = new Set<PostType>([PostType.GASTRONOMY, PostType.NIGHTLIFE]);
+        const toPoint = (loc: Localisation): Point => ({ lat: Number(loc.lat), long: Number(loc.long) });
+
+        const steps = [...trip.steps];
+        let improved = true;
+
+        while (improved) {
+            improved = false;
+
+            for (let i = 0; i < steps.length - 1; i++) {
+                for (let j = i + 1; j < steps.length; j++) {
+                    if (steps.slice(i, j + 1).some(s => TIME_SENSITIVE.has(s.post.type))) continue;
+
+                    const prev = i === 0 ? start : toPoint(steps[i - 1].localisation);
+                    const next = j < steps.length - 1 ? toPoint(steps[j + 1].localisation) : null;
+                    const iPoint = toPoint(steps[i].localisation);
+                    const jPoint = toPoint(steps[j].localisation);
+
+                    const currentCost = this.calculateTravelTime(prev, iPoint, mode) + (next ? this.calculateTravelTime(jPoint, next, mode) : 0);
+                    const newCost    = this.calculateTravelTime(prev, jPoint, mode) + (next ? this.calculateTravelTime(iPoint, next, mode) : 0);
+
+                    if (newCost < currentCost) {
+                        steps.splice(i, j - i + 1, ...steps.slice(i, j + 1).reverse());
+                        improved = true;
+                    }
+                }
+            }
+        }
+
+        let currentPoint = start;
+        for (const step of steps) {
+            const stepPoint = toPoint(step.localisation);
+            step.travelTimeFromPrevious = this.calculateTravelTime(currentPoint, stepPoint, mode);
+            currentPoint = stepPoint;
+        }
+
+        const totalTravel = steps.reduce((acc, s) => acc + s.travelTimeFromPrevious, 0);
+        const totalVisit  = steps.reduce((acc, s) => acc + s.visitDuration, 0);
+
+        return { ...trip, steps, totalDuration: totalTravel + totalVisit };
     }
 
 

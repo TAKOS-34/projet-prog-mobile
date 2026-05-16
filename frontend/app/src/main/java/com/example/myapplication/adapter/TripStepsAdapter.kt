@@ -58,6 +58,8 @@ class TripStepsAdapter(
         private val tvPriceSeparator: TextView = itemView.findViewById(R.id.tvPriceSeparator)
         private val ivPriceIcon: ImageView = itemView.findViewById(R.id.ivPriceIcon)
         private val tvPrice: TextView = itemView.findViewById(R.id.tvStepPrice)
+        private val tvDurationSeparator: TextView = itemView.findViewById(R.id.tvDurationSeparator)
+        private val ivClockIcon: ImageView = itemView.findViewById(R.id.ivStepClockIcon)
         private val tvVisit: TextView = itemView.findViewById(R.id.tvStepVisitDuration)
         private val ivVisitTrust: ImageView = itemView.findViewById(R.id.ivVisitTrust)
 
@@ -81,7 +83,7 @@ class TripStepsAdapter(
             }
 
             val distStr = step.travelDistanceFromPrevious?.let { " · ${DateUtils.formatDistance(it)}" } ?: ""
-            tvTravelTime.text = ctx.getString(R.string.trip_step_travel_time, DateUtils.formatMinutes(ctx, step.travelTimeFromPrevious)) + distStr
+            tvTravelTime.text = ctx.getString(R.string.trip_step_travel_time, DateUtils.formatMinutes(ctx, step.travelTimeFromPrevious.toInt())) + distStr
             ivTravelTrust.visibility = if (step.isTravelTimeFromPreviousTrusted) View.VISIBLE else View.GONE
 
             vDot.text = (position + 1).toString()
@@ -106,8 +108,18 @@ class TripStepsAdapter(
                 tvPrice.visibility = View.GONE
             }
 
-            tvVisit.text = ctx.getString(R.string.trip_step_visit_duration, DateUtils.formatMinutes(ctx, step.visitDuration))
-            ivVisitTrust.visibility = if (step.isVisitDurationTrusted) View.VISIBLE else View.GONE
+            if (step.visitDuration != null && step.visitDuration > 0) {
+                tvDurationSeparator.visibility = View.VISIBLE
+                ivClockIcon.visibility = View.VISIBLE
+                tvVisit.visibility = View.VISIBLE
+                tvVisit.text = ctx.getString(R.string.trip_step_visit_duration, DateUtils.formatMinutes(ctx, step.visitDuration.toInt()))
+                ivVisitTrust.visibility = if (step.isVisitDurationTrusted) View.VISIBLE else View.GONE
+            } else {
+                tvDurationSeparator.visibility = View.GONE
+                ivClockIcon.visibility = View.GONE
+                tvVisit.visibility = View.GONE
+                ivVisitTrust.visibility = View.GONE
+            }
 
             val postType = PostType.entries.firstOrNull { it.name == step.post.type }
             tvType.text = postType?.let { ctx.getString(it.labelRes) } ?: step.post.type

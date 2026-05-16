@@ -36,6 +36,8 @@ export class PostCommandService {
             throw new BadRequestException('Error with audio file');
         }
 
+        this.validateIntervals(post.minPrice, post.maxPrice, post.minDuration, post.maxDuration);
+
         if (post.groupId && !await this.prisma.member.findUnique({
             where: { groupId_userId: { groupId: post.groupId, userId: user.id } },
             select: { groupId: true }
@@ -123,6 +125,8 @@ export class PostCommandService {
 
         const { title, type, description, minPrice, maxPrice, minDuration, maxDuration } = post;
 
+        this.validateIntervals(minPrice, maxPrice, minDuration, maxDuration);
+
         const updateData = {
             isEdited: true,
             updatedAt: new Date(),
@@ -188,6 +192,28 @@ export class PostCommandService {
         // Notification to admins
 
         return { status: true, message: 'Post reported' };
+    }
+
+
+    private readonly PRICE_RANGES: [number, number][] = [
+        [0, 0], [0, 10], [10, 20], [20, 30], [40, 60],
+        [60, 100], [100, 200], [200, 500], [500, 1000]
+    ];
+    private readonly DURATION_RANGES: [number, number][] = [
+        [0, 15], [15, 30], [30, 45], [45, 60],
+        [60, 120], [120, 240], [240, 480]
+    ];
+
+    private validateIntervals(minPrice?: number | null, maxPrice?: number | null, minDuration?: number | null, maxDuration?: number | null): void {
+        if (minPrice != null && maxPrice != null) {
+            const valid = this.PRICE_RANGES.some(([min, max]) => min === minPrice && max === maxPrice);
+            if (!valid) throw new BadRequestException('Invalid price range');
+        }
+
+        if (minDuration != null && maxDuration != null) {
+            const valid = this.DURATION_RANGES.some(([min, max]) => min === minDuration && max === maxDuration);
+            if (!valid) throw new BadRequestException('Invalid duration range');
+        }
     }
 
 

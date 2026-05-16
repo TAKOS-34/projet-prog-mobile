@@ -7,7 +7,7 @@ data class TripFeedItemDto(
     val category: String,
     val startingTime: String,
     val transportMode: String,
-    val totalDuration: Int,
+    val totalDuration: Double,
     val totalCost: Int,
     val totalStep: Int,
     val totalDistance: Int?,
