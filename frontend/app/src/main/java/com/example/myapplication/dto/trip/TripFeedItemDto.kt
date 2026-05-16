@@ -13,6 +13,7 @@ data class TripFeedItemDto(
     val totalDistance: Int?,
     val weather: String,
     val difficulty: Int?,
+    val totalAscent: Int?,
     val nbLikes: Int,
     val nbBookmarks: Int,
     val isLiked: Boolean,

@@ -114,7 +114,7 @@ private fun buildTripHtml(ctx: Context, trip: TripFeedItemDto): String {
   .trip-author .username { font-size:14px; font-weight:700; color:$textPrimary; }
   .trip-author .date { font-size:12px; color:$textSecondary; margin-top:2px; }
 
-  .meta-grid { display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:12px; margin-bottom:28px; }
+  .meta-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(120px, 1fr)); gap:12px; margin-bottom:28px; }
   .meta-card { background:$background; border-radius:10px; padding:12px 14px; }
   .meta-card .label { font-size:10px; color:$textSecondary; letter-spacing:0.5px; text-transform:uppercase; margin-bottom:4px; }
   .meta-card .value { font-size:14px; font-weight:700; color:$textPrimary; }
@@ -171,8 +171,16 @@ private fun buildTripHtml(ctx: Context, trip: TripFeedItemDto): String {
       <div class="value">$transportMode</div>
     </div>
     ${trip.totalDistance?.let { """<div class="meta-card">
-      <div class="label">Distance</div>
+      <div class="label">${ctx.getString(R.string.pdf_label_distance)}</div>
       <div class="value">${DateUtils.formatDistance(it)}</div>
+    </div>""" } ?: ""}
+    ${trip.difficulty?.let { """<div class="meta-card">
+      <div class="label">${ctx.getString(R.string.pdf_label_difficulty)}</div>
+      <div class="value">⚡ $it/5</div>
+    </div>""" } ?: ""}
+    ${trip.totalAscent?.let { """<div class="meta-card">
+      <div class="label">${ctx.getString(R.string.pdf_label_ascent)}</div>
+      <div class="value">↑ ${DateUtils.formatDistance(it)}</div>
     </div>""" } ?: ""}
   </div>
 

@@ -15,6 +15,7 @@ import com.example.myapplication.utils.resolveBackendUrl
 import com.example.myapplication.R
 import com.example.myapplication.dto.trip.TripSuggestInfosDto
 import com.example.myapplication.dto.trip.WeatherDto
+import com.example.myapplication.utils.DateUtils
 import com.example.myapplication.utils.toTripDuration
 import com.example.myapplication.utils.toWeatherEmoji
 import com.example.myapplication.utils.LocalisationFormat
@@ -47,6 +48,12 @@ class TripSuggestsAdapter(
         private val tvCost: TextView = itemView.findViewById(R.id.tvTripCost)
         private val tvSteps: TextView = itemView.findViewById(R.id.tvTripSteps)
         private val tvFirstLocation: TextView = itemView.findViewById(R.id.tvFirstLocation)
+        private val llExtra: View = itemView.findViewById(R.id.llTripSuggestExtra)
+        private val ivDifficulty: ImageView = itemView.findViewById(R.id.ivTripSuggestDifficulty)
+        private val tvDifficulty: TextView = itemView.findViewById(R.id.tvTripSuggestDifficulty)
+        private val tvAscentSep: TextView = itemView.findViewById(R.id.tvTripSuggestAscentSep)
+        private val ivAscent: ImageView = itemView.findViewById(R.id.ivTripSuggestAscent)
+        private val tvAscent: TextView = itemView.findViewById(R.id.tvTripSuggestAscent)
 
         fun bind(trip: TripSuggestInfosDto, index: Int, weather: WeatherDto) {
             val ctx = itemView.context
@@ -64,6 +71,27 @@ class TripSuggestsAdapter(
             tvWeather.text = "${weather.code.toWeatherEmoji()} ${ctx.getString(R.string.trip_result_temperature, weather.temperature)}"
 
             tvFirstLocation.text = trip.steps.joinToString("  →  ") { LocalisationFormat.display(it.localisation.name) }
+
+            val hasDifficulty = trip.difficulty != null
+            val hasAscent = trip.totalAscent != null
+            llExtra.visibility = if (hasDifficulty || hasAscent) View.VISIBLE else View.GONE
+            if (hasDifficulty) {
+                ivDifficulty.visibility = View.VISIBLE
+                tvDifficulty.visibility = View.VISIBLE
+                tvDifficulty.text = "${trip.difficulty}/5"
+            } else {
+                ivDifficulty.visibility = View.GONE
+                tvDifficulty.visibility = View.GONE
+            }
+            tvAscentSep.visibility = if (hasAscent) View.VISIBLE else View.GONE
+            if (hasAscent) {
+                ivAscent.visibility = View.VISIBLE
+                tvAscent.visibility = View.VISIBLE
+                tvAscent.text = "+${DateUtils.formatDistance(trip.totalAscent!!)}"
+            } else {
+                ivAscent.visibility = View.GONE
+                tvAscent.visibility = View.GONE
+            }
 
             val firstStep = trip.steps.firstOrNull()
             if (firstStep != null) {

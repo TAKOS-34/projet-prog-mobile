@@ -75,6 +75,12 @@ class TripFeedAdapter(
         private val btnDelete: ImageView = itemView.findViewById(R.id.btnDelete)
         private val tvDistanceSep: TextView = itemView.findViewById(R.id.tvTripFeedDistanceSep)
         private val tvDistance: TextView = itemView.findViewById(R.id.tvTripFeedDistance)
+        private val llDifficulty: View = itemView.findViewById(R.id.llTripFeedDifficulty)
+        private val ivDifficulty: ImageView = itemView.findViewById(R.id.ivTripFeedDifficulty)
+        private val tvDifficulty: TextView = itemView.findViewById(R.id.tvTripFeedDifficulty)
+        private val tvDifficultySep: TextView = itemView.findViewById(R.id.tvTripFeedDifficultySep)
+        private val ivAscent: ImageView = itemView.findViewById(R.id.ivTripFeedAscent)
+        private val tvAscent: TextView = itemView.findViewById(R.id.tvTripFeedAscent)
         private val btnLike: ImageView = itemView.findViewById(R.id.btnTripFeedLike)
         private val tvLikeCount: TextView = itemView.findViewById(R.id.tvTripFeedLikeCount)
         private val btnShare: ImageView = itemView.findViewById(R.id.btnTripFeedShare)
@@ -165,6 +171,27 @@ class TripFeedAdapter(
             } else {
                 tvDistanceSep.visibility = View.GONE
                 tvDistance.visibility = View.GONE
+            }
+
+            val hasDifficulty = trip.difficulty != null
+            val hasAscent = trip.totalAscent != null
+            llDifficulty.visibility = if (hasDifficulty || hasAscent) View.VISIBLE else View.GONE
+            if (hasDifficulty) {
+                ivDifficulty.visibility = View.VISIBLE
+                tvDifficulty.visibility = View.VISIBLE
+                tvDifficulty.text = "${trip.difficulty}/5"
+            } else {
+                ivDifficulty.visibility = View.GONE
+                tvDifficulty.visibility = View.GONE
+            }
+            tvDifficultySep.visibility = if (hasDifficulty && hasAscent) View.VISIBLE else View.GONE
+            if (hasAscent) {
+                ivAscent.visibility = View.VISIBLE
+                tvAscent.visibility = View.VISIBLE
+                tvAscent.text = "+${DateUtils.formatDistance(trip.totalAscent!!)}"
+            } else {
+                ivAscent.visibility = View.GONE
+                tvAscent.visibility = View.GONE
             }
 
             val isLogged = SessionManager.getUserId() != null

@@ -206,7 +206,6 @@ export class TripCreationService {
                 post: { ...cleanPost, image: this.cdn.getPostUrl(cleanPost.id, cleanPost.imageExt) },
                 localisation: Localisation,
                 travelTimeFromPrevious: travelTimeToBest,
-                travelDistanceFromPrevious: null,
                 isTravelTimeFromPreviousTrusted: false,
                 visitDuration: cleanPost.minDuration!,
                 isVisitDurationTrusted: isDurationTrusted ?? false
@@ -223,7 +222,6 @@ export class TripCreationService {
             totalDuration: Math.floor(currentDuration),
             totalCost: currentCost,
             totalStep: selectedPosts.length,
-            totalDistance: null,
             weather
         };
     }
@@ -364,15 +362,17 @@ export class TripCreationService {
             const response = await fetch(`https://api.openrouteservice.org/v2/directions/${profile}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': this.ORS_API_KEY },
-                body: JSON.stringify({ coordinates, units: 'm' })
+                body: JSON.stringify({ coordinates, units: 'm', elevation: true })
             });
             const data = await response.json();
 
             if (!data.routes || data.routes.length === 0) return trip;
 
-            const segments = data.routes[0].segments;
             let totalTravelTime = 0;
             let totalDistanceMeters = 0;
+            const segments = data.routes[0].segments;
+            const summary = data.routes[0].summary;
+            const totalAscent = summary.ascent ? Math.round(summary.ascent) : 0;
 
             trip.steps.forEach((step, index) => {
                 const segment = segments[index];
@@ -390,6 +390,8 @@ export class TripCreationService {
             const totalVisitTime = trip.steps.reduce((acc, step) => acc + step.visitDuration, 0);
             trip.totalDuration = totalTravelTime + totalVisitTime;
             trip.totalDistance = totalDistanceMeters;
+            if (mode === TripTransportMode.WALK) trip.totalAscent = totalAscent;
+            trip.difficulty = this.getDifficultyScore(totalDistanceMeters, totalAscent, mode);
 
             return trip;
         } catch (error) {
@@ -399,12 +401,33 @@ export class TripCreationService {
 
 
 
+    private getDifficultyScore(totalDistanceMeters: number, totalAscentMeters: number, mode: TripTransportMode): number {
+        if (mode === TripTransportMode.CAR) {
+            return 1;
+        }
+
+        const distanceKm = totalDistanceMeters / 1000;
+        const ascentEffort = totalAscentMeters / 100;
+        const globalEffort = distanceKm + ascentEffort;
+
+        if (globalEffort <= 2) return 1;
+        if (globalEffort <= 6) return 2;
+        if (globalEffort <= 12) return 3;
+        if (globalEffort <= 18) return 4;
+
+        return 5;
+    }
+
+
+
     private tripBuilder(trip: TripSuggestInfos, category: TripCategory, transportMode: TripTransportMode, startingTime: TripStartingTime, weather: WeatherCode, userId: number) {
         return {
             budget: trip.totalCost,
             duration: trip.totalDuration,
             category: category,
-            totalDistance: trip.totalDistance,
+            totalDistance: trip.totalDistance ?? null,
+            difficulty: trip.difficulty ?? null,
+            totalAscent: trip.totalAscent ?? null,
             startingTime: startingTime,
             transportMode: transportMode,
             weather,
@@ -414,7 +437,7 @@ export class TripCreationService {
                     postId: step.post.id,
                     stepNumber: index + 1,
                     travelTimeFromPrevious: step.travelTimeFromPrevious,
-                    travelDistanceFromPrevious: step.travelDistanceFromPrevious,
+                    travelDistanceFromPrevious: step.travelDistanceFromPrevious ?? null,
                     isTravelTimeFromPreviousTrusted: step.isTravelTimeFromPreviousTrusted,
                     visitDuration: step.visitDuration,
                     isVisitDurationTrusted: step.isVisitDurationTrusted

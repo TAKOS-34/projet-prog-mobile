@@ -9,6 +9,7 @@ model Trip {
     transportMode TripTransportMode
     weather       WeatherCode
     difficulty    Int?
+    totalAscent   Int?
     status        TripStatus   @default(NOT_VALIDATED)
     expiresAt     DateTime?    @default(dbgenerated("now() + interval '30 minutes'"))
 

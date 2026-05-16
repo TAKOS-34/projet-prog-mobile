@@ -7,5 +7,6 @@ data class TripSuggestInfosDto(
     val totalCost: Int,
     val totalStep: Int,
     val weather: String,
-    val difficulty: Int?
+    val difficulty: Int?,
+    val totalAscent: Int?
 )

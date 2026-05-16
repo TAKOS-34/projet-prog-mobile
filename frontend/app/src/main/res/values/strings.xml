@@ -340,6 +340,9 @@
     <string name="pdf_label_budget">Budget</string>
     <string name="pdf_label_transport">Transport</string>
     <string name="pdf_label_departure">Départ</string>
+    <string name="pdf_label_distance">Distance</string>
+    <string name="pdf_label_difficulty">Difficulté</string>
+    <string name="pdf_label_ascent">Dénivelé</string>
     <string name="pdf_footer_generated">Généré avec TravelPath</string>
     <string name="pdf_footer_details">%1$s · %2$d étapes · %3$d €</string>
     <string name="pdf_travel_arrow">→ %1$s de trajet</string>

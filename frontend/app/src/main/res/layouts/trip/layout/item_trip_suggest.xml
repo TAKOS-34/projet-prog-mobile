@@ -123,6 +123,61 @@
                 tools:text="4 étapes" />
         </LinearLayout>
 
+        <LinearLayout
+            android:id="@+id/llTripSuggestExtra"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingHorizontal="16dp"
+            android:paddingBottom="4dp"
+            android:visibility="gone"
+            app:layout_constraintTop_toBottomOf="@id/llTripStats"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <ImageView
+                android:id="@+id/ivTripSuggestDifficulty"
+                android:layout_width="15dp"
+                android:layout_height="15dp"
+                android:src="@drawable/ic_bolt"
+                android:visibility="gone"
+                app:tint="@color/text_secondary" />
+
+            <TextView
+                android:id="@+id/tvTripSuggestDifficulty"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:textAppearance="@style/TextAppearance.TravelApp.BodyMedium"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/tvTripSuggestAscentSep"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="10dp"
+                android:text="·"
+                android:textColor="@color/text_hint"
+                android:visibility="gone" />
+
+            <ImageView
+                android:id="@+id/ivTripSuggestAscent"
+                android:layout_width="15dp"
+                android:layout_height="15dp"
+                android:src="@drawable/ic_arrow_up"
+                android:visibility="gone"
+                app:tint="@color/text_secondary" />
+
+            <TextView
+                android:id="@+id/tvTripSuggestAscent"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:textAppearance="@style/TextAppearance.TravelApp.BodyMedium"
+                android:visibility="gone" />
+        </LinearLayout>
+
         <ImageView
             android:id="@+id/ivTripArrow"
             android:layout_width="24dp"
@@ -145,7 +200,7 @@
             android:textAppearance="@style/TextAppearance.TravelApp.LabelMedium"
             android:maxLines="1"
             android:ellipsize="end"
-            app:layout_constraintTop_toBottomOf="@id/llTripStats"
+            app:layout_constraintTop_toBottomOf="@id/llTripSuggestExtra"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             tools:text="Cimetière marin → Plage de la corniche → ..." />
