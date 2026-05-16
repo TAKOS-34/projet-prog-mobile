@@ -24,6 +24,7 @@ class PostFeedPaginator(
     init {
         recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(rv: RecyclerView, dx: Int, dy: Int) {
+                if (rv.adapter !== adapter) return
                 if (dy <= 0 || isLoading || !hasMore) return
                 val lm = rv.layoutManager as? LinearLayoutManager ?: return
                 if (lm.findLastVisibleItemPosition() >= lm.itemCount - 3) loadNext()
@@ -46,6 +47,7 @@ class PostFeedPaginator(
     fun reattach(rv: RecyclerView) {
         rv.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(rv: RecyclerView, dx: Int, dy: Int) {
+                if (rv.adapter !== adapter) return
                 if (dy <= 0 || isLoading || !hasMore) return
                 val lm = rv.layoutManager as? LinearLayoutManager ?: return
                 if (lm.findLastVisibleItemPosition() >= lm.itemCount - 3) loadNext()

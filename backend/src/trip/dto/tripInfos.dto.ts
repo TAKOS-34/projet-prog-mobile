@@ -48,11 +48,6 @@ export interface TripStepDetail {
     isVisitDurationTrusted: boolean;
 }
 
-export interface ScoredPost extends Post {
-    score: number;
-    Localisation: Localisation;
-}
-
 export type Weather = {
     code: WeatherCode
     temperature: number;

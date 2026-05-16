@@ -42,7 +42,7 @@ export class TripService {
     async getMyTrips(user: UserSession, limit: number, cursor?: number): Promise<TripInfos> {
         const trips = await this.prisma.trip.findMany({
             take: limit + 1,
-            skip: cursor ? 1 : 0,
+            skip: cursor ? 2 : 0,
             ...(cursor ? { cursor: { id: cursor } } : {}),
             where: { userId: user.id, status: TripStatus.VALIDATED },
             orderBy: { creationDate: 'desc' },
@@ -120,7 +120,7 @@ export class TripService {
 
         const trips = await this.prisma.trip.findMany({
             take: limit + 1,
-            skip: cursor ? 1 : 0,
+            skip: cursor ? 2 : 0,
             ...(cursor ? { cursor: { id: cursor } } : {}),
             where: {
                 status: TripStatus.VALIDATED,

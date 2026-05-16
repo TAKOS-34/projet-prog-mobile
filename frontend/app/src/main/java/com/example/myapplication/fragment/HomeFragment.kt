@@ -55,10 +55,23 @@ class HomeFragment : Fragment() {
     private var postTab = PostTab.FOR_YOU
     private val gson = Gson()
 
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putString("feedMode", feedMode.name)
+        outState.putString("tripTab", tripTab.name)
+        outState.putString("postTab", postTab.name)
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        savedInstanceState?.let {
+            feedMode = FeedMode.valueOf(it.getString("feedMode", feedMode.name)!!)
+            tripTab = TripTab.valueOf(it.getString("tripTab", tripTab.name)!!)
+            postTab = PostTab.valueOf(it.getString("postTab", postTab.name)!!)
+        }
+
         val view = inflater.inflate(R.layout.fragment_home, container, false)
 
         rvPosts = view.findViewById(R.id.rvPosts)
@@ -212,6 +225,7 @@ class HomeFragment : Fragment() {
     }
 
     private fun activatePostTab() {
+        if (feedMode != FeedMode.TRAVEL_SHARE) return
         rvPosts.visibility = View.VISIBLE
         when (postTab) {
             PostTab.FOR_YOU -> {
@@ -226,6 +240,7 @@ class HomeFragment : Fragment() {
     }
 
     private fun activateTripTab() {
+        if (feedMode != FeedMode.TRAVEL_PATH) return
         rvTrips.visibility = View.VISIBLE
         tvTripsEmpty.visibility = View.GONE
 

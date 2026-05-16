@@ -39,7 +39,10 @@ class MainActivity : AppCompatActivity() {
             .setPopUpTo(navController.graph.startDestinationId, inclusive = false)
             .build()
 
+        var isRestoringNavSelection = false
+
         bottomNav.setOnItemSelectedListener { item ->
+            if (isRestoringNavSelection) return@setOnItemSelectedListener true
             if (navController.currentDestination?.id != item.itemId) {
                 navController.navigate(item.itemId, null, bottomNavOptions)
             }
@@ -47,7 +50,9 @@ class MainActivity : AppCompatActivity() {
         }
 
         navController.addOnDestinationChangedListener { _, destination, _ ->
+            isRestoringNavSelection = true
             bottomNav.menu.findItem(destination.id)?.isChecked = true
+            isRestoringNavSelection = false
         }
 
         handleTripDeepLink(intent, navController)

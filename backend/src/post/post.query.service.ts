@@ -31,7 +31,7 @@ export class PostQueryService {
 
         const posts = await this.prisma.post.findMany({
             take: limit + 1,
-            skip: cursor ? 1 : 0,
+            skip: cursor ? 2 : 0,
             ...(cursor ? { cursor: { id: cursor } } : {}),
             where: {
                 AND: [

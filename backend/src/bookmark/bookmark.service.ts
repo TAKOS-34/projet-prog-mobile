@@ -53,8 +53,8 @@ export class BookmarkService {
 
         const posts = await this.prisma.post.findMany({
             where: { id: { in: bookmarks.map(b => b.postId) } },
-            take: limit,
-            skip: cursor ? 1 : 0,
+            take: limit + 1,
+            skip: cursor ? 2 : 0,
             ...(cursor ? { cursor: { id: cursor } } : {}),
             orderBy: [{ creationDate: 'desc' }, { id: 'desc' }],
             include: {
@@ -129,7 +129,7 @@ export class BookmarkService {
         const trips = await this.prisma.trip.findMany({
             where: { id: { in: bookmarks.map(b => b.tripId) } },
             take: limit + 1,
-            skip: cursor ? 1 : 0,
+            skip: cursor ? 2 : 0,
             ...(cursor ? { cursor: { id: cursor } } : {}),
             orderBy: { creationDate: 'desc' },
             include: {

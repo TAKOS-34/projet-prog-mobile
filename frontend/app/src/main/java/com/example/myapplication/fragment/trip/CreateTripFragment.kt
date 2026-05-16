@@ -244,7 +244,7 @@ class CreateTripFragment : Fragment() {
     private fun applyCardState(card: MaterialCardView, selected: Boolean) {
         val ctx = requireContext()
         if (selected) {
-            card.setCardBackgroundColor(ContextCompat.getColor(ctx, R.color.primary_light))
+            card.setCardBackgroundColor(ContextCompat.getColor(ctx, R.color.primary_very_light))
             card.strokeColor = ContextCompat.getColor(ctx, R.color.primary)
             card.strokeWidth = (2 * resources.displayMetrics.density).toInt()
             val inner = card.getChildAt(0) as? LinearLayout ?: return
