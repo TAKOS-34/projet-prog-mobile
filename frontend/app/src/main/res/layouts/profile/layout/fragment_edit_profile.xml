@@ -12,7 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingHorizontal="24dp"
-        android:paddingBottom="16dp">
+        android:paddingBottom="24dp">
 
         <ImageView
             android:id="@+id/btnBack"
@@ -44,113 +44,75 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
 
-        <TextView
-            android:id="@+id/tvLoginLabel"
-            style="@style/Widget.TravelApp.TextView.InputLabel"
-            android:text="@string/label_edit_username"
-            android:layout_marginTop="32dp"
-            app:layout_constraintTop_toBottomOf="@id/tvEditSubtitle"
-            app:layout_constraintStart_toStartOf="parent" />
-
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/tilLogin"
-            style="@style/Widget.TravelApp.TextInputLayout.Line"
+            style="@style/Widget.TravelApp.TextField"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:layout_constraintTop_toBottomOf="@id/tvLoginLabel">
+            android:hint="@string/hint_edit_username"
+            android:layout_marginTop="24dp"
+            app:layout_constraintTop_toBottomOf="@id/tvEditSubtitle">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etLogin"
-                style="@style/Widget.TravelApp.TextInputEditText.Line"
+                style="@style/Widget.TravelApp.TextInputEditText.Outlined"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="text" />
         </com.google.android.material.textfield.TextInputLayout>
 
-        <View style="@style/Widget.TravelApp.View.Divider"
-            app:layout_constraintTop_toBottomOf="@id/tilLogin" />
-
-        <TextView
-            android:id="@+id/tvEmailLabel"
-            style="@style/Widget.TravelApp.TextView.InputLabel"
-            android:text="@string/label_edit_email"
-            android:layout_marginTop="16dp"
-            app:layout_constraintTop_toBottomOf="@id/tilLogin"
-            app:layout_constraintStart_toStartOf="parent" />
-
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/tilEmail"
-            style="@style/Widget.TravelApp.TextInputLayout.Line"
+            style="@style/Widget.TravelApp.TextField"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:layout_constraintTop_toBottomOf="@id/tvEmailLabel">
+            android:hint="@string/hint_edit_email"
+            android:layout_marginTop="16dp"
+            app:layout_constraintTop_toBottomOf="@id/tilLogin">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etEmail"
-                style="@style/Widget.TravelApp.TextInputEditText.Line"
+                style="@style/Widget.TravelApp.TextInputEditText.Outlined"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="textEmailAddress" />
         </com.google.android.material.textfield.TextInputLayout>
 
-        <View style="@style/Widget.TravelApp.View.Divider"
-            app:layout_constraintTop_toBottomOf="@id/tilEmail" />
-
-        <TextView
-            android:id="@+id/tvPasswordLabel"
-            style="@style/Widget.TravelApp.TextView.InputLabel"
-            android:text="@string/label_edit_password"
-            android:layout_marginTop="16dp"
-            app:layout_constraintTop_toBottomOf="@id/tilEmail"
-            app:layout_constraintStart_toStartOf="parent" />
-
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/tilPassword"
-            style="@style/Widget.TravelApp.TextInputLayout.Line"
+            style="@style/Widget.TravelApp.TextField"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:hint="@string/hint_new_password"
+            android:layout_marginTop="16dp"
             app:passwordToggleEnabled="true"
-            app:layout_constraintTop_toBottomOf="@id/tvPasswordLabel">
+            app:layout_constraintTop_toBottomOf="@id/tilEmail">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etPassword"
-                style="@style/Widget.TravelApp.TextInputEditText.Line"
+                style="@style/Widget.TravelApp.TextInputEditText.Outlined"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="••••••••"
                 android:inputType="textPassword" />
         </com.google.android.material.textfield.TextInputLayout>
-
-        <View style="@style/Widget.TravelApp.View.Divider"
-            app:layout_constraintTop_toBottomOf="@id/tilPassword" />
-
-        <TextView
-            android:id="@+id/tvConfirmPasswordLabel"
-            style="@style/Widget.TravelApp.TextView.InputLabel"
-            android:text="@string/label_edit_confirm_password"
-            android:layout_marginTop="16dp"
-            app:layout_constraintTop_toBottomOf="@id/tilPassword"
-            app:layout_constraintStart_toStartOf="parent" />
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/tilConfirmPassword"
-            style="@style/Widget.TravelApp.TextInputLayout.Line"
+            style="@style/Widget.TravelApp.TextField"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:hint="@string/hint_confirm_password"
+            android:layout_marginTop="16dp"
             app:passwordToggleEnabled="true"
-            app:layout_constraintTop_toBottomOf="@id/tvConfirmPasswordLabel">
+            app:layout_constraintTop_toBottomOf="@id/tilPassword">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etConfirmPassword"
-                style="@style/Widget.TravelApp.TextInputEditText.Line"
+                style="@style/Widget.TravelApp.TextInputEditText.Outlined"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="••••••••"
                 android:inputType="textPassword" />
         </com.google.android.material.textfield.TextInputLayout>
-
-        <View style="@style/Widget.TravelApp.View.Divider"
-            app:layout_constraintTop_toBottomOf="@id/tilConfirmPassword" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnUpdate"
@@ -158,7 +120,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/btn_update_profile"
-            android:layout_marginTop="24dp"
+            android:layout_marginTop="32dp"
             app:layout_constraintTop_toBottomOf="@id/tilConfirmPassword" />
 
         <com.google.android.material.button.MaterialButton
@@ -168,7 +130,9 @@
             android:layout_height="wrap_content"
             android:text="@string/btn_delete_account"
             android:layout_marginTop="12dp"
-            app:layout_constraintTop_toBottomOf="@id/btnUpdate"/>
+            android:layout_marginBottom="24dp"
+            app:layout_constraintTop_toBottomOf="@id/btnUpdate"
+            app:layout_constraintBottom_toBottomOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>

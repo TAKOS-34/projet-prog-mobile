@@ -45,8 +45,8 @@ class EditGroupFragment : Fragment() {
         switchPrivate = view.findViewById(R.id.switchGroupPrivate)
         btnUpdate = view.findViewById(R.id.btnUpdateGroup)
 
-        etName.hint = group.name
-        etDescription.hint = group.description.orEmpty()
+        etName.setText(group.name)
+        etDescription.setText(group.description.orEmpty())
         switchPrivate.isChecked = group.isGroupPrivate
 
         view.findViewById<ImageView>(R.id.btnBack).setOnClickListener {

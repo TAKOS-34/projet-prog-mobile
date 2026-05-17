@@ -57,21 +57,20 @@
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/tilGroupsSearch"
-        style="@style/Widget.TravelApp.SearchBar"
+        style="@style/Widget.TravelApp.TextField"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
+        android:hint="@string/groups_search_hint"
         android:visibility="gone"
         app:startIconDrawable="@android:drawable/ic_menu_search"
-        app:hintEnabled="false"
         app:layout_constraintTop_toBottomOf="@id/tgGroupsTabs">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/etGroupsSearch"
+            style="@style/Widget.TravelApp.TextInputEditText.Outlined"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/groups_search_hint"
-            android:paddingVertical="12dp"
             android:inputType="text"
             android:imeOptions="actionSearch" />
     </com.google.android.material.textfield.TextInputLayout>

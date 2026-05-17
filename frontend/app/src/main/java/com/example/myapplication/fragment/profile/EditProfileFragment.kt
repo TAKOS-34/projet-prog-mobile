@@ -66,8 +66,8 @@ class EditProfileFragment : Fragment() {
     private fun applyInitialHints() {
         initialUsername = arguments?.getString(ARG_USERNAME).orEmpty()
         initialEmail = arguments?.getString(ARG_EMAIL).orEmpty()
-        etUsername.hint = initialUsername
-        etEmail.hint = initialEmail
+        etUsername.setText(initialUsername)
+        etEmail.setText(initialEmail)
     }
 
     private fun initViews(view: View) {

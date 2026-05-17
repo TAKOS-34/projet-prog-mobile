@@ -183,6 +183,12 @@
     <string name="hint_post_tags">paris, plage, randonnée…</string>
     <string name="hint_post_group">Groupe (optionnel)</string>
     <string name="hint_edit_post_title">Titre du post</string>
+    <string name="hint_edit_username">Nom d\'utilisateur</string>
+    <string name="hint_group_name">Nom du groupe *</string>
+    <string name="hint_group_description">Description du groupe</string>
+    <string name="hint_edit_email">Adresse e-mail</string>
+    <string name="hint_new_password">Nouveau mot de passe</string>
+    <string name="hint_confirm_password">Confirmer le mot de passe</string>
     <string name="hint_edit_post_type">Type de post</string>
     <string name="hint_edit_post_description">Description</string>
     <string name="label_post_tags_short">TAGS</string>
