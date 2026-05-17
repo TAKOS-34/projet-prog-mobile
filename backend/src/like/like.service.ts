@@ -52,10 +52,17 @@ export class LikeService {
         }
 
         else if (anonymousToken) {
-            await this.prisma.postLike.deleteMany({ where: {
-                postId,
-                anonymousUserId: anonymousToken
-            }});
+            await this.prisma.$transaction([
+                this.prisma.postLike.deleteMany({ where: {
+                    postId,
+                    anonymousUserId: anonymousToken
+                }}),
+                this.prisma.notification.deleteMany({ where: {
+                    targetPostId: postId,
+                    anonymousUserId: anonymousToken,
+                    type: NotificationType.NEW_POST_LIKE
+                }})
+            ]);
         }
 
         return { status: true, message: 'Post like deleted' };

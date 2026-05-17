@@ -5,6 +5,11 @@ generator client {
     previewFeatures = ["strictUndefinedChecks"]
 }
 
+generator erd {
+    provider = "prisma-erd-generator"
+    output   = "schema_db.png"
+}
+
 datasource db {
     provider = "postgresql"
 }
