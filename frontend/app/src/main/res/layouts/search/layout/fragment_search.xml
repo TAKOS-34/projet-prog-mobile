@@ -2,6 +2,7 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:fitsSystemWindows="true"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/background">
@@ -60,24 +61,23 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingHorizontal="24dp"
-            android:paddingTop="24dp"
             android:paddingBottom="24dp">
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/tilSearchQ"
-                style="@style/Widget.TravelApp.SearchBar"
+                style="@style/Widget.TravelApp.TextField"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:hint="@string/search_q_hint"
                 app:startIconDrawable="@android:drawable/ic_menu_search"
-                app:hintEnabled="false"
+                app:startIconTint="@color/text_secondary"
                 app:layout_constraintTop_toTopOf="parent">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etSearchQ"
+                    style="@style/Widget.TravelApp.TextInputEditText.Outlined"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="@string/search_q_hint"
-                    android:paddingVertical="12dp"
                     android:inputType="text"
                     android:imeOptions="actionSearch" />
             </com.google.android.material.textfield.TextInputLayout>
@@ -127,18 +127,17 @@
 
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/tilSearchType"
-                    style="@style/Widget.TravelApp.SearchBar"
+                    style="@style/Widget.TravelApp.TextField"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    app:hintEnabled="false">
+                    android:hint="@string/search_type_hint"
+                    android:layout_marginTop="8dp">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/etSearchType"
+                        style="@style/Widget.TravelApp.TextInputEditText.Outlined"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="@string/search_type_hint"
-                        android:paddingVertical="12dp"
                         android:inputType="none"
                         android:focusable="false"
                         android:clickable="true"
@@ -147,18 +146,17 @@
 
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/tilSearchTag"
-                    style="@style/Widget.TravelApp.SearchBar"
+                    style="@style/Widget.TravelApp.TextField"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
-                    app:hintEnabled="false">
+                    android:hint="@string/search_tag_hint"
+                    android:layout_marginTop="12dp">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/etSearchTag"
+                        style="@style/Widget.TravelApp.TextInputEditText.Outlined"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="@string/search_tag_hint"
-                        android:paddingVertical="12dp"
                         android:inputType="text"
                         android:imeOptions="actionSearch" />
                 </com.google.android.material.textfield.TextInputLayout>
@@ -178,36 +176,36 @@
 
                     <com.google.android.material.textfield.TextInputLayout
                         android:id="@+id/tilSearchLoc"
-                        style="@style/Widget.TravelApp.SearchBar"
+                        style="@style/Widget.TravelApp.TextField"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        app:hintEnabled="false">
+                        android:hint="@string/search_loc_hint"
+                        app:startIconDrawable="@drawable/ic_location"
+                        app:startIconTint="@color/text_secondary">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/etSearchLoc"
+                            style="@style/Widget.TravelApp.TextInputEditText.Outlined"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:hint="@string/search_loc_hint"
-                            android:paddingVertical="12dp"
                             android:inputType="text"
                             android:imeOptions="actionSearch" />
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <com.google.android.material.textfield.TextInputLayout
                         android:id="@+id/tilSearchDist"
-                        style="@style/Widget.TravelApp.SearchBar"
+                        style="@style/Widget.TravelApp.TextField"
                         android:layout_width="120dp"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="8dp"
-                        app:hintEnabled="false">
+                        android:hint="@string/search_dist_hint">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/etSearchDist"
+                            style="@style/Widget.TravelApp.TextInputEditText.Outlined"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:hint="@string/search_dist_hint"
-                            android:paddingVertical="12dp"
                             android:inputType="none"
                             android:focusable="false"
                             android:clickable="true"
@@ -289,7 +287,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingHorizontal="24dp"
-            android:paddingTop="24dp"
             android:paddingBottom="24dp">
 
             <LinearLayout
@@ -303,36 +300,36 @@
 
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/tilTripSearchLoc"
-                    style="@style/Widget.TravelApp.SearchBar"
+                    style="@style/Widget.TravelApp.TextField"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    app:hintEnabled="false">
+                    android:hint="@string/search_loc_hint"
+                    app:startIconDrawable="@drawable/ic_location"
+                    app:startIconTint="@color/text_secondary">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/etTripSearchLoc"
+                        style="@style/Widget.TravelApp.TextInputEditText.Outlined"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="@string/search_loc_hint"
-                        android:paddingVertical="12dp"
                         android:inputType="text"
                         android:imeOptions="actionSearch" />
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/tilTripSearchDist"
-                    style="@style/Widget.TravelApp.SearchBar"
+                    style="@style/Widget.TravelApp.TextField"
                     android:layout_width="120dp"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
-                    app:hintEnabled="false">
+                    android:hint="@string/search_dist_hint">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/etTripSearchDist"
+                        style="@style/Widget.TravelApp.TextInputEditText.Outlined"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="@string/search_dist_hint"
-                        android:paddingVertical="12dp"
                         android:inputType="none"
                         android:focusable="false"
                         android:clickable="true"
