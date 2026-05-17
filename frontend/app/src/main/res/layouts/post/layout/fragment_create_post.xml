@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/background"
@@ -46,137 +45,91 @@
         <androidx.cardview.widget.CardView
             android:id="@+id/cvPreview"
             android:layout_width="match_parent"
-            android:layout_height="200dp"
+            android:layout_height="220dp"
             android:layout_marginTop="24dp"
             android:visibility="gone"
-            app:cardCornerRadius="12dp"
+            app:cardCornerRadius="16dp"
             app:cardElevation="0dp"
+            app:cardBackgroundColor="@color/surface_variant"
             app:layout_constraintTop_toBottomOf="@id/tvCreatePostSubtitle">
-            
+
             <ImageView
                 android:id="@+id/ivPreview"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:scaleType="centerCrop"
-                android:background="@color/surface_variant" />
+                android:scaleType="centerCrop" />
         </androidx.cardview.widget.CardView>
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnIaTags"
-            style="@style/Widget.TravelApp.Button.Outlined"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Suggérer par IA"
-            android:visibility="gone"
-            android:textSize="10sp"
-            app:layout_constraintTop_toTopOf="@id/tvTagsLabel"
-            app:layout_constraintBottom_toBottomOf="@id/tvTagsLabel"
-            app:layout_constraintEnd_toEndOf="parent" />
-
-        <ProgressBar
-            android:id="@+id/pbIaLoading"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:layout_marginEnd="8dp"
-            android:visibility="gone"
-            app:layout_constraintTop_toTopOf="@id/btnIaTags"
-            app:layout_constraintBottom_toBottomOf="@id/btnIaTags"
-            app:layout_constraintEnd_toStartOf="@id/btnIaTags" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnSelectImage"
             style="@style/Widget.TravelApp.Button.Outlined"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:minHeight="72dp"
             android:text="@string/btn_select_image"
             android:layout_marginTop="16dp"
             app:layout_constraintTop_toBottomOf="@id/cvPreview" />
 
-        <TextView
-            android:id="@+id/tvTitleLabel"
-            style="@style/Widget.TravelApp.TextView.InputLabel"
-            android:text="@string/label_post_title"
-            android:layout_marginTop="24dp"
-            app:layout_constraintTop_toBottomOf="@id/btnSelectImage"
-            app:layout_constraintStart_toStartOf="parent" />
-
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/tilTitle"
-            style="@style/Widget.TravelApp.TextInputLayout.Line"
+            style="@style/Widget.TravelApp.TextField"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:hint="@string/hint_post_title"
+            android:layout_marginTop="24dp"
             app:counterEnabled="true"
             app:counterMaxLength="64"
-            app:layout_constraintTop_toBottomOf="@id/tvTitleLabel">
+            app:layout_constraintTop_toBottomOf="@id/btnSelectImage">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etTitle"
-                style="@style/Widget.TravelApp.TextInputEditText.Line"
+                style="@style/Widget.TravelApp.TextInputEditText.Outlined"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:maxLength="64"
                 android:inputType="text" />
         </com.google.android.material.textfield.TextInputLayout>
 
-        <View
-            android:id="@+id/divType"
-            style="@style/Widget.TravelApp.View.Divider"
-            app:layout_constraintTop_toBottomOf="@id/tilTitle" />
-
-        <TextView
-            android:id="@+id/tvTypeLabel"
-            style="@style/Widget.TravelApp.TextView.InputLabel"
-            android:text="@string/label_post_type"
-            android:layout_marginTop="16dp"
-            app:layout_constraintTop_toBottomOf="@id/divType"
-            app:layout_constraintStart_toStartOf="parent" />
-
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/tilType"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+            style="@style/Widget.TravelApp.TextField.Dropdown"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:layout_constraintTop_toBottomOf="@id/tvTypeLabel"
-            app:boxStrokeWidth="0dp"
-            app:boxStrokeWidthFocused="0dp"
-            android:background="@android:color/transparent">
+            android:hint="@string/hint_post_type"
+            android:layout_marginTop="16dp"
+            app:layout_constraintTop_toBottomOf="@id/tilTitle">
 
             <AutoCompleteTextView
                 android:id="@+id/atvType"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="none"
-                android:paddingStart="0dp"
-                android:paddingEnd="0dp"
-                android:textAppearance="@style/TextAppearance.TravelApp.BodyLarge"
-                android:background="@android:color/transparent" />
+                android:textAppearance="@style/TextAppearance.TravelApp.BodyLarge" />
         </com.google.android.material.textfield.TextInputLayout>
 
-        <View
-            android:id="@+id/div1"
-            style="@style/Widget.TravelApp.View.Divider"
-            app:layout_constraintTop_toBottomOf="@id/tilType" />
-
+        <!-- Prix (affiché dynamiquement selon le type) -->
         <TextView
             android:id="@+id/tvPriceLabel"
             style="@style/Widget.TravelApp.TextView.InputLabel"
             android:text="@string/label_post_price"
             android:layout_marginTop="16dp"
             android:visibility="gone"
-            app:layout_constraintTop_toBottomOf="@id/div1"
+            app:layout_constraintTop_toBottomOf="@id/tilType"
             app:layout_constraintStart_toStartOf="parent" />
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/tilPrice"
-            style="@style/Widget.TravelApp.TextInputLayout.Line"
+            style="@style/Widget.TravelApp.TextField"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:hint="@string/hint_post_price"
+            android:layout_marginTop="8dp"
             android:visibility="gone"
             app:layout_constraintTop_toBottomOf="@id/tvPriceLabel">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etPrice"
-                style="@style/Widget.TravelApp.TextInputEditText.Line"
+                style="@style/Widget.TravelApp.TextInputEditText.Outlined"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="none"
@@ -187,10 +140,12 @@
 
         <View
             android:id="@+id/divPrice"
-            style="@style/Widget.TravelApp.View.Divider"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
             android:visibility="gone"
             app:layout_constraintTop_toBottomOf="@id/tilPrice" />
 
+        <!-- Durée (affiché dynamiquement selon le type) -->
         <TextView
             android:id="@+id/tvDurationLabel"
             style="@style/Widget.TravelApp.TextView.InputLabel"
@@ -202,15 +157,17 @@
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/tilDuration"
-            style="@style/Widget.TravelApp.TextInputLayout.Line"
+            style="@style/Widget.TravelApp.TextField"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:hint="@string/hint_post_duration"
+            android:layout_marginTop="8dp"
             android:visibility="gone"
             app:layout_constraintTop_toBottomOf="@id/tvDurationLabel">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etDuration"
-                style="@style/Widget.TravelApp.TextInputEditText.Line"
+                style="@style/Widget.TravelApp.TextInputEditText.Outlined"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="none"
@@ -221,28 +178,25 @@
 
         <View
             android:id="@+id/divDuration"
-            style="@style/Widget.TravelApp.View.Divider"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
             android:visibility="gone"
             app:layout_constraintTop_toBottomOf="@id/tilDuration" />
 
-        <TextView
-            android:id="@+id/tvLocationLabel"
-            style="@style/Widget.TravelApp.TextView.InputLabel"
-            android:text="@string/label_post_location"
-            android:layout_marginTop="16dp"
-            app:layout_constraintTop_toBottomOf="@id/divDuration"
-            app:layout_constraintStart_toStartOf="parent" />
-
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/tilLocation"
-            style="@style/Widget.TravelApp.TextInputLayout.Line"
+            style="@style/Widget.TravelApp.TextField"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:layout_constraintTop_toBottomOf="@id/tvLocationLabel">
+            android:hint="@string/hint_post_location"
+            android:layout_marginTop="16dp"
+            app:startIconDrawable="@drawable/ic_location"
+            app:startIconTint="@color/text_secondary"
+            app:layout_constraintTop_toBottomOf="@id/divDuration">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etLocation"
-                style="@style/Widget.TravelApp.TextInputEditText.Line"
+                style="@style/Widget.TravelApp.TextInputEditText.Outlined"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="text" />
@@ -255,63 +209,71 @@
             android:layout_marginTop="8dp"
             app:layout_constraintTop_toBottomOf="@id/tilLocation" />
 
-        <View
-            android:id="@+id/div2"
-            style="@style/Widget.TravelApp.View.Divider"
-            app:layout_constraintTop_toBottomOf="@id/cgLocationSuggestions" />
-
-        <TextView
-            android:id="@+id/tvDescriptionLabel"
-            style="@style/Widget.TravelApp.TextView.InputLabel"
-            android:text="@string/label_post_description"
-            android:layout_marginTop="16dp"
-            app:layout_constraintTop_toBottomOf="@id/div2"
-            app:layout_constraintStart_toStartOf="parent" />
-
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/tilDescription"
-            style="@style/Widget.TravelApp.TextInputLayout.Line"
+            style="@style/Widget.TravelApp.TextField"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:hint="@string/hint_post_description"
+            android:layout_marginTop="16dp"
             app:counterEnabled="true"
             app:counterMaxLength="280"
-            app:layout_constraintTop_toBottomOf="@id/tvDescriptionLabel">
+            app:layout_constraintTop_toBottomOf="@id/cgLocationSuggestions">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etDescription"
-                style="@style/Widget.TravelApp.TextInputEditText.Line"
+                style="@style/Widget.TravelApp.TextInputEditText.Outlined"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:maxLength="280"
                 android:inputType="textMultiLine"
-                android:minLines="2" />
+                android:minLines="3" />
         </com.google.android.material.textfield.TextInputLayout>
-
-        <View
-            android:id="@+id/div3"
-            style="@style/Widget.TravelApp.View.Divider"
-            app:layout_constraintTop_toBottomOf="@id/tilDescription" />
 
         <TextView
             android:id="@+id/tvTagsLabel"
             style="@style/Widget.TravelApp.TextView.InputLabel"
             android:layout_width="0dp"
-            android:text="@string/label_post_tags"
-            android:layout_marginTop="16dp"
-            app:layout_constraintTop_toBottomOf="@id/div3"
+            android:text="@string/label_post_tags_short"
+            android:layout_marginTop="20dp"
+            app:layout_constraintTop_toBottomOf="@id/tilDescription"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toStartOf="@id/btnIaTags" />
 
+        <ProgressBar
+            android:id="@+id/pbIaLoading"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginEnd="8dp"
+            android:visibility="gone"
+            app:layout_constraintTop_toTopOf="@id/btnIaTags"
+            app:layout_constraintBottom_toBottomOf="@id/btnIaTags"
+            app:layout_constraintEnd_toStartOf="@id/btnIaTags" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnIaTags"
+            style="@style/Widget.TravelApp.Button.Outlined"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/btn_suggest_ia"
+            android:visibility="gone"
+            android:textSize="10sp"
+            app:layout_constraintTop_toTopOf="@id/tvTagsLabel"
+            app:layout_constraintBottom_toBottomOf="@id/tvTagsLabel"
+            app:layout_constraintEnd_toEndOf="parent" />
+
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/tilTags"
-            style="@style/Widget.TravelApp.TextInputLayout.Line"
+            style="@style/Widget.TravelApp.TextField"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:hint="@string/hint_post_tags"
+            android:layout_marginTop="8dp"
             app:layout_constraintTop_toBottomOf="@id/tvTagsLabel">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etTags"
-                style="@style/Widget.TravelApp.TextInputEditText.Line"
+                style="@style/Widget.TravelApp.TextInputEditText.Outlined"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="text" />
@@ -324,29 +286,18 @@
             android:layout_marginTop="8dp"
             app:layout_constraintTop_toBottomOf="@id/tilTags" />
 
-        <View
-            android:id="@+id/div4"
-            style="@style/Widget.TravelApp.View.Divider"
-            app:layout_constraintTop_toBottomOf="@id/cgSuggestedTags" />
-
-        <TextView
-            android:id="@+id/tvGroupLabel"
-            style="@style/Widget.TravelApp.TextView.InputLabel"
-            android:text="@string/label_post_group"
-            android:layout_marginTop="16dp"
-            app:layout_constraintTop_toBottomOf="@id/div4"
-            app:layout_constraintStart_toStartOf="parent" />
-
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/tilGroup"
-            style="@style/Widget.TravelApp.TextInputLayout.Line"
+            style="@style/Widget.TravelApp.TextField"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:layout_constraintTop_toBottomOf="@id/tvGroupLabel">
+            android:hint="@string/hint_post_group"
+            android:layout_marginTop="16dp"
+            app:layout_constraintTop_toBottomOf="@id/cgSuggestedTags">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etGroup"
-                style="@style/Widget.TravelApp.TextInputEditText.Line"
+                style="@style/Widget.TravelApp.TextInputEditText.Outlined"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:focusable="false"
@@ -355,19 +306,14 @@
                 android:inputType="none" />
         </com.google.android.material.textfield.TextInputLayout>
 
-        <View
-            android:id="@+id/div5"
-            style="@style/Widget.TravelApp.View.Divider"
-            app:layout_constraintTop_toBottomOf="@id/tilGroup" />
-
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnSelectAudio"
             style="@style/Widget.TravelApp.Button.Outlined"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/btn_select_audio"
-            android:layout_marginTop="16dp"
-            app:layout_constraintTop_toBottomOf="@id/div5" />
+            android:layout_marginTop="24dp"
+            app:layout_constraintTop_toBottomOf="@id/tilGroup" />
 
         <TextView
             android:id="@+id/tvAudioStatus"
@@ -386,10 +332,10 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/btn_create_post"
-            android:layout_marginTop="4dp"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="24dp"
             app:layout_constraintTop_toBottomOf="@id/tvAudioStatus"
-            app:layout_constraintBottom_toBottomOf="parent"
-            android:layout_marginBottom="24dp"/>
+            app:layout_constraintBottom_toBottomOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>

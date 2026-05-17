@@ -71,8 +71,8 @@ class EditPostFragment : Fragment() {
         etDuration = view.findViewById(R.id.etDuration)
         divDuration = view.findViewById(R.id.divDuration)
 
-        etTitle.hint = post.title
-        etDescription.hint = post.description.orEmpty()
+        etTitle.setText(post.title)
+        etDescription.setText(post.description.orEmpty())
 
         selectedMinPrice = post.minPrice
         selectedMaxPrice = post.maxPrice
