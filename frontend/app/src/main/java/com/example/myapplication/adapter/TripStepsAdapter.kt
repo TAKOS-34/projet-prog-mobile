@@ -23,8 +23,13 @@ class TripStepsAdapter(
     private val onLocationClick: (name: String, lat: Double, long: Double) -> Unit,
     private val startLocationName: String? = null,
     private val startLocationLat: Double = 0.0,
-    private val startLocationLong: Double = 0.0
+    private val startLocationLong: Double = 0.0,
+    private val startingTime: String? = null
 ) : RecyclerView.Adapter<TripStepsAdapter.StepViewHolder>() {
+
+    companion object {
+        const val SHOW_ARRIVAL_TIME = true
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): StepViewHolder {
         val view = LayoutInflater.from(parent.context)
@@ -48,6 +53,7 @@ class TripStepsAdapter(
         private val tvStartLocation: TextView = itemView.findViewById(R.id.tvStartLocation)
         private val tvTravelTime: TextView = itemView.findViewById(R.id.tvTravelTime)
         private val ivTravelTrust: ImageView = itemView.findViewById(R.id.ivTravelTrust)
+        private val tvArrivalTime: TextView = itemView.findViewById(R.id.tvArrivalTime)
         private val ivConnector: ImageView = itemView.findViewById(R.id.ivConnector)
         private val vDot: TextView = itemView.findViewById(R.id.vDot)
         private val vBottomLine: View = itemView.findViewById(R.id.vBottomLine)
@@ -85,6 +91,20 @@ class TripStepsAdapter(
             val distStr = step.travelDistanceFromPrevious?.let { " · ${DateUtils.formatDistance(it)}" } ?: ""
             tvTravelTime.text = ctx.getString(R.string.trip_step_travel_time, DateUtils.formatMinutes(ctx, step.travelTimeFromPrevious.toInt())) + distStr
             ivTravelTrust.visibility = if (step.isTravelTimeFromPreviousTrusted) View.VISIBLE else View.GONE
+
+            if (SHOW_ARRIVAL_TIME && startingTime != null) {
+                val baseHour = DateUtils.startingTimeToBaseHour(startingTime)
+                val arrival = DateUtils.computeArrivalTime(
+                    steps.map { it.travelTimeFromPrevious },
+                    steps.map { it.visitDuration },
+                    position,
+                    baseHour
+                )
+                tvArrivalTime.text = "· $arrival"
+                tvArrivalTime.visibility = View.VISIBLE
+            } else {
+                tvArrivalTime.visibility = View.GONE
+            }
 
             vDot.text = (position + 1).toString()
             vBottomLine.visibility = if (isLast) View.INVISIBLE else View.VISIBLE

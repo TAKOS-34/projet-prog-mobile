@@ -140,6 +140,25 @@
             android:visibility="gone"
             tools:text="2.3 km" />
 
+        <TextView
+            android:id="@+id/tvFeedDetailStartingTimeSep"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="8dp"
+            android:text="·"
+            android:textColor="@color/text_hint"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/tvFeedDetailStartingTime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/TextAppearance.TravelApp.BodyMedium"
+            android:textColor="@color/text_secondary"
+            android:visibility="gone"
+            tools:text="Matin (9h)"
+            tools:visibility="visible" />
+
     </LinearLayout>
 
     <LinearLayout

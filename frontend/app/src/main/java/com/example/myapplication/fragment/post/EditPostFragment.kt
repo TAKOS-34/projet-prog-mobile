@@ -36,11 +36,9 @@ class EditPostFragment : Fragment() {
     private lateinit var tvPriceLabel: TextView
     private lateinit var tilPrice: TextInputLayout
     private lateinit var etPrice: TextInputEditText
-    private lateinit var divPrice: View
     private lateinit var tvDurationLabel: TextView
     private lateinit var tilDuration: TextInputLayout
     private lateinit var etDuration: TextInputEditText
-    private lateinit var divDuration: View
 
     private var selectedPostType: PostType? = null
     private var selectedMinPrice: Int? = null
@@ -65,11 +63,9 @@ class EditPostFragment : Fragment() {
         tvPriceLabel = view.findViewById(R.id.tvPriceLabel)
         tilPrice = view.findViewById(R.id.tilPrice)
         etPrice = view.findViewById(R.id.etPrice)
-        divPrice = view.findViewById(R.id.divPrice)
         tvDurationLabel = view.findViewById(R.id.tvDurationLabel)
         tilDuration = view.findViewById(R.id.tilDuration)
         etDuration = view.findViewById(R.id.etDuration)
-        divDuration = view.findViewById(R.id.divDuration)
 
         etTitle.setText(post.title)
         etDescription.setText(post.description.orEmpty())
@@ -119,7 +115,6 @@ class EditPostFragment : Fragment() {
 
         tvPriceLabel.visibility = if (showPrice) View.VISIBLE else View.GONE
         tilPrice.visibility = if (showPrice) View.VISIBLE else View.GONE
-        divPrice.visibility = if (showPrice) View.VISIBLE else View.GONE
         if (showPrice) {
             etPrice.setText(PostMetrics.formatPrice(ctx, selectedMinPrice, selectedMaxPrice).orEmpty())
         } else {
@@ -130,7 +125,6 @@ class EditPostFragment : Fragment() {
 
         tvDurationLabel.visibility = if (showDuration) View.VISIBLE else View.GONE
         tilDuration.visibility = if (showDuration) View.VISIBLE else View.GONE
-        divDuration.visibility = if (showDuration) View.VISIBLE else View.GONE
         if (showDuration) {
             etDuration.setText(PostMetrics.formatDuration(ctx, selectedMinDuration, selectedMaxDuration).orEmpty())
         } else {
@@ -185,13 +179,17 @@ class EditPostFragment : Fragment() {
     private fun performUpdate() {
         val newTitle = etTitle.text.toString().trim().takeIf { it.isNotEmpty() && it != post.title }
         val newType = selectedPostType?.name?.takeIf { it != post.type }
-        val newDescription = etDescription.text.toString().trim()
-            .takeIf { it.isNotEmpty() && it != post.description.orEmpty() }
+        val descriptionInput = etDescription.text.toString().trim()
+        val newDescription: Any? = when {
+            descriptionInput.isEmpty() && post.description != null -> null
+            descriptionInput.isNotEmpty() && descriptionInput != post.description.orEmpty() -> descriptionInput
+            else -> Unit
+        }
 
         val body = mutableMapOf<String, Any?>()
         if (newTitle != null) body["title"] = newTitle
         if (newType != null) body["type"] = newType
-        if (newDescription != null) body["description"] = newDescription
+        if (newDescription !== Unit) body["description"] = newDescription
 
         if (selectedMinPrice != post.minPrice) body["minPrice"] = selectedMinPrice
         if (selectedMaxPrice != post.maxPrice) body["maxPrice"] = selectedMaxPrice
@@ -204,6 +202,7 @@ class EditPostFragment : Fragment() {
                 btnUpdate.isEnabled = true
                 if (error == null) {
                     Toast.makeText(context, R.string.success_post_updated, Toast.LENGTH_SHORT).show()
+                    parentFragmentManager.setFragmentResult("postUpdated", Bundle().apply { putString("postId", post.id) })
                     findNavController().navigateUp()
                 } else {
                     Toast.makeText(context, R.string.error_post_update, Toast.LENGTH_LONG).show()

@@ -131,7 +131,7 @@ export class PostCommandService {
             isEdited: true,
             updatedAt: new Date(),
             ...(title && { title }),
-            ...(description && { description }),
+            ...(description !== undefined && { description }),
             ...(type && { type }),
             ...(minPrice !== undefined && { minPrice }),
             ...(maxPrice !== undefined && { maxPrice }),

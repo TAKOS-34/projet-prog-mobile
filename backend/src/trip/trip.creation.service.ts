@@ -255,7 +255,7 @@ export class TripCreationService {
         let baseHour: number;
 
         switch (startingTime) {
-            case TripStartingTime.MORNING:   baseHour = 8; break;
+            case TripStartingTime.MORNING:   baseHour = 9; break;
             case TripStartingTime.MIDDAY:    baseHour = 12; break;
             case TripStartingTime.AFTERNOON: baseHour = 14; break;
             case TripStartingTime.EVENING:   baseHour = 19; break;

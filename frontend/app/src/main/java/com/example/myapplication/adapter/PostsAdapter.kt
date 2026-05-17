@@ -55,6 +55,11 @@ class PostsAdapter(
         holder.releasePlayer()
     }
 
+    fun replacePost(post: PostDto) {
+        val updated = currentList.map { if (it.id == post.id) post else it }
+        if (updated != currentList) submitList(updated)
+    }
+
     class PostViewHolder(
         itemView: View,
         private val onLike: (PostDto, Boolean) -> Unit,

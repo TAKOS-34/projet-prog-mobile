@@ -63,6 +63,7 @@ class TripDetailFragment : Fragment() {
         val weatherJson = arguments?.getString("weatherJson")
         val startLat = arguments?.getDouble("startLat") ?: 0.0
         val startLong = arguments?.getDouble("startLong") ?: 0.0
+        val startingTime = arguments?.getString("startingTime")
 
         val trip = gson.fromJson(tripJson, TripSuggestInfosDto::class.java)
         val weather = weatherJson?.let { gson.fromJson(it, WeatherDto::class.java) }
@@ -92,7 +93,8 @@ class TripDetailFragment : Fragment() {
             },
             startLocationName = localisation.ifBlank { null },
             startLocationLat = startLat,
-            startLocationLong = startLong
+            startLocationLong = startLong,
+            startingTime = startingTime
         )
 
         view.findViewById<MaterialButton>(R.id.btnValidate).setOnClickListener {

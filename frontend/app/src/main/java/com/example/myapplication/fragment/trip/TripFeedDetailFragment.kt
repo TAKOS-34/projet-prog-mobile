@@ -19,6 +19,7 @@ import com.example.myapplication.adapter.TripStepsAdapter
 import com.example.myapplication.dto.trip.TripFeedItemDto
 import com.example.myapplication.fragment.post.LocalisationViewerFragment
 import com.example.myapplication.utils.ApiClient
+import com.example.myapplication.dto.trip.StartingTime
 import com.example.myapplication.utils.DateUtils
 import com.example.myapplication.utils.exportTripToPdf
 import com.example.myapplication.utils.LocalisationFormat
@@ -225,6 +226,19 @@ class TripFeedDetailFragment : Fragment() {
         } else {
             tvDist.visibility = View.GONE
         }
+
+        val startingTime = StartingTime.fromApiValue(trip.startingTime)
+        val tvStartingTimeSep = view.findViewById<TextView>(R.id.tvFeedDetailStartingTimeSep)
+        val tvStartingTime = view.findViewById<TextView>(R.id.tvFeedDetailStartingTime)
+        if (startingTime != null) {
+            val baseHour = DateUtils.startingTimeToBaseHour(trip.startingTime)
+            tvStartingTimeSep.visibility = View.VISIBLE
+            tvStartingTime.visibility = View.VISIBLE
+            tvStartingTime.text = "${ctx.getString(startingTime.labelRes)} (${baseHour}h)"
+        } else {
+            tvStartingTimeSep.visibility = View.GONE
+            tvStartingTime.visibility = View.GONE
+        }
     }
 
     private fun bindSteps(view: View, trip: TripFeedItemDto) {
@@ -244,7 +258,8 @@ class TripFeedDetailFragment : Fragment() {
                 }
                 findNavController().navigate(R.id.localisationViewerFragment, bundle)
             },
-            startLocationName = trip.startLocalisation?.name
+            startLocationName = trip.startLocalisation?.name,
+            startingTime = trip.startingTime
         )
     }
 

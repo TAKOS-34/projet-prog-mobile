@@ -12,6 +12,7 @@ import android.webkit.WebView
 import android.widget.ProgressBar
 import androidx.fragment.app.Fragment
 import com.example.myapplication.R
+import com.example.myapplication.adapter.TripStepsAdapter
 import com.example.myapplication.dto.post.PostType
 import com.example.myapplication.dto.trip.StartingTime
 import com.example.myapplication.dto.trip.TransportMode
@@ -79,9 +80,16 @@ private fun buildTripHtml(ctx: Context, trip: TripFeedItemDto): String {
     val transportMode = TransportMode.fromApiValue(trip.transportMode)
         ?.let { ctx.getString(it.labelRes) } ?: trip.transportMode
 
+    val baseHour = DateUtils.startingTimeToBaseHour(trip.startingTime)
+    val travelTimes = trip.steps.map { it.travelTimeFromPrevious }
+    val visitDurations = trip.steps.map { it.visitDuration }
+
     val stepsHtml = buildString {
         trip.steps.forEachIndexed { i, step ->
-            append(buildStepHtml(ctx, i + 1, step, i < trip.steps.size - 1, primary, textPrimary, textSecondary, surface, divider))
+            val arrivalTime = if (TripStepsAdapter.SHOW_ARRIVAL_TIME)
+                DateUtils.computeArrivalTime(travelTimes, visitDurations, i, baseHour)
+            else null
+            append(buildStepHtml(ctx, i + 1, step, i < trip.steps.size - 1, primary, textPrimary, textSecondary, surface, divider, arrivalTime))
         }
     }
 
@@ -301,7 +309,8 @@ private fun buildStepHtml(
     textPrimary: String,
     textSecondary: String,
     surface: String,
-    divider: String
+    divider: String,
+    arrivalTime: String? = null
 ): String {
     val postType = PostType.fromApiValue(step.post.type)
     val typeLabel = postType?.let { ctx.getString(it.labelRes) } ?: step.post.type
@@ -341,7 +350,10 @@ private fun buildStepHtml(
           <div class="step-title">${step.post.title.escapeHtml()}</div>
           <div class="step-location">📍 ${LocalisationFormat.display(step.localisation.name).escapeHtml()}</div>
           <div class="step-tags">$tagsHtml</div>
-          ${if (visitLabel != null) """<div class="step-details"><div class="step-detail">$visitLabel</div></div>""" else ""}
+          ${if (arrivalTime != null || visitLabel != null) """<div class="step-details">
+            ${if (arrivalTime != null) """<div class="step-detail">⏰ <span>$arrivalTime</span></div>""" else ""}
+            ${if (visitLabel != null) """<div class="step-detail">$visitLabel</div>""" else ""}
+          </div>""" else ""}
         </div>
         $travelHtml
       </div>

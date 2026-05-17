@@ -146,7 +146,8 @@ class TripFeedAdapter(
             val startingTime = StartingTime.fromApiValue(trip.startingTime)
             if (startingTime != null) {
                 ivStartingTime.setImageResource(startingTime.iconRes)
-                tvStartingTime.text = ctx.getString(startingTime.labelRes)
+                val baseHour = DateUtils.startingTimeToBaseHour(trip.startingTime)
+                tvStartingTime.text = "${ctx.getString(startingTime.labelRes)} (${baseHour}h)"
             }
 
             val startLoc = trip.startLocalisation

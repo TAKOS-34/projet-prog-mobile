@@ -73,6 +73,20 @@
         tools:visibility="visible" />
 
     <TextView
+        android:id="@+id/tvArrivalTime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="4dp"
+        android:textAppearance="@style/TextAppearance.TravelApp.LabelMedium"
+        android:textColor="@color/primary"
+        android:visibility="gone"
+        app:layout_constraintStart_toEndOf="@id/ivTravelTrust"
+        app:layout_constraintTop_toTopOf="@id/tvTravelTime"
+        app:layout_constraintBottom_toBottomOf="@id/tvTravelTime"
+        tools:text="· 10:30"
+        tools:visibility="visible" />
+
+    <TextView
         android:id="@+id/vDot"
         android:layout_width="22dp"
         android:layout_height="22dp"

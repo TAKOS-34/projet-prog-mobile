@@ -102,6 +102,7 @@ class TripSuggestsResultFragment : Fragment() {
                 putString("weatherJson", gson.toJson(response.weather))
                 putDouble("startLat", startLat)
                 putDouble("startLong", startLong)
+                putString("startingTime", requestDto?.startingTime)
             }
             findNavController().navigate(R.id.action_tripResult_to_tripDetail, bundle)
         }

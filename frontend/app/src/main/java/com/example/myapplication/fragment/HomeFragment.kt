@@ -13,7 +13,9 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.myapplication.R
 import com.example.myapplication.adapter.PostsAdapter
 import com.example.myapplication.adapter.TripFeedAdapter
+import com.example.myapplication.dto.post.PostDto
 import com.example.myapplication.dto.trip.TripFeedItemDto
+import com.example.myapplication.utils.ApiClient
 import com.example.myapplication.utils.PostFeedPaginator
 import com.example.myapplication.utils.SessionManager
 import com.example.myapplication.utils.TripFeedPaginator
@@ -54,6 +56,7 @@ class HomeFragment : Fragment() {
     private var tripTab = TripTab.WORLD
     private var postTab = PostTab.FOR_YOU
     private val gson = Gson()
+    private var isRestoringState = false
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
@@ -98,7 +101,26 @@ class HomeFragment : Fragment() {
         setupTripTabs(isLogged)
         applyFeedMode(isLogged)
 
+        parentFragmentManager.setFragmentResultListener("postUpdated", viewLifecycleOwner) { _, result ->
+            val postId = result.getString("postId") ?: return@setFragmentResultListener
+            refreshPostInFeeds(postId)
+        }
+
         return view
+    }
+
+    private fun refreshPostInFeeds(postId: String) {
+        ApiClient.get("post/$postId") { body, _, error ->
+            if (error == null && body != null) {
+                try {
+                    val updated = Gson().fromJson(body, PostDto::class.java)
+                    activity?.runOnUiThread {
+                        forYouPostAdapter.replacePost(updated)
+                        popularPostAdapter.replacePost(updated)
+                    }
+                } catch (_: Exception) {}
+            }
+        }
     }
 
     private fun rebindViews(isLogged: Boolean) {
@@ -170,9 +192,9 @@ class HomeFragment : Fragment() {
 
     private fun setupPostTabs() {
         tgPostTabs.addOnButtonCheckedListener { _, checkedId, isChecked ->
-            if (!isChecked) return@addOnButtonCheckedListener
+            if (!isChecked || isRestoringState) return@addOnButtonCheckedListener
             postTab = if (checkedId == R.id.btnTabForYou) PostTab.FOR_YOU else PostTab.POPULAR
-            activatePostTab()
+            activatePostTab(forceReset = true)
         }
     }
 
@@ -182,9 +204,9 @@ class HomeFragment : Fragment() {
         }
 
         tgTripTabs.addOnButtonCheckedListener { _, checkedId, isChecked ->
-            if (!isChecked) return@addOnButtonCheckedListener
+            if (!isChecked || isRestoringState) return@addOnButtonCheckedListener
             tripTab = if (checkedId == R.id.btnTabWorldTrips) TripTab.WORLD else TripTab.MINE
-            activateTripTab()
+            activateTripTab(forceReset = true)
         }
     }
 
@@ -203,7 +225,9 @@ class HomeFragment : Fragment() {
                 fabNewPost.visibility = if (isLogged) View.VISIBLE else View.GONE
                 fabNewTrip.visibility = View.GONE
 
+                isRestoringState = true
                 tgPostTabs.check(if (postTab == PostTab.FOR_YOU) R.id.btnTabForYou else R.id.btnTabPopular)
+                isRestoringState = false
                 activatePostTab()
             }
             FeedMode.TRAVEL_PATH -> {
@@ -218,28 +242,30 @@ class HomeFragment : Fragment() {
                 fabNewPost.visibility = View.GONE
                 fabNewTrip.visibility = if (isLogged) View.VISIBLE else View.GONE
 
+                isRestoringState = true
                 tgTripTabs.check(if (tripTab == TripTab.WORLD) R.id.btnTabWorldTrips else R.id.btnTabMyTrips)
+                isRestoringState = false
                 activateTripTab()
             }
         }
     }
 
-    private fun activatePostTab() {
+    private fun activatePostTab(forceReset: Boolean = false) {
         if (feedMode != FeedMode.TRAVEL_SHARE) return
         rvPosts.visibility = View.VISIBLE
         when (postTab) {
             PostTab.FOR_YOU -> {
                 rvPosts.adapter = forYouPostAdapter
-                if (forYouPostAdapter.itemCount == 0) forYouPostPaginator.reset()
+                if (forceReset || forYouPostAdapter.itemCount == 0) forYouPostPaginator.reset()
             }
             PostTab.POPULAR -> {
                 rvPosts.adapter = popularPostAdapter
-                if (popularPostAdapter.itemCount == 0) popularPostPaginator.reset()
+                if (forceReset || popularPostAdapter.itemCount == 0) popularPostPaginator.reset()
             }
         }
     }
 
-    private fun activateTripTab() {
+    private fun activateTripTab(forceReset: Boolean = false) {
         if (feedMode != FeedMode.TRAVEL_PATH) return
         rvTrips.visibility = View.VISIBLE
         tvTripsEmpty.visibility = View.GONE
@@ -247,18 +273,19 @@ class HomeFragment : Fragment() {
         when (tripTab) {
             TripTab.WORLD -> {
                 rvTrips.adapter = worldTripAdapter
-                if (worldTripAdapter.itemCount == 0) worldTripPaginator.reset()
+                if (forceReset || worldTripAdapter.itemCount == 0) worldTripPaginator.reset()
             }
             TripTab.MINE -> {
                 rvTrips.adapter = myTripAdapter
-                if (myTripAdapter.itemCount == 0) myTripPaginator.reset()
+                if (forceReset || myTripAdapter.itemCount == 0) myTripPaginator.reset()
             }
         }
     }
 
     private fun updateEmptyState(isEmpty: Boolean) {
+        if (feedMode != FeedMode.TRAVEL_PATH) return
         tvTripsEmpty.visibility = if (isEmpty) View.VISIBLE else View.GONE
-        rvTrips.visibility = if (isEmpty) View.GONE else View.VISIBLE
+        rvTrips.visibility = if (isEmpty) View.INVISIBLE else View.VISIBLE
     }
 
 }

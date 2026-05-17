@@ -110,20 +110,13 @@
                 android:cursorVisible="false" />
         </com.google.android.material.textfield.TextInputLayout>
 
-        <View
-            android:id="@+id/divPrice"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:visibility="gone"
-            app:layout_constraintTop_toBottomOf="@id/tilPrice" />
-
         <TextView
             android:id="@+id/tvDurationLabel"
             style="@style/Widget.TravelApp.TextView.InputLabel"
             android:text="@string/label_post_duration"
             android:layout_marginTop="16dp"
             android:visibility="gone"
-            app:layout_constraintTop_toBottomOf="@id/divPrice"
+            app:layout_constraintTop_toBottomOf="@id/tilPrice"
             app:layout_constraintStart_toStartOf="parent" />
 
         <com.google.android.material.textfield.TextInputLayout
@@ -147,12 +140,12 @@
                 android:cursorVisible="false" />
         </com.google.android.material.textfield.TextInputLayout>
 
-        <View
-            android:id="@+id/divDuration"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:visibility="gone"
-            app:layout_constraintTop_toBottomOf="@id/tilDuration" />
+        <androidx.constraintlayout.widget.Barrier
+            android:id="@+id/barrierMetrics"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:barrierDirection="bottom"
+            app:constraint_referenced_ids="tilType,tilPrice,tilDuration" />
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/tilDescription"
@@ -163,7 +156,7 @@
             android:layout_marginTop="16dp"
             app:counterEnabled="true"
             app:counterMaxLength="280"
-            app:layout_constraintTop_toBottomOf="@id/divDuration">
+            app:layout_constraintTop_toBottomOf="@id/barrierMetrics">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etDescription"
@@ -184,7 +177,8 @@
             android:layout_marginTop="32dp"
             android:layout_marginBottom="24dp"
             app:layout_constraintTop_toBottomOf="@id/tilDescription"
-            app:layout_constraintBottom_toBottomOf="parent" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>

@@ -8,5 +8,6 @@ data class TripSuggestInfosDto(
     val totalStep: Int,
     val weather: String,
     val difficulty: Int?,
-    val totalAscent: Int?
+    val totalAscent: Int?,
+    val startingTime: String? = null
 )

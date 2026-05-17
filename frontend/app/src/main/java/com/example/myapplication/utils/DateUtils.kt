@@ -48,6 +48,30 @@ object DateUtils {
         return if (meters < 1000) "${meters} m" else "${"%.1f".format(meters / 1000.0)} km"
     }
 
+    fun startingTimeToBaseHour(startingTime: String?): Int = when (startingTime?.uppercase()) {
+        "MORNING"   -> 9
+        "MIDDAY"    -> 12
+        "AFTERNOON" -> 14
+        "EVENING"   -> 19
+        else        -> 9
+    }
+
+    fun computeArrivalTime(
+        travelTimes: List<Double>,
+        visitDurations: List<Double?>,
+        index: Int,
+        baseHour: Int
+    ): String {
+        var minutes = baseHour * 60
+        for (i in 0..index) {
+            minutes += travelTimes[i].toInt()
+            if (i < index) minutes += (visitDurations[i] ?: 0.0).toInt()
+        }
+        val h = (minutes / 60) % 24
+        val m = minutes % 60
+        return "%02d:%02d".format(h, m)
+    }
+
     fun formatMinutes(context: Context, totalMinutes: Int): String {
         return if (totalMinutes < 60) {
             context.getString(R.string.trip_total_duration_m, totalMinutes)
