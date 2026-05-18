@@ -12,6 +12,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
 import coil.load
 import coil.transform.CircleCropTransformation
@@ -30,6 +31,7 @@ class ProfileFragment : Fragment() {
 
     private val authViewModel: AuthViewModel by activityViewModels()
 
+    private var viewBuiltForLoggedIn: Boolean? = null
     private var pickedAvatarUri: Uri? = null
     private var ivProfileCover: ImageView? = null
     private var btnSaveAvatar: MaterialButton? = null
@@ -46,11 +48,24 @@ class ProfileFragment : Fragment() {
         btnSaveAvatar?.visibility = View.VISIBLE
     }
 
+    override fun onResume() {
+        super.onResume()
+        val isLoggedIn = authViewModel.isAuthenticated()
+        if (viewBuiltForLoggedIn != null && viewBuiltForLoggedIn != isLoggedIn) {
+            findNavController().navigate(
+                R.id.nav_profile,
+                null,
+                NavOptions.Builder().setPopUpTo(R.id.nav_profile, true).build()
+            )
+        }
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         val isLoggedIn = authViewModel.isAuthenticated()
+        viewBuiltForLoggedIn = isLoggedIn
 
         val layoutId = if (isLoggedIn) R.layout.fragment_profile else R.layout.fragment_profile_guest
         val view = inflater.inflate(layoutId, container, false)
